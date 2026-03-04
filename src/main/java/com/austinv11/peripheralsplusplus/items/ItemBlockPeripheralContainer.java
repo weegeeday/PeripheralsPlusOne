@@ -1,20 +1,12 @@
 package com.austinv11.peripheralsplusplus.items;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemBlock;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
-public class ItemBlockPeripheralContainer extends ItemBlock {
-	
-	public ItemBlockPeripheralContainer(Block block) {
-		super(block);
-		this.maxStackSize = 1;
-	}
+public class ItemBlockPeripheralContainer extends BlockItem {
 
-//	@Override
-//	public boolean onItemUseFirst(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float hitX, float hitY, float hitZ) {
-//		if (!world.isRemote) {
-//
-//		}
-//		return super.onItemUseFirst(stack, player, world, x, y, z, side, hitX, hitY, hitZ);
-//	}
+public ItemBlockPeripheralContainer(Block block, Item.Properties props) {
+super(block, props);
+}
 }

@@ -1,8 +1,8 @@
 package com.austinv11.peripheralsplusplus.pocket;
 
-import com.austinv11.collectiveframework.minecraft.utils.Colors;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
-import com.austinv11.collectiveframework.utils.LogicUtils;
+
+
+
 import com.austinv11.peripheralsplusplus.hooks.ComputerCraftRegistry;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.pocket.peripherals.PeripheralPeripheralContainer;
@@ -12,12 +12,12 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.IPocketAccess;
 import dan200.computercraft.api.pocket.IPocketUpgrade;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -105,7 +105,7 @@ public class PocketPeripheralContainer implements IPocketUpgrade {
 	}
 
 	@Override
-	public boolean onRightClick(@Nonnull World world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
+	public boolean onRightClick(@Nonnull Level world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
 		if (!(peripheral instanceof PeripheralPeripheralContainer))
 			return false;
 		Map<IPocketUpgrade, IPeripheral> peripherals = ((PeripheralPeripheralContainer) peripheral).getUpgrades();

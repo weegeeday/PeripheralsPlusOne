@@ -6,9 +6,9 @@ import com.austinv11.peripheralsplusplus.tiles.TileEntityRfidReaderWriter;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.IPocketAccess;
 import dan200.computercraft.api.pocket.IPocketUpgrade;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +29,7 @@ public class PocketRfid implements IPocketUpgrade {
     @Nonnull
     @Override
     public ItemStack getCraftingItem() {
-        return new ItemStack(ModItems.RFID_READER_WRITER);
+        return new ItemStack(ModItems.RFID_READER_WRITER.get());
     }
 
     @Nullable
@@ -47,7 +47,7 @@ public class PocketRfid implements IPocketUpgrade {
     }
 
     @Override
-    public boolean onRightClick(@Nonnull World world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
+    public boolean onRightClick(@Nonnull Level world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
         return false;
     }
 }

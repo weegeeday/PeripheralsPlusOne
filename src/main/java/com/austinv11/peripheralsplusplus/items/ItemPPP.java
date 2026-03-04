@@ -4,11 +4,7 @@ import net.minecraft.world.item.Item;
 
 public class ItemPPP extends Item {
 
-    public ItemPPP(Properties properties) {
-        super(properties);
-    }
-
-    public ItemPPP() {
-        this(new Properties());
-    }
+public ItemPPP(Properties props) {
+super(props);
+}
 }

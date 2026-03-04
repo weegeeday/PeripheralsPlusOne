@@ -1,126 +1,80 @@
 package com.austinv11.peripheralsplusplus.pocket.peripherals;
 
-import com.austinv11.collectiveframework.minecraft.utils.Location;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import com.austinv11.peripheralsplusplus.utils.TurtleUtil;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class PeripheralMotionDetector implements IPlusPlusPeripheral {
-	
-	private Location oldLocation = null;
-	private IComputerAccess computer;
-	private float pitch, yaw;
-	
-	public PeripheralMotionDetector(Entity entity) {
-		if (entity != null) {
-			oldLocation = new Location(entity);
-			setPitchAndYaw(entity);
-		}
-		MinecraftForge.EVENT_BUS.register(this);
-	}
-	
-	private void setPitchAndYaw(Entity entity) {
-		pitch = entity.rotationPitch;
-		yaw = entity.rotationYaw;
-	}
-	
-	@Override
-	public String getType() {
-		return "motionDetector";
-	}
-	
-	@Override
-	public String[] getMethodNames() {
-		return new String[0];
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		return new Object[0];
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
-	
-	public void update(Entity entity) {
-		if (!Config.enableMotionDetector)
-			return;
-		if (computer != null) {
-			Location newLocation = new Location(entity);
-			if (oldLocation == null)
-				oldLocation = new Location(newLocation);
-			if (!newLocation.equals(oldLocation)) {
-				if (!newLocation.getWorld().equals(oldLocation.getWorld()))
-					computer.queueEvent("worldChanged", new Object[]{oldLocation.getWorld().provider
-                            .getDimension(),
-							newLocation.getWorld().provider.getDimension()});
-				computer.queueEvent("locationChanged", new Object[]{newLocation.getX()-oldLocation.getX(),
-						newLocation.getY()-oldLocation.getY(), newLocation.getZ()-oldLocation.getZ()});
-				oldLocation = newLocation;
-			}
-			if (entity.rotationPitch != pitch || entity.rotationYaw != yaw) {
-				computer.queueEvent("rotationChanged", new Object[]{entity.rotationYaw, entity.rotationPitch});
-				setPitchAndYaw(entity);
-			}
-		}
-	}
-	
-	@Override
-	public void attach(IComputerAccess computer) {
-		this.computer = computer;
-	}
-	
-	@Override
-	public void detach(IComputerAccess computer) {
-		this.computer = null;
-	}
-	
-	@SubscribeEvent
-	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (!Config.enableMotionDetector)
-			return;
-		if (computer == null)
-			return;
-		if (!event.isCanceled()) {
-            ItemStack heldItem = event.getEntityPlayer().getHeldItemMainhand();
-            if (!heldItem.isEmpty()) {
-                ItemStack pocket = TurtleUtil.getPocket(true);
-                if (heldItem.getItem() == pocket.getItem())
-                    if (NBTHelper.hasTag(heldItem, "upgrade")) {
-                        String upgrade = "";
-                        if (NBTHelper.hasTag(heldItem, Reference.POCKET_PERIPHERAL_CONTAINER)) {
-                            NBTTagList list = NBTHelper.getList(heldItem, Reference.POCKET_PERIPHERAL_CONTAINER,
-                                    Constants.NBT.TAG_STRING);
-                            for (int i = 0; i < list.tagCount(); i++)
-                                if (list.getStringTagAt(i).equals(Reference.POCKET_MOTION_DETECTOR)) {
-                                    upgrade = Reference.POCKET_MOTION_DETECTOR;
-                                    break;
-                                }
-                        } else
-                            upgrade = NBTHelper.getString(heldItem, "upgrade");
-                        if (upgrade.equals(Reference.POCKET_MOTION_DETECTOR)) {
-                            if (event instanceof PlayerInteractEvent.LeftClickBlock)
-                                computer.queueEvent("blockHit", new Object[0]);
-                            else
-                                computer.queueEvent("rightClick", new Object[0]);
-                        }
-                    }
-            }
-        }
-	}
+
+private double oldX, oldY, oldZ;
+private float oldPitch, oldYaw;
+private IComputerAccess computer;
+private boolean initialized = false;
+
+public PeripheralMotionDetector(Entity entity) {
+if (entity != null) {
+oldX = entity.getX();
+oldY = entity.getY();
+oldZ = entity.getZ();
+oldPitch = entity.getXRot();
+oldYaw = entity.getYRot();
+initialized = true;
+}
+MinecraftForge.EVENT_BUS.register(this);
+}
+
+@Override
+public String getType() {
+return "motionDetector";
+}
+
+@Override
+public boolean equals(IPeripheral other) {
+return other == this;
+}
+
+public void update(Entity entity) {
+if (!Config.enableMotionDetector || computer == null || entity == null) return;
+if (!initialized) {
+oldX = entity.getX(); oldY = entity.getY(); oldZ = entity.getZ();
+oldPitch = entity.getXRot(); oldYaw = entity.getYRot();
+initialized = true;
+return;
+}
+double dx = entity.getX() - oldX;
+double dy = entity.getY() - oldY;
+double dz = entity.getZ() - oldZ;
+if (dx != 0 || dy != 0 || dz != 0) {
+computer.queueEvent("locationChanged", new Object[]{dx, dy, dz});
+oldX = entity.getX(); oldY = entity.getY(); oldZ = entity.getZ();
+}
+if (entity.getXRot() != oldPitch || entity.getYRot() != oldYaw) {
+computer.queueEvent("rotationChanged", new Object[]{entity.getYRot(), entity.getXRot()});
+oldPitch = entity.getXRot(); oldYaw = entity.getYRot();
+}
+}
+
+@Override
+public void attach(IComputerAccess computer) {
+this.computer = computer;
+}
+
+@Override
+public void detach(IComputerAccess computer) {
+this.computer = null;
+}
+
+@SubscribeEvent
+public void onPlayerInteract(PlayerInteractEvent event) {
+if (!Config.enableMotionDetector || computer == null) return;
+if (event instanceof PlayerInteractEvent.LeftClickBlock)
+computer.queueEvent("blockHit", new Object[0]);
+else if (event instanceof PlayerInteractEvent.RightClickBlock || event instanceof PlayerInteractEvent.RightClickItem)
+computer.queueEvent("rightClick", new Object[0]);
+}
 }

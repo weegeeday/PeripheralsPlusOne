@@ -1,42 +1,32 @@
 package com.austinv11.peripheralsplusplus.items;
 
 import com.austinv11.peripheralsplusplus.capabilities.rfid.CapabilityRfid;
-import com.austinv11.peripheralsplusplus.capabilities.rfid.RfidTagHolder;
 import com.austinv11.peripheralsplusplus.init.ModItems;
-import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumHand;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemRfidChip extends ItemPPP {
-    public ItemRfidChip() {
-        super();
-    }
 
-    @Override
-    public boolean itemInteractionForEntity(ItemStack item, EntityPlayer player, EntityLivingBase target,
-                                            EnumHand hand) {
-        if (player.world.isRemote)
-            return true;
-        // Get capability
-        RfidTagHolder tagHolder = target.getCapability(CapabilityRfid.INSTANCE, null);
-        if (tagHolder == null)
-            return false;
-        // Check item is valid
-        if (!item.isItemEqual(new ItemStack(ModItems.RFID_CHIP)) || item.getCount() < 1)
-            return false;
-        // Check the entity has been prodded
-        if (!tagHolder.hasBeenProdded())
-            return false;
-        // Add tag
-        if (tagHolder.getTag().isEmpty()) {
-            ItemStack tag = item.copy();
-            tag.setCount(1);
-            tagHolder.setTag(tag);
-            tagHolder.setProdded(false);
-            item.shrink(1);
-        }
-        return true;
-    }
+public ItemRfidChip(Properties props) {
+super(props);
+}
+
+@Override
+public boolean interactLivingEntity(ItemStack item, Player player, LivingEntity target, InteractionHand hand) {
+if (player.level().isClientSide()) return true;
+target.getCapability(CapabilityRfid.CAPABILITY).ifPresent(tagHolder -> {
+if (!item.is(ModItems.RFID_CHIP.get()) || item.getCount() < 1) return;
+if (!tagHolder.hasBeenProdded()) return;
+if (tagHolder.getTag().isEmpty()) {
+ItemStack tag = item.copy();
+tag.setCount(1);
+tagHolder.setTag(tag);
+tagHolder.setProdded(false);
+item.shrink(1);
+}
+});
+return true;
+}
 }
