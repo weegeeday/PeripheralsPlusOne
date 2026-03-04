@@ -1,7 +1,11 @@
 package com.austinv11.peripheralsplusplus;
 
 import com.austinv11.peripheralsplusplus.client.gui.GuiFactory;
+import com.austinv11.peripheralsplusplus.client.gui.GuiSmartHelmetOverlay;
 import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
+import com.austinv11.peripheralsplusplus.event.handler.CapabilitiesHandler;
+import com.austinv11.peripheralsplusplus.event.handler.PeripheralContainerHandler;
+import com.austinv11.peripheralsplusplus.event.handler.RobotHandler;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.init.ModEntities;
 import com.austinv11.peripheralsplusplus.init.ModItems;
@@ -13,13 +17,14 @@ import com.austinv11.peripheralsplusplus.network.*;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import com.austinv11.peripheralsplusplus.capabilities.nano.NanoBotHolder;
 import com.austinv11.peripheralsplusplus.capabilities.rfid.RfidTagHolder;
-import com.austinv11.peripheralsplusplus.event.handler.CapabilitiesHandler;
-import net.minecraftforge.event.RegisterCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -61,6 +66,7 @@ public class PeripheralsPlusPlus {
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(this::clientSetup);
+        modBus.addListener(this::registerGuiOverlays);
         modBus.addListener(Config::onLoad);
         modBus.addListener(this::registerCapabilities);
 
@@ -74,6 +80,7 @@ public class PeripheralsPlusPlus {
 
     private void commonSetup(FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new CapabilitiesHandler());
+        MinecraftForge.EVENT_BUS.register(new PeripheralContainerHandler());
         // Register network packets
         int id = 0;
         NETWORK.registerMessage(id++, ChatPacket.class, ChatPacket::encode, ChatPacket::decode, ChatPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -96,6 +103,14 @@ public class PeripheralsPlusPlus {
 
     private void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(GuiFactory::registerScreens);
+        // Register client-only event handlers
+        MinecraftForge.EVENT_BUS.register(new RobotHandler());
+    }
+
+    private void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(),
+                new ResourceLocation(Reference.MOD_ID, "smart_helmet"),
+                GuiSmartHelmetOverlay.INSTANCE);
     }
 }
 
