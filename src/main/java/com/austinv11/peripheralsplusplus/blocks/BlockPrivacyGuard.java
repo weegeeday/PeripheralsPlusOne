@@ -7,20 +7,15 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public class BlockPrivacyGuard extends BlockPppBase {
+public class BlockPrivacyGuard extends BlockContainerPPP {
 
 public BlockPrivacyGuard() {
 super();
 }
 
-@Override
-public boolean hasTileEntity(BlockState state) {
-return true;
-}
-
 @Nullable
 @Override
-public BlockEntity createTileEntity(BlockState state, net.minecraft.world.level.BlockGetter world) {
-return new TileEntityPrivacyGuard(BlockPos.ZERO, state);
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityPrivacyGuard(pos, state);
 }
 }

@@ -13,21 +13,16 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 
-public class BlockPeripheralContainer extends BlockPppBase {
+public class BlockPeripheralContainer extends BlockContainerPPP {
 
 public BlockPeripheralContainer() {
 super();
 }
 
-@Override
-public boolean hasTileEntity(BlockState state) {
-return true;
-}
-
 @Nullable
 @Override
-public BlockEntity createTileEntity(BlockState state, net.minecraft.world.level.BlockGetter world) {
-return new TileEntityPeripheralContainer(BlockPos.ZERO, state);
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityPeripheralContainer(pos, state);
 }
 
 @Override

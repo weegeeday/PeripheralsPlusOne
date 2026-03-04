@@ -26,4 +26,4 @@
 ## Misc
 /src/main/resources/doc
 /src/main/resources/reference
-/docs
+*.bak
