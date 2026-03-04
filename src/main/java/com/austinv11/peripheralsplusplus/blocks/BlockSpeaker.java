@@ -16,8 +16,6 @@ public class BlockSpeaker extends BlockPppDirectional implements ITileEntityProv
 	public BlockSpeaker() {
 		super();
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-		this.setRegistryName(Reference.MOD_ID, "speaker");
-		this.setUnlocalizedName("speaker");
 	}
 
 	@Override

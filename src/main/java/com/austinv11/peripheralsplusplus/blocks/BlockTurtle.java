@@ -21,9 +21,6 @@ public class BlockTurtle extends BlockPppDirectional implements ITileEntityProvi
 	public BlockTurtle() {
 		super();
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-		this.setRegistryName(Reference.MOD_ID, "turtle");
-		this.setUnlocalizedName("turtle");
-		this.setLightOpacity(0);
 	}
 
 	@Override

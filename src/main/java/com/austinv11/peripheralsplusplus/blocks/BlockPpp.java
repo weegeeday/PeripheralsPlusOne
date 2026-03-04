@@ -1,10 +1,5 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import net.minecraft.creativetab.CreativeTabs;
-
+/** Marker interface for PeripheralsPlusOne blocks. */
 public interface BlockPpp {
-
-    CreativeTabs getTab();
-
-    String getModId();
 }

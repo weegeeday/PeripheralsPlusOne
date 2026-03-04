@@ -19,10 +19,6 @@ public class BlockPlayerInterface extends BlockContainerPPP {
     public BlockPlayerInterface()
     {
         super(Material.ROCK);
-        this.setRegistryName(Reference.MOD_ID, "player_interface");
-        this.setUnlocalizedName("player_interface");
-        this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-        this.setHardness(4f);
     }
 
     @Override

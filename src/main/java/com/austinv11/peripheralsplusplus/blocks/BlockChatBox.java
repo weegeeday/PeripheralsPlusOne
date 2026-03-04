@@ -11,8 +11,6 @@ public class BlockChatBox extends BlockPppBase implements ITileEntityProvider {
 
 	public BlockChatBox() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "chat_box");
-		this.setUnlocalizedName("chat_box");
 	}
 
 	@Override

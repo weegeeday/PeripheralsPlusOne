@@ -18,10 +18,6 @@ public class BlockResupplyStation extends BlockContainerPPP {
 	
 	public BlockResupplyStation() {
 		super(Material.ROCK);
-		this.setRegistryName(Reference.MOD_ID, "resupply_station");
-		this.setUnlocalizedName("resupply_station");
-		this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-		this.setHardness(4f);
 	}
 
     @Override

@@ -19,8 +19,6 @@ import java.util.List;
 public class ItemFork extends ItemPPP {
     public ItemFork() {
         super();
-        this.setRegistryName(Reference.MOD_ID, "fork");
-        this.setUnlocalizedName("fork");
         this.setMaxStackSize(1);
     }
 

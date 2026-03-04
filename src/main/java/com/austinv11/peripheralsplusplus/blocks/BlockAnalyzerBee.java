@@ -14,8 +14,6 @@ public class BlockAnalyzerBee extends BlockAnalyzer {
 	
 	public BlockAnalyzerBee() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "analyzer_bee");
-		this.setUnlocalizedName("analyzer_bee");
 	}
 
 	@Override

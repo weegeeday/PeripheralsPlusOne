@@ -21,8 +21,6 @@ import javax.annotation.Nullable;
 public class BlockMagReaderWriter extends BlockPppBase implements ITileEntityProvider {
     public BlockMagReaderWriter() {
         super();
-        this.setRegistryName(Reference.MOD_ID, "mag_reader_writer");
-        this.setUnlocalizedName("mag_reader_writer");
     }
 
     @Nullable

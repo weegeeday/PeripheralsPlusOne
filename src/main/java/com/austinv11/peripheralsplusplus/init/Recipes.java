@@ -329,18 +329,6 @@ public class Recipes {
 					'r', "dustRedstone",
 					'e', Items.ENDER_PEARL
 			).setRegistryName(Reference.MOD_ID, "recipe_motion_detector"));
-        if (Config.enableAIChatBox)
-            RECIPES.register(new ShapedOreRecipe(
-            		MOD_GROUP,
-            		new ItemStack(ModBlocks.AI_CHAT_BOX),
-					" r ",
-					"cbc",
-					" s ",
-					'r', new ItemStack(Items.REDSTONE),
-					'c', new ItemStack(Items.COMPARATOR),
-					'b', new ItemStack(ModBlocks.CHAT_BOX),
-					's', new ItemStack(Items.SLIME_BALL)
-			).setRegistryName(Reference.MOD_ID, "recipe_ai_chat_box"));
         if (Config.enableNanoBots)
         	RECIPES.register(new ShapedOreRecipe(
         			MOD_GROUP,

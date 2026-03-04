@@ -10,8 +10,6 @@ public class BlockTimeSensor extends BlockPppBase implements ITileEntityProvider
 
 	public BlockTimeSensor() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "time_sensor");
-		this.setUnlocalizedName("time_sensor");
 	}
 
 	@Override

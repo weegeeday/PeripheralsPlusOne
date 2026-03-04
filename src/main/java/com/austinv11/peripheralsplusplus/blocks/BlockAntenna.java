@@ -28,9 +28,6 @@ public class BlockAntenna extends BlockPppDirectional implements ITileEntityProv
 	public BlockAntenna() {
 		super();
 		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-		this.setRegistryName(Reference.MOD_ID, "antenna");
-		this.setUnlocalizedName("antenna");
-		this.setLightOpacity(0);
 	}
 
 	@Override

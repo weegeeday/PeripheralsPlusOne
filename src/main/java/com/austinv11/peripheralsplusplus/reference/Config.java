@@ -1,6 +1,7 @@
 package com.austinv11.peripheralsplusplus.reference;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 public class Config {
 
@@ -306,5 +307,12 @@ public class Config {
         enableRfidItems = ENABLE_RFID_ITEMS_V.get();
         enableMagStripItems = ENABLE_MAG_STRIP_ITEMS_V.get();
         enablePrivacyGuard = ENABLE_PRIVACY_GUARD_V.get();
+    }
+
+    /** Listens for config load/reload events and rebakes static values. */
+    public static void onLoad(ModConfigEvent event) {
+        if (event.getConfig().getSpec() == SPEC) {
+            bake();
+        }
     }
 }

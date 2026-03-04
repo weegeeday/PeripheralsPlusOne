@@ -6,7 +6,5 @@ public class ItemFeederUpgrade extends ItemPPP {
 
 	public ItemFeederUpgrade() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "feeder_upgrade");
-		this.setUnlocalizedName("feeder_upgrade");
 	}
 }

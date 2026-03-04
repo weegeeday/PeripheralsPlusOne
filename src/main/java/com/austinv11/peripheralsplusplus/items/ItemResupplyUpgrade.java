@@ -6,7 +6,5 @@ public class ItemResupplyUpgrade extends ItemPPP {
 	
 	public ItemResupplyUpgrade() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "resupply_upgrade");
-		this.setUnlocalizedName("resupply_upgrade");
 	}
 }

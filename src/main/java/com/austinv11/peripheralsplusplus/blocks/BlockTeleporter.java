@@ -26,8 +26,6 @@ public class BlockTeleporter extends BlockPppDirectional implements ITileEntityP
 		this.setDefaultState(this.blockState.getBaseState()
 				.withProperty(FACING, EnumFacing.NORTH)
 				.withProperty(TIER, 0));
-		this.setRegistryName(Reference.MOD_ID, "teleporter");
-		this.setUnlocalizedName("teleporter");
 	}
 
 	@Override

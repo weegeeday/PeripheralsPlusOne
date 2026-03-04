@@ -1,19 +1,15 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.collectiveframework.minecraft.blocks.BlockBase;
-import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
-import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
-public class BlockPppBase extends BlockBase implements BlockPpp {
+public class BlockPppBase extends Block {
 
-	@Override
-	public CreativeTabs getTab() {
-		return CreativeTabPPP.PPP_TAB;
-	}
-	
-	@Override
-	public String getModId() {
-		return Reference.MOD_ID;
-	}
+    public BlockPppBase(BlockBehaviour.Properties properties) {
+        super(properties);
+    }
+
+    public BlockPppBase() {
+        this(BlockBehaviour.Properties.of().strength(4.0F).requiresCorrectToolForDrops());
+    }
 }

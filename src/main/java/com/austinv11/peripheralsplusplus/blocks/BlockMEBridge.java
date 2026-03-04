@@ -18,8 +18,6 @@ public class BlockMEBridge extends BlockPppBase implements ITileEntityProvider {
 
 	public BlockMEBridge() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "me_bridge");
-		this.setUnlocalizedName("me_bridge");
 	}
 
 	@Override

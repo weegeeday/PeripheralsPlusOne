@@ -10,8 +10,6 @@ public class BlockEnvironmentScanner extends BlockPppBase implements ITileEntity
 
 	public BlockEnvironmentScanner() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "environment_scanner");
-		this.setUnlocalizedName("environment_scanner");
 	}
 
 	@Override

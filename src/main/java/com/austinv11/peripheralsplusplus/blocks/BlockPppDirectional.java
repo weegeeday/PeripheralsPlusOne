@@ -1,40 +1,24 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
-import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.block.BlockDirectional;
-import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.DirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 
-public class BlockPppDirectional extends BlockDirectional implements BlockPpp {
-    public BlockPppDirectional(Material material) {
-        super(material);
-        this.setHardness(4.0F);
-        if (this.getTab() != null)
-            this.setCreativeTab(this.getTab());
+public class BlockPppDirectional extends DirectionalBlock {
 
+    public BlockPppDirectional(BlockBehaviour.Properties properties) {
+        super(properties);
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
     }
 
     public BlockPppDirectional() {
-        this(Material.ROCK);
-    }
-
-    public String getUnlocalizedName() {
-        return String.format("tile.%s%s", this.getModId().toLowerCase() + ":",
-                this.getUnwrappedUnlocalizedName(this.getUnwrappedUnlocalizedName(super.getUnlocalizedName())));
-    }
-
-    protected String getUnwrappedUnlocalizedName(String unlocalizedName) {
-        return unlocalizedName.substring(unlocalizedName.indexOf(".") + 1);
+        this(BlockBehaviour.Properties.of().strength(4.0F).requiresCorrectToolForDrops());
     }
 
     @Override
-    public CreativeTabs getTab() {
-        return CreativeTabPPP.PPP_TAB;
-    }
-
-    @Override
-    public String getModId() {
-        return Reference.MOD_ID;
+    protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(FACING);
     }
 }

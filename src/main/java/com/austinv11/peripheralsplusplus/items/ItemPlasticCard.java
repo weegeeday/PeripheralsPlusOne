@@ -9,7 +9,5 @@ public class ItemPlasticCard extends ItemPPP {
 
     public ItemPlasticCard() {
         super();
-        this.setRegistryName(Reference.MOD_ID, "plastic_card");
-        this.setUnlocalizedName("plastic_card");
     }
 }

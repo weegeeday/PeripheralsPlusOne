@@ -26,8 +26,6 @@ public class ItemNanoSwarm extends ItemPPP {
 	public ItemNanoSwarm() {
 		super();
 		this.setMaxStackSize(16);
-		this.setRegistryName("nano_swarm");
-		this.setUnlocalizedName("nano_swarm");
 	}
 	
 	@Override

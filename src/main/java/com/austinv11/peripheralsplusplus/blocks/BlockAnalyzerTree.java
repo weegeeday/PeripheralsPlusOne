@@ -14,8 +14,6 @@ public class BlockAnalyzerTree extends BlockAnalyzer {
 	
 	public BlockAnalyzerTree() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "analyzer_tree");
-        this.setUnlocalizedName("analyzer_tree");
 	}
 
 	@Override

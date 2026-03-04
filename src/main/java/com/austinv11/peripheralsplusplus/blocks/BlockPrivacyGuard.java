@@ -11,8 +11,6 @@ import javax.annotation.Nullable;
 public class BlockPrivacyGuard extends BlockPppBase implements ITileEntityProvider {
     public BlockPrivacyGuard() {
         super();
-        this.setRegistryName(Reference.MOD_ID, "privacy_guard");
-        this.setUnlocalizedName("privacy_guard");
     }
 
     @Nullable

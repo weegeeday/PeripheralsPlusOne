@@ -22,8 +22,6 @@ public class ItemSmartHelmet extends ItemArmor implements ISpecialArmor {
 	public ItemSmartHelmet(ArmorMaterial material, int renderIndex, EntityEquipmentSlot armorType) {
 		super(material, renderIndex, armorType);
 		this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-		this.setUnlocalizedName("smart_helmet");
-		this.setRegistryName(Reference.MOD_ID, "smart_helmet");
 	}
 
 	public ItemSmartHelmet() {

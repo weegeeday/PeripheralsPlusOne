@@ -21,8 +21,6 @@ public class ItemPermissionsCard extends ItemPPP
     public ItemPermissionsCard()
     {
         super();
-        this.setUnlocalizedName("permissions_card");
-        this.setRegistryName(Reference.MOD_ID, "permissions_card");
         this.setMaxStackSize(1);
     }
 

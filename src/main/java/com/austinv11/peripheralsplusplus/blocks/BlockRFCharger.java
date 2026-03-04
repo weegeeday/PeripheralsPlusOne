@@ -15,8 +15,6 @@ public class BlockRFCharger extends BlockPppBase implements ITileEntityProvider 
 
 	public BlockRFCharger() {
 		super();
-		this.setUnlocalizedName("rf_charger");
-		this.setRegistryName(Reference.MOD_ID, "rf_charger");
 	}
 
 	@Override

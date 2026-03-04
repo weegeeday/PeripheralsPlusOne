@@ -20,10 +20,6 @@ public class BlockRfidReaderWriter extends BlockContainerPPP {
 
     public BlockRfidReaderWriter() {
         super(Material.ROCK);
-        this.setRegistryName(Reference.MOD_ID, "rfid_reader_writer");
-        this.setUnlocalizedName("rfid_reader_writer");
-        this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-        this.setHardness(4);
     }
 
     @Nullable

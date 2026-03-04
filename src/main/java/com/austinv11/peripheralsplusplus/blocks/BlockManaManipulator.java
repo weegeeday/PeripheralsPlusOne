@@ -31,10 +31,6 @@ public class BlockManaManipulator extends BlockContainerPPP implements ITileEnti
 
     public BlockManaManipulator() {
         super(Material.WOOD);
-        this.setRegistryName(Reference.MOD_ID, "mana_manipulator");
-        this.setUnlocalizedName("mana_manipulator");
-        this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-        this.setHardness(2);
     }
 
     @Nullable

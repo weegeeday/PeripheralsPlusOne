@@ -22,7 +22,6 @@ public class ItemBlockTurtle extends ItemBlock {
 	
 	public ItemBlockTurtle(Block block) {
 		super(block);
-		setRegistryName(ModBlocks.TURTLE.getRegistryName());
 	}
 
     @Override

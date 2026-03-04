@@ -7,8 +7,6 @@ import net.minecraft.item.ItemStack;
 public class ItemTeleporter extends ItemBlock {
     public ItemTeleporter(BlockTeleporter teleporter) {
         super(teleporter);
-        this.setRegistryName(teleporter.getRegistryName());
-        this.setUnlocalizedName(teleporter.getUnlocalizedName());
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
     }

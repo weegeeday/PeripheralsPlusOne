@@ -6,7 +6,5 @@ public class ItemMotionDetector extends ItemPPP {
 	
 	public ItemMotionDetector() {
 		super();
-		this.setUnlocalizedName("motion_detector");
-		this.setRegistryName(Reference.MOD_ID, "motion_detector");
 	}
 }

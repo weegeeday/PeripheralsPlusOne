@@ -18,10 +18,6 @@ public class BlockInteractiveSorter extends BlockContainerPPP {
 	
 	public BlockInteractiveSorter() {
 		super(Material.ROCK);
-		this.setRegistryName(Reference.MOD_ID, "interactive_sorter");
-		this.setUnlocalizedName("interactive_sorter");
-		this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-		this.setHardness(4f);
 	}
 
 	@Override

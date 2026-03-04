@@ -16,8 +16,6 @@ public class BlockOreDictionary extends BlockPppBase implements ITileEntityProvi
 
 	public BlockOreDictionary() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "ore_dictionary");
-		this.setUnlocalizedName("ore_dictionary");
 	}
 
 	@Override

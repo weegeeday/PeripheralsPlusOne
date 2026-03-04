@@ -6,7 +6,5 @@ public class ItemTank extends ItemPPP {
 
 	public ItemTank() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "tank");
-		this.setUnlocalizedName("tank");
 	}
 }

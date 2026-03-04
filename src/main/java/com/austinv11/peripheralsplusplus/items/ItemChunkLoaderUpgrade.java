@@ -6,7 +6,5 @@ public class ItemChunkLoaderUpgrade extends ItemPPP {
 	
 	public ItemChunkLoaderUpgrade() {
 		super();
-		this.setUnlocalizedName("chunk_loader_upgrade");
-		this.setRegistryName(Reference.MOD_ID, "chunk_loader_upgrade");
 	}
 }

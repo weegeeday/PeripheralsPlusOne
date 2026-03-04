@@ -14,8 +14,6 @@ public class BlockAnalyzerButterfly extends BlockAnalyzer {
 	
 	public BlockAnalyzerButterfly() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "analyzer_butterfly");
-		this.setUnlocalizedName("analyzer_butterfly");
 	}
 
 	@Override

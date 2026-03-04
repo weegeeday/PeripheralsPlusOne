@@ -16,8 +16,6 @@ public class BlockPlayerSensor extends BlockPppBase implements ITileEntityProvid
 
 	public BlockPlayerSensor() {
 		super();
-        this.setRegistryName(Reference.MOD_ID, "player_sensor");
-        this.setUnlocalizedName("player_sensor");
 	}
 
 	@Override

@@ -21,8 +21,6 @@ public class BlockPeripheralContainer extends BlockPppBase implements ITileEntit
 
 	public BlockPeripheralContainer() {
 		super();
-		this.setRegistryName(Reference.MOD_ID, "peripheral_container");
-		this.setUnlocalizedName("peripheral_container");
 	}
 
 	@Override
