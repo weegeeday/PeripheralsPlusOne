@@ -277,7 +277,7 @@ public void clearContent() { items[0] = ItemStack.EMPTY; }
 
 // MenuProvider implementation
 @Override
-public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.rfid_reader_writer"); }
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.rfid_reader_writer"); }
 
 @Nullable
 @Override

@@ -72,7 +72,7 @@ public void clearContent() { for (int i = 0; i < SIZE; i++) items[i] = ItemStack
 
 // MenuProvider
 @Override
-public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.resupply_station"); }
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.resupply_station"); }
 @Nullable
 @Override
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {

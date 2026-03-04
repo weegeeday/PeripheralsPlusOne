@@ -5,10 +5,14 @@ import com.austinv11.peripheralsplusplus.entities.EntityRidableTurtle;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+@Mod.EventBusSubscriber(modid = Reference.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModEntities {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES =
@@ -25,4 +29,9 @@ public class ModEntities {
                     .<EntityRidableTurtle>of(EntityRidableTurtle::new, MobCategory.MISC)
                     .sized(0.9F, 0.5F)
                     .build(Reference.MOD_ID + ":ridable_turtle"));
+
+    @SubscribeEvent
+    public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+        event.put(RIDABLE_TURTLE.get(), EntityRidableTurtle.createAttributes().build());
+    }
 }

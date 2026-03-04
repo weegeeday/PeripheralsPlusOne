@@ -202,7 +202,7 @@ public void clearContent() { slot0 = ItemStack.EMPTY; }
 
 // MenuProvider
 @Override
-public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.interactive_sorter"); }
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.interactive_sorter"); }
 @Nullable
 @Override
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {

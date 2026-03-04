@@ -154,7 +154,7 @@ public void clearContent() { for (int i = 0; i < items.length; i++) items[i] = I
 
 // MenuProvider
 @Override
-public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.player_interface"); }
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.player_interface"); }
 @Nullable
 @Override
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {

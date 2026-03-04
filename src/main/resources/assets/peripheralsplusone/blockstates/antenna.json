@@ -1,18 +1,10 @@
 {
-  "forge_marker": 1,
-  "defaults": {
-    "textures": {
-      "all": "minecraft:blocks/iron_block"
-    },
-    "model": "minecraft:iron_block",
-    "uvlock": true
-  },
   "variants": {
-    "facing=north": [{}],
-    "facing=east": [{}],
-    "facing=south": [{}],
-    "facing=west": [{}],
-    "facing=up": [{}],
-    "facing=down": [{}]
+    "facing=north": { "model": "peripheralsplusone:block/antenna" },
+    "facing=east":  { "model": "peripheralsplusone:block/antenna", "y": 90 },
+    "facing=south": { "model": "peripheralsplusone:block/antenna", "y": 180 },
+    "facing=west":  { "model": "peripheralsplusone:block/antenna", "y": 270 },
+    "facing=up":    { "model": "peripheralsplusone:block/antenna", "x": 270 },
+    "facing=down":  { "model": "peripheralsplusone:block/antenna", "x": 90 }
   }
 }

@@ -1,11 +1,5 @@
 {
-  "forge_marker": 1,
-  "defaults": {
-    "model": "peripheralsplusone:analyzer_butterfly",
-    "uvlock": true
-  },
   "variants": {
-    "normal": [{}],
-    "inventory": [{}]
+    "": { "model": "peripheralsplusone:block/analyzer_butterfly" }
   }
 }

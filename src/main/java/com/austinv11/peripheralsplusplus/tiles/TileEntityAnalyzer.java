@@ -80,7 +80,7 @@ public boolean stillValid(Player player) { return Container.stillValidBlockEntit
 public void clearContent() { items[0] = ItemStack.EMPTY; }
 
 @Override
-public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.analyzer"); }
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.analyzer"); }
 
 @Nullable
 @Override

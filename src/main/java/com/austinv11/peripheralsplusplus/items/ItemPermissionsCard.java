@@ -61,7 +61,7 @@ public Component getName(ItemStack stack) {
 if (stack.hasTag() && stack.getTag().contains("profile")) {
 GameProfile profile = NbtUtils.readGameProfile(stack.getTag().getCompound("profile"));
 if (profile != null && profile.getName() != null)
-return Component.translatable("item.peripheralsplusplus.permissions_card")
+return Component.translatable("item.peripheralsplusone.permissions_card")
 .append(" - " + profile.getName());
 }
 return super.getName(stack);

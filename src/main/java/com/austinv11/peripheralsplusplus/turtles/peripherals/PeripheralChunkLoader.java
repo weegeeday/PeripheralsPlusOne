@@ -45,7 +45,7 @@ releaseChunks();
 for (int x = pos.x - Config.chunkLoadingRadius; x <= pos.x + Config.chunkLoadingRadius; x++) {
 for (int z = pos.z - Config.chunkLoadingRadius; z <= pos.z + Config.chunkLoadingRadius; z++) {
 ForgeChunkManager.forceChunk((net.minecraft.server.level.ServerLevel) turtle.getLevel(),
-"peripheralsplusplus", BlockPos.ZERO, x, z, true, false);
+"peripheralsplusone", BlockPos.ZERO, x, z, true, false);
 }
 }
 }
@@ -55,7 +55,7 @@ if (!turtle.getLevel().isClientSide()) {
 for (int x = pos.x - Config.chunkLoadingRadius; x <= pos.x + Config.chunkLoadingRadius; x++) {
 for (int z = pos.z - Config.chunkLoadingRadius; z <= pos.z + Config.chunkLoadingRadius; z++) {
 ForgeChunkManager.forceChunk((net.minecraft.server.level.ServerLevel) turtle.getLevel(),
-"peripheralsplusplus", BlockPos.ZERO, x, z, false, false);
+"peripheralsplusone", BlockPos.ZERO, x, z, false, false);
 }
 }
 }
