@@ -30,10 +30,6 @@ public TileEntityAnalyzer(net.minecraft.world.level.block.entity.BlockEntityType
 super(type, pos, state);
 }
 
-public TileEntityAnalyzer(BlockPos pos, BlockState state) {
-super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_BEE.get(), pos, state);
-}
-
 @Override
 public String getType() {
 return "generic_analyzer_this_is_a_bug";

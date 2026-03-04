@@ -54,8 +54,9 @@ BlockEntity te = turtle.getLevel().getBlockEntity(pos);
 if (!(te instanceof SignBlockEntity sign))
 throw new LuaException("No sign found.");
 ArrayList<String> lines = new ArrayList<>();
-for (int i = 0; i < 4; i++)
-lines.add(sign.getMessage(i, false).getString());
+net.minecraft.network.chat.Component[] messages = sign.getFrontText().getMessages(false);
+for (net.minecraft.network.chat.Component msg : messages)
+lines.add(msg.getString());
 return new Object[]{Util.arrayToMap(lines.toArray())};
 }
 

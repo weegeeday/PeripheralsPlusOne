@@ -20,7 +20,7 @@ List<String> attached = new ArrayList<>();
 try {
 IMount dynScript = ComputerCraftAPI.createResourceMount(Reference.MOD_ID, "lua/mount");
 if (dynScript != null) {
-String path = computer.mount("/rom/programs/dyn.lua", dynScript);
+String path = computer.mount("/ppo_lib", dynScript);
 if (path != null) attached.add(path);
 }
 } catch (RuntimeException e) {
