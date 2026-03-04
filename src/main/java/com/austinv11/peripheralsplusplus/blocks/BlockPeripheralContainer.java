@@ -1,57 +1,47 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.init.ModBlocks;
-import com.austinv11.peripheralsplusplus.utils.peripheralcontainer.ContainedPeripheral;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityPeripheralContainer;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import com.austinv11.peripheralsplusplus.utils.peripheralcontainer.ContainedPeripheral;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class BlockPeripheralContainer extends BlockPppBase implements ITileEntityProvider {
+import javax.annotation.Nullable;
 
-	public BlockPeripheralContainer() {
-		super();
-	}
+public class BlockPeripheralContainer extends BlockPppBase {
 
-	@Override
-	public TileEntity createNewTileEntity(World world, int meta) {
-		return new TileEntityPeripheralContainer();
-	}
+public BlockPeripheralContainer() {
+super();
+}
 
-    @Override
-    public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer,
-                                ItemStack itemStack) {
-        NBTTagCompound tag = itemStack.getTagCompound();
-        String key = ModBlocks.PERIPHERAL_CONTAINER.getRegistryName().toString();
-        if (tag == null || !tag.hasKey(key))
-            return;
-        NBTBase peripheralsBase = tag.getTag(key);
-        if (!(peripheralsBase instanceof NBTTagList))
-            return;
-        NBTTagList peripherals = (NBTTagList) peripheralsBase;
-        for (NBTBase peripheralBase : peripherals) {
-            if (!(peripheralBase instanceof NBTTagCompound))
-                continue;
-            ContainedPeripheral peripheral = new ContainedPeripheral((NBTTagCompound) peripheralBase);
-            TileEntity container = world.getTileEntity(pos);
-            if (container != null && container instanceof TileEntityPeripheralContainer)
-                ((TileEntityPeripheralContainer)container).addPeripheral(peripheral);
-        }
-    }
+@Override
+public boolean hasTileEntity(BlockState state) {
+return true;
+}
 
-    @Override
-    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state,
-                         int fortune) {
+@Nullable
+@Override
+public BlockEntity createTileEntity(BlockState state, net.minecraft.world.level.BlockGetter world) {
+return new TileEntityPeripheralContainer(BlockPos.ZERO, state);
+}
 
-    }
+@Override
+public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+CompoundTag tag = stack.getTag();
+if (tag == null) return;
+String key = "peripheralsplusone:peripheral_container";
+if (!tag.contains(key)) return;
+ListTag peripherals = tag.getList(key, 10);
+BlockEntity container = level.getBlockEntity(pos);
+if (!(container instanceof TileEntityPeripheralContainer te)) return;
+for (int i = 0; i < peripherals.size(); i++) {
+CompoundTag peripheralTag = peripherals.getCompound(i);
+te.addPeripheral(new ContainedPeripheral(peripheralTag));
+}
+}
 }

@@ -1,98 +1,92 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.collectiveframework.minecraft.utils.Colors;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
 import com.austinv11.peripheralsplusplus.items.ItemNanoSwarm;
 import com.austinv11.peripheralsplusplus.items.ItemSmartHelmet;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityAntenna;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class BlockAntenna extends BlockPppDirectional implements ITileEntityProvider {
+public class BlockAntenna extends BlockPppDirectional {
 
-	public BlockAntenna() {
-		super();
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-	}
+public BlockAntenna() {
+super();
+this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+}
 
-	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, FACING);
-	}
+@Override
+protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+builder.add(FACING);
+}
 
-	@Override
-	public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_) {
-		return new TileEntityAntenna();
-	}
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityAntenna(pos, state);
+}
 
-	@Override
-	public boolean isOpaqueCube(IBlockState state) {
-		return false;
-	}
+@Override
+public boolean isCollisionShapeFullBlock(BlockState state, net.minecraft.world.level.BlockGetter getter, BlockPos pos) {
+return false;
+}
 
-	@Override
-	public EnumBlockRenderType getRenderType(IBlockState state) {
-		return EnumBlockRenderType.INVISIBLE;
-	}
+@Override
+public RenderShape getRenderShape(BlockState state) {
+return RenderShape.INVISIBLE;
+}
 
-	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer,
-								ItemStack stack) {
-		worldIn.setBlockState(pos, state.withProperty(FACING,
-				EnumFacing.getDirectionFromEntityLiving(pos, placer)), 2);
-	}
+@Override
+public VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter getter, BlockPos pos, CollisionContext context) {
+return Shapes.empty();
+}
 
-	@Override
-	public int getMetaFromState(IBlockState state) {
-		return state.getValue(FACING).getIndex();
-	}
+@Override
+public BlockState getStateForPlacement(BlockPlaceContext context) {
+return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+}
 
-	@Override
-	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
-	}
+@Override
+public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+if (placer != null) {
+level.setBlock(pos, state.setValue(FACING, placer.getDirection().getOpposite()), 3);
+}
+}
 
-	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-									EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		if (player.getHeldItemMainhand().isEmpty() ||
-				!((player.getHeldItemMainhand().getItem() instanceof ItemSmartHelmet) ||
-						(player.getHeldItemMainhand().getItem() instanceof ItemNanoSwarm)))
-			return false;
-		if (!world.isRemote) {
-			TileEntityAntenna antenna = (TileEntityAntenna) world.getTileEntity(pos);
-			if (antenna == null)
-				return false;
-			UUID id = antenna.identifier;
-			NBTHelper.setString(player.getHeldItemMainhand(), "identifier", id.toString());
-			List<String> info = new ArrayList<String>();
-
-			if (antenna.getLabel() == null) {
-				info.add(Colors.RESET.toString() + Colors.GRAY + id.toString());
-			}
-			else {
-				String label = antenna.getLabel();
-				info.add(Colors.RESET.toString() + Colors.GRAY + label);
-				NBTHelper.setString(player.getHeldItemMainhand(), "label", label);
-			}
-
-			NBTHelper.setInfo(player.getHeldItemMainhand(), info);
-		}
-		return true;
-	}
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+ InteractionHand hand, BlockHitResult hit) {
+ItemStack held = player.getMainHandItem();
+if (held.isEmpty() || !((held.getItem() instanceof ItemSmartHelmet) || (held.getItem() instanceof ItemNanoSwarm)))
+return InteractionResult.PASS;
+if (!level.isClientSide) {
+TileEntityAntenna antenna = (TileEntityAntenna) level.getBlockEntity(pos);
+if (antenna == null)
+return InteractionResult.FAIL;
+UUID id = antenna.identifier;
+CompoundTag tag = held.getOrCreateTag();
+tag.putString("identifier", id.toString());
+if (antenna.getLabel() != null) {
+tag.putString("label", antenna.getLabel());
+}
+}
+return InteractionResult.sidedSuccess(level.isClientSide);
+}
 }

@@ -1,83 +1,39 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityMagReaderWriter;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
-public class BlockMagReaderWriter extends BlockPppBase implements ITileEntityProvider {
-    public BlockMagReaderWriter() {
-        super();
-    }
+public class BlockMagReaderWriter extends BlockContainerPPP {
 
-    @Nullable
-    @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new TileEntityMagReaderWriter();
-    }
+public BlockMagReaderWriter() {
+super();
+}
 
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand,
-                                    EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (world.isRemote)
-            return true;
-        TileEntity te = world.getTileEntity(pos);
-        if (te instanceof TileEntityMagReaderWriter)
-            ((TileEntityMagReaderWriter)te).itemSwipped(player.getHeldItem(hand));
-        return true;
-    }
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityMagReaderWriter(pos, state);
+}
 
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.INVISIBLE;
-    }
-
-    @Override
-    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return false;
-    }
-
-    @Override
-    public boolean doesSideBlockRendering(IBlockState state, IBlockAccess world, BlockPos pos, EnumFacing face) {
-        return false;
-    }
-
-    @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return new AxisAlignedBB(.25, 0, .2, .7, .25, .8);
-    }
-
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public BlockRenderLayer getBlockLayer() {
-        return BlockRenderLayer.CUTOUT;
-    }
-
-    @Override
-    public boolean isFullCube(IBlockState state) {
-        return false;
-    }
-
-    @Override
-    public BlockFaceShape getBlockFaceShape(IBlockAccess blockAccess, IBlockState state, BlockPos pos,
-                                            EnumFacing facing) {
-        return BlockFaceShape.UNDEFINED;
-    }
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+ InteractionHand hand, BlockHitResult hit) {
+if (!level.isClientSide) {
+BlockEntity te = level.getBlockEntity(pos);
+if (te instanceof net.minecraft.world.MenuProvider menuProvider)
+NetworkHooks.openScreen((ServerPlayer) player, menuProvider, pos);
+}
+return InteractionResult.sidedSuccess(level.isClientSide);
+}
 }

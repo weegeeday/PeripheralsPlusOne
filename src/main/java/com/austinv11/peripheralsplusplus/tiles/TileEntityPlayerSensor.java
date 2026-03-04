@@ -1,138 +1,113 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.minecraft.utils.Location;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import com.austinv11.peripheralsplusplus.utils.Util;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import java.util.HashMap;
+import java.util.List;
 
-public class TileEntityPlayerSensor extends TileEntity implements IPlusPlusPeripheral {
-	private HashMap<IComputerAccess,Boolean> computers = new HashMap<IComputerAccess,Boolean>();
-	private Location location;
-	private ITurtleAccess turtle;
+public class TileEntityPlayerSensor extends BlockEntity implements IPlusPlusPeripheral {
 
-	public TileEntityPlayerSensor() {
-		super();
-	}
+private final HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
+private ITurtleAccess turtle;
 
-	public TileEntityPlayerSensor(ITurtleAccess turtle) {
-		location = new Location(turtle.getPosition().getX(),turtle.getPosition().getY(), turtle.getPosition().getZ(),
-                turtle.getWorld());
-		this.turtle = turtle;
-		this.setPos(turtle.getPosition());
-		this.setWorld(turtle.getWorld());
-	}
+public TileEntityPlayerSensor(BlockPos pos, BlockState state) {
+super(null, pos, state);
+}
 
-    @Override
-    public void validate() {
-        super.validate();
+public TileEntityPlayerSensor(ITurtleAccess turtle) {
+super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+this.turtle = turtle;
+}
 
-        if(world != null)
-            location = new Location(this);
-    }
+public void tickAsTurtle() {
+if (turtle != null)
+this.worldPosition = turtle.getPosition();
+}
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-	}
+@Override
+public String getType() {
+return "playerSensor";
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		return nbttagcompound;
-	}
+@LuaFunction
+public final Object[] getNearbyPlayers(IArguments args) throws LuaException {
+if (!Config.enablePlayerSensor)
+throw new LuaException("Player sensors have been disabled");
+if (!Config.additionalMethods)
+throw new LuaException("Additional methods for player sensors have been disabled");
 
-	@Override
-	public String getType() {
-		return "playerSensor";
-	}
+double range = args.count() > 0 ? args.getDouble(0) : Config.sensorRange;
+BlockPos pos = getBlockPos();
+AABB box = new AABB(pos.getX() - range, pos.getY() - range, pos.getZ() - range,
+pos.getX() + range, pos.getY() + range, pos.getZ() + range);
 
-	@Override
-	public String[] getMethodNames() {
-		if (Config.additionalMethods)
-			return new String[] {"getNearbyPlayers"/*params: (optional) range returns:table containing players (in table with 'player' and 'distance' keys)*/, "getAllPlayers"/*params: (optional) limitToCurrentWorld returns:table containing all players*/};
-		return new String[0];
-	}
+List<Player> nearby = getLevel().getEntitiesOfClass(Player.class, box);
+HashMap<Integer, HashMap<String, Object>> returnVal = new HashMap<>();
+int i = 1;
+for (Player player : nearby) {
+double dist = player.distanceTo(new net.minecraft.world.entity.Entity(null, null) {
+{ setPos(pos.getX(), pos.getY(), pos.getZ()); }
+@Override public net.minecraft.world.entity.EntityType<?> getType() { return null; }
+});
+// Simpler distance calculation
+double dx = player.getX() - pos.getX();
+double dy = player.getY() - pos.getY();
+double dz = player.getZ() - pos.getZ();
+double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+HashMap<String, Object> table = new HashMap<>();
+table.put("player", player.getName().getString());
+table.put("distance", distance);
+returnVal.put(i++, table);
+}
+return new Object[]{returnVal};
+}
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enablePlayerSensor)
-			throw new LuaException("Player sensors have been disabled");
-		if (!Config.additionalMethods)
-			throw new LuaException("Additional methods for player sensors have been disabled");
-		if (method == 0) {
-			try {
-                if (arguments.length > 0 && !(arguments[0] instanceof Double))
-                    throw new LuaException("Bad argument #1 (expected number)");
-                synchronized (this) {
-                    double range = Config.sensorRange;
-                    if (arguments.length > 0)
-                        range = (Double) arguments[0];
+@LuaFunction
+public final Object[] getAllPlayers(IArguments args) throws LuaException {
+if (!Config.enablePlayerSensor)
+throw new LuaException("Player sensors have been disabled");
+if (!Config.additionalMethods)
+throw new LuaException("Additional methods for player sensors have been disabled");
 
-					HashMap<String,Double> map = new Location(this).getPlayers(range);
-                    HashMap<Integer,HashMap<String,Object>> returnVal = new HashMap<Integer,HashMap<String,Object>>();
-                    int i = 1;
-                    for (String player : map.keySet()) {
-                        HashMap<String,Object> table = new HashMap<String,Object>();
-                        table.put("player", player);
-                        table.put("distance", map.get(player));
-                        returnVal.put(i, table);
-                        i++;
-                    }
-                    return new Object[]{returnVal};
-                }
-			}catch (Exception e) {
-				e.printStackTrace();
-			}
-		}else if (method == 1) {
-			if (arguments.length > 0 && !(arguments[0] instanceof Boolean))
-				throw new LuaException("Bad argument #1 (expected boolean)");
-			boolean inWorld = false;
-			if (arguments.length > 0)
-				inWorld = (Boolean) arguments[0];
-			synchronized (this) {
-				HashMap<Integer,String> map = new HashMap<Integer,String>();
-				int i = 1;
-				for (String p : Util.getPlayers(inWorld ? getWorld() : null)) {
-					map.put(i, p);
-					i++;
-				}
-				return new Object[]{map};
-			}
-		}
-		return new Object[0];
-	}
+boolean inWorld = args.count() > 0 && args.getBoolean(0);
+HashMap<Integer, String> map = new HashMap<>();
+int i = 1;
+for (String p : Util.getPlayers(inWorld ? getLevel() : null)) {
+map.put(i++, p);
+}
+return new Object[]{map};
+}
 
-	@Override
-	public void attach(IComputerAccess computer) {
-		computers.put(computer, true);
-	}
+@Override
+public void attach(IComputerAccess computer) {
+computers.put(computer, true);
+}
 
-	@Override
-	public void detach(IComputerAccess computer) {
-		computers.remove(computer);
-	}
+@Override
+public void detach(IComputerAccess computer) {
+computers.remove(computer);
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {//FIXME idk what I'm doing
-		return (other == this);
-	}
+@Override
+public boolean equals(IPeripheral other) {
+return other == this;
+}
 
-	public void update() {
-	    setPos(turtle.getPosition());
-	}
-
-	public void blockActivated(String player) {
-		for (IComputerAccess computer : computers.keySet()) {
-			computer.queueEvent("player", new Object[]{player});
-		}
-	}
+public void blockActivated(String player) {
+for (IComputerAccess computer : computers.keySet())
+computer.queueEvent("player", new Object[]{player});
+}
 }

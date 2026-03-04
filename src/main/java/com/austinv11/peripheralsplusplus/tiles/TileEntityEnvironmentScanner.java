@@ -2,88 +2,88 @@ package com.austinv11.peripheralsplusplus.tiles;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import com.austinv11.peripheralsplusplus.utils.ReflectionHelper;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class TileEntityEnvironmentScanner extends TileEntity implements IPlusPlusPeripheral {
-	private boolean isRaining = false;
-	private String biome;
-	private String temp;
-	private boolean isSnow;
-	private ITurtleAccess turtle;
+public class TileEntityEnvironmentScanner extends BlockEntity implements IPlusPlusPeripheral {
 
-	public TileEntityEnvironmentScanner() {
-		super();
-	}
+private boolean isRaining = false;
+private String biome = "unknown";
+private String temp = "MEDIUM";
+private boolean isSnow = false;
+private ITurtleAccess turtle;
 
-	public TileEntityEnvironmentScanner(ITurtleAccess turtle) {
-		this.turtle = turtle;
-	}
+public TileEntityEnvironmentScanner(BlockPos pos, BlockState state) {
+super(null, pos, state);
+}
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-	}
+public TileEntityEnvironmentScanner(ITurtleAccess turtle) {
+super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+this.turtle = turtle;
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		return nbttagcompound;
-	}
+public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, TileEntityEnvironmentScanner self) {
+if (level != null) {
+self.isRaining = level.isRaining();
+Biome b = level.getBiome(pos).value();
+self.biome = level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME)
+.getKey(b) != null ? level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.BIOME).getKey(b).toString() : "unknown";
+self.temp = b.getBaseTemperature() < 0.15f ? "COLD" : (b.getBaseTemperature() < 1.0f ? "MEDIUM" : "WARM");
+self.isSnow = b.coldEnoughToSnow(pos);
+}
+if (self.turtle != null) {
+self.worldPosition = self.turtle.getPosition();
+}
+}
 
-	public void update() {
-		if (world != null) {
-			isRaining = world.isRaining();
-			biome = world.getBiome(getPos()).getBiomeName();
-			temp = world.getBiome(getPos()).getTempCategory().name();
-			isSnow = world.getBiome(getPos()).getEnableSnow();
-		}
-		if (turtle != null) {
-			this.setWorld(turtle.getWorld());
-			this.setPos(turtle.getPosition());
-		}
-		else
-			try {
-				turtle = ReflectionHelper.getTurtle(this);
-			} catch (Exception ignore) {}
-	}
+@Override
+public String getType() {
+return "environmentScanner";
+}
 
-	@Override
-	public String getType() {
-		return "environmentScanner";
-	}
+@LuaFunction
+public final Object[] isRaining(IArguments args) throws LuaException {
+if (!Config.enableEnvironmentScanner)
+throw new LuaException("Environment Scanners have been disabled");
+return new Object[]{isRaining};
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[]{"isRaining", "getBiome", "getTemperature", "getTemp", "isSnow"};
-	}
+@LuaFunction
+public final Object[] getBiome(IArguments args) throws LuaException {
+if (!Config.enableEnvironmentScanner)
+throw new LuaException("Environment Scanners have been disabled");
+return new Object[]{biome};
+}
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enableEnvironmentScanner)
-			throw new LuaException("Environment Scanners have been disabled");
-		switch (method) {
-			case 0:
-				return new Object[]{isRaining};
-			case 1:
-				return new Object[]{biome};
-			case 2:
-			case 3:
-				return new Object[]{temp};
-			case 4:
-				return new Object[]{isSnow};
-		}
-		return new Object[0];
-	}
+@LuaFunction
+public final Object[] getTemperature(IArguments args) throws LuaException {
+if (!Config.enableEnvironmentScanner)
+throw new LuaException("Environment Scanners have been disabled");
+return new Object[]{temp};
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (this == other);
-	}
+@LuaFunction
+public final Object[] getTemp(IArguments args) throws LuaException {
+return getTemperature(args);
+}
+
+@LuaFunction
+public final Object[] isSnow(IArguments args) throws LuaException {
+if (!Config.enableEnvironmentScanner)
+throw new LuaException("Environment Scanners have been disabled");
+return new Object[]{isSnow};
+}
+
+@Override
+public boolean equals(IPeripheral other) {
+return this == other;
+}
 }

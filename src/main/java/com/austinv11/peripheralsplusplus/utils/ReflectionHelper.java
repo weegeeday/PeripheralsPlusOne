@@ -6,8 +6,8 @@ import com.austinv11.peripheralsplusplus.utils.proxy.PeripheralChangeListener;
 import com.austinv11.peripheralsplusplus.utils.proxy.Task;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
@@ -25,7 +25,7 @@ public class ReflectionHelper {
 	 * @return turtle access or null
 	 * @throws Exception Turlte could not be obtained via reflection
 	 */
-	public static ITurtleAccess getTurtle(TileEntity te) throws Exception {
+	public static ITurtleAccess getTurtle(BlockEntity te) throws Exception {
 		if (te instanceof ITurtleAccess)
 			return (ITurtleAccess) te;
 		Class teClass = te.getClass();

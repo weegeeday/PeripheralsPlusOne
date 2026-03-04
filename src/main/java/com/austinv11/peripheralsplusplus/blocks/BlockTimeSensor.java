@@ -1,19 +1,21 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityTimeSensor;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class BlockTimeSensor extends BlockPppBase implements ITileEntityProvider {
+import javax.annotation.Nullable;
 
-	public BlockTimeSensor() {
-		super();
-	}
+public class BlockTimeSensor extends BlockContainerPPP {
 
-	@Override
-	public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_) {
-		return new TileEntityTimeSensor();
-	}
+public BlockTimeSensor() {
+super();
+}
+
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityTimeSensor(pos, state);
+}
 }

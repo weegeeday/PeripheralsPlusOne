@@ -1,83 +1,69 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityTeleporter;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
-public class BlockTeleporter extends BlockPppDirectional implements ITileEntityProvider {
-	public static final PropertyInteger TIER = PropertyInteger.create("tier", 0, 1);
+import javax.annotation.Nullable;
 
-	public BlockTeleporter() {
-		super();
-		this.setDefaultState(this.blockState.getBaseState()
-				.withProperty(FACING, EnumFacing.NORTH)
-				.withProperty(TIER, 0));
-	}
+public class BlockTeleporter extends BlockPppDirectional {
+public static final IntegerProperty TIER = IntegerProperty.create("tier", 0, 1);
 
-	@Override
-	public TileEntity createNewTileEntity(World p_149915_1_, int p_149915_2_) {
-		return new TileEntityTeleporter();
-	}
+public BlockTeleporter() {
+super();
+this.registerDefaultState(this.stateDefinition.any()
+.setValue(FACING, Direction.NORTH)
+.setValue(TIER, 0));
+}
 
-	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, FACING, TIER);
-	}
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityTeleporter(pos, state);
+}
 
-	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer,
-								ItemStack stack) {
-		worldIn.setBlockState(pos,
-				state.withProperty(FACING, EnumFacing.getDirectionFromEntityLiving(pos, placer))
-						.withProperty(TIER, stack.getItemDamage()), 2);
-	}
+@Override
+protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+builder.add(FACING, TIER);
+}
 
-	@Override
-	public int getMetaFromState(IBlockState state) {
-		return (state.getValue(FACING).getIndex() << 1) | state.getValue(TIER);
-	}
+@Nullable
+@Override
+public BlockState getStateForPlacement(BlockPlaceContext context) {
+int tier = context.getItemInHand().getDamageValue();
+return this.defaultBlockState()
+.setValue(FACING, context.getHorizontalDirection().getOpposite())
+.setValue(TIER, Math.min(tier, 1));
+}
 
-	@Override
-	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(FACING, EnumFacing.getFront(meta >> 1))
-				.withProperty(TIER, meta & 1);
-	}
+@Override
+public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+// Facing already set in getStateForPlacement
+}
 
-	@Override
-	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-									EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-		TileEntityTeleporter tp = (TileEntityTeleporter)world.getTileEntity(pos);
-		if (tp == null)
-			return false;
-		if (player.getHeldItem(hand).isEmpty() || !player.getHeldItem(hand).isItemEqual(new ItemStack(Items.REPEATER)))
-			return false;
-		if (!world.isRemote)
-			tp.blockActivated(player, hand);
-		return true;
-	}
-
-	@Override
-	public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> list) {
-		for (int tier : TIER.getAllowedValues())
-			list.add(new ItemStack(this, 1, tier));
-	}
-
-	@Override
-	public int damageDropped(IBlockState state) {
-		return state.getValue(TIER);
-	}
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+ InteractionHand hand, BlockHitResult hit) {
+TileEntityTeleporter tp = (TileEntityTeleporter) level.getBlockEntity(pos);
+if (tp == null)
+return InteractionResult.PASS;
+if (player.getItemInHand(hand).isEmpty() || !player.getItemInHand(hand).is(Items.REPEATER))
+return InteractionResult.PASS;
+if (!level.isClientSide)
+tp.blockActivated(player, hand);
+return InteractionResult.sidedSuccess(level.isClientSide);
+}
 }

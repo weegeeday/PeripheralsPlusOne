@@ -4,150 +4,108 @@ import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
 import com.austinv11.peripheralsplusplus.network.SynthPacket;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import dan200.computercraft.api.turtle.TurtleSide;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
-public class TileEntitySpeaker extends TileEntity implements IPlusPlusPeripheral {
-	private ITurtleAccess turtle;
-	private TurtleSide side = null;
-	private int id;
-	private List<IComputerAccess> computers = new ArrayList<>();
-	private Map<UUID, Long> pendingEvents = new HashMap<>();
+public class TileEntitySpeaker extends BlockEntity implements IPlusPlusPeripheral {
 
-	public TileEntitySpeaker() {
-		super();
-	}
+private ITurtleAccess turtle;
+private TurtleSide side = null;
+private final List<IComputerAccess> computers = new ArrayList<>();
+private final Map<UUID, Long> pendingEvents = new HashMap<>();
 
-	public TileEntitySpeaker(ITurtleAccess turtle, TurtleSide side) {
-		this();
-		this.turtle = turtle;
-		this.side = side;
-	}
+public TileEntitySpeaker(BlockPos pos, BlockState state) {
+super(null, pos, state);
+}
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-	}
+public TileEntitySpeaker(ITurtleAccess turtle, TurtleSide side) {
+super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+this.turtle = turtle;
+this.side = side;
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		return nbttagcompound;
-	}
+public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, TileEntitySpeaker self) {
+if (self.turtle != null)
+self.worldPosition = self.turtle.getPosition();
+synchronized (self) {
+for (Map.Entry<UUID, Long> entry : new ArrayList<>(self.pendingEvents.entrySet())) {
+if (System.currentTimeMillis() - entry.getValue() > 30000) {
+self.onSpeechCompletion("", entry.getKey());
+break;
+}
+}
+}
+}
 
-	public void update() {
-		if (turtle != null) {
-			this.setWorld(turtle.getWorld());
-			this.setPos(turtle.getPosition());
-		}
-		if (world != null)
-			id = world.provider.getDimension();
-		synchronized (this) {
-			for (Map.Entry<UUID, Long> pendingEvent : pendingEvents.entrySet())
-				if (System.currentTimeMillis() - pendingEvent.getValue() > 30000) {
-					onSpeechCompletion("", pendingEvent.getKey());
-					break;
-				}
-		}
-	}
+@Override
+public String getType() {
+return "speaker";
+}
 
-	@Override
-	public String getType() {
-		return "speaker";
-	}
+@LuaFunction(mainThread = false)
+public final Object[] speak(IArguments args) throws LuaException {
+return synthesize(args);
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[]{"speak", "synthesize" /*text, [range, [voice, [pitch, [pitchRange, [pitchShift, [rate, [volume, [wait]]]]]]]]*/};
-	}
+@LuaFunction(mainThread = false)
+public final Object[] synthesize(IArguments args) throws LuaException {
+if (!Config.enableSpeaker)
+throw new LuaException("Speakers have been disabled");
+String text = args.getString(0);
+double range = args.count() > 1 ? args.getDouble(1) : (Config.speechRange < 0 ? Double.MAX_VALUE : Config.speechRange);
+String voice = args.count() > 2 ? args.getString(2) : "kevin16";
+Float pitch = args.count() > 3 ? (float) args.getDouble(3) : null;
+Float pitchRange = args.count() > 4 ? (float) args.getDouble(4) : null;
+Float pitchShift = args.count() > 5 ? (float) args.getDouble(5) : null;
+Float rateVal = args.count() > 6 ? (float) args.getDouble(6) : null;
+Float volume = args.count() > 7 ? (float) args.getDouble(7) : null;
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
-			throws LuaException, InterruptedException {
-		if (!Config.enableSpeaker)
-			throw new LuaException("Speakers have been disabled");
-		if (method <= 1) {
-			if (!(arguments.length > 0) || !(arguments[0] instanceof String))
-				throw new LuaException("Bad argument #1 (expected string)");
-			if (arguments.length > 1 && !(arguments[1] instanceof Double))
-				throw new LuaException("Bad argument #2 (expected number)");
-			if (arguments.length > 2 && !(arguments[2] instanceof String))
-				throw new LuaException("Bad argument #3 (expected string)");
-			if (arguments.length > 3 && !(arguments[3] instanceof Double))
-				throw new LuaException("Bad argument #4 (expected number)");
-			if (arguments.length > 4 && !(arguments[4] instanceof Double))
-				throw new LuaException("Bad argument #5 (expected number)");
-			if (arguments.length > 5 && !(arguments[5] instanceof Double))
-				throw new LuaException("Bad argument #6 (expected number)");
-			if (arguments.length > 6 && !(arguments[6] instanceof Double))
-				throw new LuaException("Bad argument #7 (expected number)");
-			if (arguments.length > 7 && !(arguments[7] instanceof Double))
-				throw new LuaException("Bad argument #8 (expected number)");
-			if (arguments.length > 8 && !(arguments[8] instanceof Boolean))
-				throw new LuaException("Bad argument #9 (expected boolean");
-			
-			String text = (String) arguments[0];
-			double range;
-			if (Config.speechRange < 0)
-				range = Double.MAX_VALUE;
-			else
-				range = Config.speechRange;
-			if (arguments.length > 1)
-				range = (Double) arguments[1];
-			String voice = arguments.length > 2 ? (String) arguments[2] : "kevin16";
-			Float pitch = arguments.length > 3 ? ((Double)arguments[3]).floatValue() : null;
-			Float pitchRange = arguments.length > 4 ? ((Double)arguments[4]).floatValue() : null;
-			Float pitchShift = arguments.length > 5 ? ((Double)arguments[5]).floatValue() : null;
-			Float rate = arguments.length > 6 ? ((Double)arguments[6]).floatValue() : null;
-			Float volume = arguments.length > 7 ? ((Double)arguments[7]).floatValue() : null;
+UUID eventId = UUID.randomUUID();
+while (pendingEvents.containsKey(eventId)) eventId = UUID.randomUUID();
+pendingEvents.put(eventId, System.currentTimeMillis());
 
-			UUID eventId = null;
-			while (eventId == null || pendingEvents.containsKey(eventId))
-				eventId = UUID.randomUUID();
-			pendingEvents.put(eventId, System.currentTimeMillis());
-			PeripheralsPlusPlus.NETWORK.sendToAllAround(
-			        new SynthPacket(text, voice, pitch, pitchRange, pitchShift, rate, volume, getPos(), id, side,
-							eventId),
-                    new NetworkRegistry.TargetPoint(id, getPos().getX(), getPos().getY(), getPos().getZ(), range));
-			
-			if (arguments.length > 8 && (Boolean) arguments[8])
-				context.pullEvent("synthComplete");
-			return new Object[]{eventId.toString()};
-		}
-		return new Object[0];
-	}
+BlockPos pos = getBlockPos();
+PeripheralsPlusPlus.NETWORK.send(
+PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(
+pos.getX(), pos.getY(), pos.getZ(), range, null)),
+new SynthPacket(text, voice, pitch, pitchRange, pitchShift, rateVal, volume, pos, 0, side, eventId));
 
-	@Override
-	public void attach(IComputerAccess computer) {
-		computers.add(computer);
-	}
+return new Object[]{eventId.toString()};
+}
 
-	@Override
-	public void detach(IComputerAccess computer) {
-		computers.remove(computer);
-	}
+@Override
+public void attach(IComputerAccess computer) {
+computers.add(computer);
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (this == other);
-	}
+@Override
+public void detach(IComputerAccess computer) {
+computers.remove(computer);
+}
 
-	public void onSpeechCompletion(String text, UUID eventId) {
-		synchronized (this) {
-			if (!pendingEvents.containsKey(eventId))
-				return;
-			pendingEvents.remove(eventId);
-		}
-		for (IComputerAccess computer : computers)
-			computer.queueEvent("synthComplete", new Object[]{text, eventId});
-	}
+@Override
+public boolean equals(IPeripheral other) {
+return this == other;
+}
+
+public void onSpeechCompletion(String text, UUID eventId) {
+synchronized (this) {
+if (!pendingEvents.containsKey(eventId))
+return;
+pendingEvents.remove(eventId);
+}
+for (IComputerAccess computer : computers)
+computer.queueEvent("synthComplete", new Object[]{text, eventId});
+}
 }
