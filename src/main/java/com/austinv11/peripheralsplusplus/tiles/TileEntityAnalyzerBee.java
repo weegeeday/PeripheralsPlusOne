@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class TileEntityAnalyzerBee extends TileEntityAnalyzer {
 
 public TileEntityAnalyzerBee(BlockPos pos, BlockState state) {
-super(pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_BEE.get(), pos, state);
 }
 
 @Override

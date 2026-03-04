@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class TileEntityAnalyzerTree extends TileEntityAnalyzer {
 
 public TileEntityAnalyzerTree(BlockPos pos, BlockState state) {
-super(pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_TREE.get(), pos, state);
 }
 
 @Override

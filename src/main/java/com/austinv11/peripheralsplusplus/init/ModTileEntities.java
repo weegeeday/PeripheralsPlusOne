@@ -99,8 +99,4 @@ TILE_ENTITIES.register("privacy_guard", () -> BlockEntityType.Builder
 public static final RegistryObject<BlockEntityType<TileEntityTurtle>> TURTLE =
 TILE_ENTITIES.register("turtle", () -> BlockEntityType.Builder
 .of(TileEntityTurtle::new, ModBlocks.TURTLE.get()).build(null));
-
-public static final RegistryObject<BlockEntityType<TileEntityAnalyzer>> ANALYZER_CHAT_BOX =
-TILE_ENTITIES.register("analyzer", () -> BlockEntityType.Builder
-.of(TileEntityAnalyzer::new, ModBlocks.CHAT_BOX.get()).build(null));
 }

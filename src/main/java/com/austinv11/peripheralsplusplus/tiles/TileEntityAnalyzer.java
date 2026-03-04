@@ -26,8 +26,12 @@ public abstract class TileEntityAnalyzer extends BlockEntity implements IPlusPlu
 
 protected final ItemStack[] items = new ItemStack[]{ItemStack.EMPTY};
 
+public TileEntityAnalyzer(net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+super(type, pos, state);
+}
+
 public TileEntityAnalyzer(BlockPos pos, BlockState state) {
-super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_CHAT_BOX.get(), pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_BEE.get(), pos, state);
 }
 
 @Override

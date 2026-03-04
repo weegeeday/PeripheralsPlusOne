@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class TileEntityAnalyzerButterfly extends TileEntityAnalyzer {
 
 public TileEntityAnalyzerButterfly(BlockPos pos, BlockState state) {
-super(pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_BUTTERFLY.get(), pos, state);
 }
 
 @Override
