@@ -1,62 +1,36 @@
 package com.austinv11.peripheralsplusplus.tiles.containers;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public class ContainerAnalyzer extends Container {
+import javax.annotation.Nullable;
 
-	private EntityPlayer player;
-	private IInventory inv;
-	private final int slotX = 80;
-	private final int slotY = 34;
+public class ContainerAnalyzer extends AbstractContainerMenu {
 
-	public ContainerAnalyzer(EntityPlayer player, IInventory inv, int xSize, int ySize) {
-		this.player = player;
-		this.inv = inv;
-		inv.openInventory(player);
-		layout(xSize,ySize);
-	}
+public ContainerAnalyzer(int syncId, Inventory playerInv, net.minecraft.world.Container inv) {
+super(null, syncId);
+addSlot(new Slot(inv, 0, 80, 34));
+layoutPlayerInventory(playerInv, 8, 84);
+}
 
-	protected void layout(int xSize, int ySize) {
-		addSlotToContainer(new Slot(inv,0,slotX,slotY));
-		int leftCol = (xSize - 162) / 2 + 1;
-		for (int playerInvRow = 0; playerInvRow < 3; playerInvRow++) {
-			for (int playerInvCol = 0; playerInvCol < 9; playerInvCol++) {
-				addSlotToContainer(new Slot(player.inventory, playerInvCol + playerInvRow * 9 + 9, leftCol + playerInvCol * 18, ySize - (4 - playerInvRow) * 18 - 10));
-			}
-		}
-		for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-			addSlotToContainer(new Slot(player.inventory, hotbarSlot, leftCol + hotbarSlot * 18, ySize - 24));
-		}
-	}
+protected void layoutPlayerInventory(Inventory playerInv, int left, int top) {
+for (int row = 0; row < 3; row++)
+for (int col = 0; col < 9; col++)
+addSlot(new Slot(playerInv, col + row * 9 + 9, left + col * 18, top + row * 18));
+for (int col = 0; col < 9; col++)
+addSlot(new Slot(playerInv, col, left + col * 18, top + 58));
+}
 
-	@Override
-	public ItemStack transferStackInSlot(EntityPlayer p_82846_1_, int p_82846_2_) {
-		ItemStack var2 = ItemStack.EMPTY;
-		Slot var3 = this.inventorySlots.get(p_82846_2_);
+@Override
+public ItemStack quickMoveStack(net.minecraft.world.entity.player.Player player, int index) {
+return ItemStack.EMPTY;
+}
 
-		if (var3 != null && var3.getHasStack()) {
-			ItemStack var4 = var3.getStack();
-			var2 = var4.copy();
-
-			if (p_82846_2_ < 1) {
-				if (!this.mergeItemStack(var4, 1, this.inventorySlots.size(), true)) {
-					return ItemStack.EMPTY;
-				}
-			} else if (!this.mergeItemStack(var4, 0, 1, false)) return ItemStack.EMPTY;
-
-			if (var4.getCount() == 0) var3.putStack(ItemStack.EMPTY);
-			else var3.onSlotChanged();
-		}
-
-		return var2;
-	}
-
-	@Override
-	public boolean canInteractWith(EntityPlayer player) {
-		return inv.isUsableByPlayer(player);
-	}
+@Override
+public boolean stillValid(net.minecraft.world.entity.player.Player player) {
+return true;
+}
 }

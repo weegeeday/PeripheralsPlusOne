@@ -2,233 +2,206 @@ package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import dan200.computercraft.api.turtle.TurtleSide;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 import java.util.Random;
 
 public class PeripheralXP implements IPlusPlusPeripheral {
 
-	private static final int MAX_LEVEL = 30;
-	private static final double COLLECT_RANGE = 2.0D;
-	private final BetterRandom random = new BetterRandom();
-	private int experience = 0;
-	private int experienceRemainder = 0;
-	private int experienceLevel = 0;
-	private boolean autoCollect = false;
-	private int ticker = random.nextInt(20);
-	public boolean changed = false;
-	private ITurtleAccess turtle;
-	private TurtleSide side;
+private static final int MAX_LEVEL = 30;
+private static final double COLLECT_RANGE = 2.0D;
+private final BetterRandom random = new BetterRandom();
+private int experience = 0;
+private int experienceRemainder = 0;
+private int experienceLevel = 0;
+private boolean autoCollect = false;
+private int ticker;
+public boolean changed = false;
+private final ITurtleAccess turtle;
+private final TurtleSide side;
 
-	public PeripheralXP(ITurtleAccess turtleAccess, TurtleSide side) {
-		turtle = turtleAccess;
-		this.side = side;
-		NBTTagCompound tag = turtle.getUpgradeNBTData(side);
-		experience = tag.getInteger("experience");
-		experienceRemainder = tag.getInteger("experienceRemainder");
-		experienceLevel = tag.getInteger("experienceLevel");
-		random.setSeed(tag.getLong("rndSeed"));
-	}
+public PeripheralXP(ITurtleAccess turtle, TurtleSide side) {
+this.turtle = turtle;
+this.side = side;
+CompoundTag tag = turtle.getUpgradeNBTData(side);
+experience = tag.getInt("experience");
+experienceRemainder = tag.getInt("experienceRemainder");
+experienceLevel = tag.getInt("experienceLevel");
+random.setSeed(tag.getLong("rndSeed"));
+ticker = random.nextInt(20);
+}
 
-	public void update() {
-		if (autoCollect && ++ticker >= 20) {
-			ticker = 0;
-			addExperience(collect());
-			changed = true;
-		}
-		if (changed) {
-			NBTTagCompound tag = turtle.getUpgradeNBTData(side);
-			tag.setInteger("experience", experience);
-			tag.setInteger("experienceRemainder", experienceRemainder);
-			tag.setInteger("experienceLevel", experienceLevel);
-			tag.setLong("rndSeed", random.getSeed());
-			turtle.updateUpgradeNBTData(side);
-			changed = false;
-		}
-	}
+public void update() {
+if (autoCollect && ++ticker >= 20) {
+ticker = 0;
+addExperience(collect());
+changed = true;
+}
+if (changed) {
+CompoundTag tag = turtle.getUpgradeNBTData(side);
+tag.putInt("experience", experience);
+tag.putInt("experienceRemainder", experienceRemainder);
+tag.putInt("experienceLevel", experienceLevel);
+tag.putLong("rndSeed", random.getSeed());
+turtle.updateUpgradeNBTData(side);
+changed = false;
+}
+}
 
-	public void addExperience(int amount) {
-		int var = Integer.MAX_VALUE - this.experience;
-		if (amount > var)
-			amount = var;
-		this.experienceRemainder += amount;
-		for (this.experience += amount; this.experienceRemainder < 0 || this.experienceRemainder >= levelXP(experienceLevel); this.experienceRemainder -= levelXP(experienceLevel) * (this.experienceRemainder < 0 ? -1 : 1)){
-			this.addLevels(this.experienceRemainder < 0 ? -1 : 1, false);
-		}
-	}
+public void addExperience(int amount) {
+int var = Integer.MAX_VALUE - this.experience;
+if (amount > var) amount = var;
+this.experienceRemainder += amount;
+this.experience += amount;
+while (experienceRemainder < 0 || experienceRemainder >= levelXP(experienceLevel)) {
+int sign = experienceRemainder < 0 ? -1 : 1;
+this.experienceRemainder -= levelXP(experienceLevel) * sign;
+this.addLevels(sign, false);
+}
+}
 
-	public void addLevels(int par1, boolean updateXP) {
-		this.experienceLevel += par1;
-		if (this.experienceLevel < 0)
-			this.experienceLevel = 0;
-		if (updateXP)
-			experience = calculateLevelXP(experienceLevel) + experienceRemainder;
-	}
+public void addLevels(int par1, boolean updateXP) {
+this.experienceLevel += par1;
+if (this.experienceLevel < 0) this.experienceLevel = 0;
+if (updateXP) experience = calculateLevelXP(experienceLevel) + experienceRemainder;
+}
 
-	public int levelXP(int level) {
-		return level >= 30 ? 62 + (level - 30) * 7 : (level >= 15 ? 17 + (level - 15) * 3 : 17);
-	}
+public int levelXP(int level) {
+return level >= 30 ? 62 + (level - 30) * 7 : (level >= 15 ? 17 + (level - 15) * 3 : 17);
+}
 
-	public int calculateLevelXP(int level) {
-		int levelXP = 0;
-		for (int currentLevel = 1;currentLevel <= level;currentLevel++) {
-			levelXP += levelXP(currentLevel);
-		}
-		return levelXP;
-	}
+public int calculateLevelXP(int level) {
+int levelXP = 0;
+for (int i = 1; i <= level; i++) levelXP += levelXP(i);
+return levelXP;
+}
 
-	private int collect() {
-		int ret = 0;
-		BlockPos pos = turtle.getPosition();
-        List<EntityXPOrb> entities = turtle.getWorld().getEntitiesWithinAABB(EntityXPOrb.class,
-                new AxisAlignedBB(
-                        pos.getX() - COLLECT_RANGE,
-                        pos.getY() - COLLECT_RANGE,
-                        pos.getZ() - COLLECT_RANGE,
-                        pos.getX() + 1 + COLLECT_RANGE,
-                        pos.getY() + 1 + COLLECT_RANGE,
-                        pos.getZ() + 1 + COLLECT_RANGE
-                )
-        );
-		for (EntityXPOrb orb : entities) {
-			ret += orb.getXpValue();
-			orb.setDead();
-		}
-		return ret;
-	}
+private int collect() {
+BlockPos pos = turtle.getPosition();
+AABB box = new AABB(pos.getX() - COLLECT_RANGE, pos.getY() - COLLECT_RANGE, pos.getZ() - COLLECT_RANGE,
+pos.getX() + 1 + COLLECT_RANGE, pos.getY() + 1 + COLLECT_RANGE, pos.getZ() + 1 + COLLECT_RANGE);
+int ret = 0;
+for (ExperienceOrb orb : turtle.getLevel().getEntitiesOfClass(ExperienceOrb.class, box)) {
+ret += orb.getValue();
+orb.discard();
+}
+return ret;
+}
 
-	@Override
-	public String getType() {
-		return "xp";
-	}
+@Override
+public String getType() {
+return "xp";
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[] {"add", "getXP", "getLevels", "collect", "setAutoCollect", "enchant"};
-	}
+@LuaFunction
+public final Object[] add(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+int amount = args.count() > 0 ? args.getInt(0) : Integer.MAX_VALUE;
+ItemStack slot = turtle.getInventory().getItem(turtle.getSelectedSlot());
+if (slot.isEmpty()) return new Object[]{0};
+amount = Math.min(amount, slot.getCount());
+int recharge = 0;
+if (slot.is(Items.EXPERIENCE_BOTTLE)) {
+recharge = (3 + random.nextInt(5) + random.nextInt(5)) * amount;
+}
+addExperience(recharge);
+if (recharge > 0) {
+slot.shrink(amount);
+if (slot.getCount() <= 0) slot = ItemStack.EMPTY;
+turtle.getInventory().setItem(turtle.getSelectedSlot(), slot);
+}
+changed = true;
+return new Object[]{recharge};
+}
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
-            throws LuaException, InterruptedException {
-		if (!Config.enableXPTurtle)
-			throw new LuaException("XP Turtles have been disabled");
-		ItemStack slot;
-		switch (method) {
-			case 0:
-				slot = turtle.getInventory().getStackInSlot(turtle.getSelectedSlot());
-				int amount = Integer.MAX_VALUE;
-				if (arguments.length > 0) {
-					if (!(arguments[0] instanceof Double))
-						throw new LuaException("Bad argument #1 (expected number)");
-					amount = (int)Math.floor((Double)arguments[0]);
-				}
-				if (slot.getCount() < 1)
-					return new Object[] {0};
-				amount = Math.min(amount, slot.getCount());
-				int recharge = 0;
-				if (slot.isItemEqual(new ItemStack(Items.EXPERIENCE_BOTTLE))) {
-					recharge = 3 + random.nextInt(5) + random.nextInt(5);
-				}
-				recharge *= amount;
-				addExperience(recharge);
-				if (recharge > 0) {
-				    slot.setCount(slot.getCount() - amount);
-					if (slot.getCount() <= 0)
-						slot = ItemStack.EMPTY;
-					turtle.getInventory().setInventorySlotContents(turtle.getSelectedSlot(), slot);
-				}
-				changed = true;
-				return new Object[] {recharge};
-			case 1:
-				return new Object[] {experience};
-			case 2:
-				return new Object[] {experienceLevel};
-			case 3:
-				int collected = collect();
-				addExperience(collected);
-				changed = true;
-				return new Object[] {collected};
-			case 4:
-				boolean ac = !autoCollect;
-				if (arguments.length > 0) {
-					if (!(arguments[0] instanceof Boolean))
-						throw new LuaException("Bad argument #1 (expected boolean)");
-					ac = (Boolean)arguments[0];
-				}
-				autoCollect = ac;
-				return new Object[] {autoCollect};
-			case 5:
-				if (arguments.length < 1)
-					throw new LuaException("Too few arguments");
-				if (!(arguments[0] instanceof Double))
-					throw new LuaException("Bad argument #1 (expected number)");
-				int levels = (int)Math.floor((Double)arguments[0]);
-				if (levels < 1 || levels > MAX_LEVEL)
-					throw new LuaException("invalid level count "+levels+" (expected 1-"+MAX_LEVEL+")");
-				slot = turtle.getInventory().getStackInSlot(turtle.getSelectedSlot());
-				if (!slot.isItemEnchantable())
-					return new Object[] {false};
-				if (experienceLevel < levels)
-					return new Object[] {false};
-				List enchants = EnchantmentHelper.buildEnchantmentList(random, slot, levels, true);
-				if (enchants.isEmpty())
-					return new Object[] {false};
-				ItemStack enchanted = slot.copy();
-				if (enchanted.isItemEqual(new ItemStack(Items.BOOK))) {
-					enchanted = new ItemStack(Items.ENCHANTED_BOOK);
-					enchanted.setTagCompound(new NBTTagCompound());
-					NBTTagList storedEnchantments = new NBTTagList();
-					NBTTagCompound enchantment = new NBTTagCompound();
-					EnchantmentData data = (EnchantmentData)enchants.get(0);
-					enchantment.setShort("id", (short) Enchantment.getEnchantmentID(data.enchantment));
-					enchantment.setShort("lvl", (short)data.enchantmentLevel);
-					storedEnchantments.appendTag(enchantment);
-					enchanted.getTagCompound().setTag("StoredEnchantments", storedEnchantments);
-				} else {
-					for (EnchantmentData data : (List<EnchantmentData>)enchants) {
-						enchanted.addEnchantment(data.enchantment, data.enchantmentLevel);
-					}
-				}
-				addLevels(-levels, true);
-				turtle.getInventory().setInventorySlotContents(turtle.getSelectedSlot(), enchanted);
-				changed = true;
-				return new Object[] {true};
-		}
-		return new Object[0];
-	}
+@LuaFunction
+public final Object[] getXP(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+return new Object[]{experience};
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (other == this);
-	}
+@LuaFunction
+public final Object[] getLevels(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+return new Object[]{experienceLevel};
+}
 
-	private class BetterRandom extends Random {
-		private long seed;
+@LuaFunction
+public final Object[] collect(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+int collected = collect();
+addExperience(collected);
+changed = true;
+return new Object[]{collected};
+}
 
-		@Override
-		public void setSeed(long seed) {
-			super.setSeed(seed);
-			this.seed = seed;
-		}
+@LuaFunction
+public final Object[] setAutoCollect(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+autoCollect = args.count() > 0 ? args.getBoolean(0) : !autoCollect;
+return new Object[]{autoCollect};
+}
 
-		public long getSeed() {
-			return seed;
-		}
-	}
+@LuaFunction
+public final Object[] enchant(IArguments args) throws LuaException {
+if (!Config.enableXPTurtle)
+throw new LuaException("XP Turtles have been disabled");
+int levels = args.getInt(0);
+if (levels < 1 || levels > MAX_LEVEL)
+throw new LuaException("invalid level count " + levels + " (expected 1-" + MAX_LEVEL + ")");
+ItemStack slot = turtle.getInventory().getItem(turtle.getSelectedSlot());
+if (!slot.isEnchantable()) return new Object[]{false};
+if (experienceLevel < levels) return new Object[]{false};
+List<EnchantmentInstance> enchants = EnchantmentHelper.selectEnchantment(random, slot, levels, true);
+if (enchants.isEmpty()) return new Object[]{false};
+ItemStack enchanted = slot.copy();
+if (enchanted.is(Items.BOOK)) {
+enchanted = new ItemStack(Items.ENCHANTED_BOOK);
+}
+for (EnchantmentInstance data : enchants) {
+enchanted.enchant(data.enchantment, data.level);
+}
+addLevels(-levels, true);
+turtle.getInventory().setItem(turtle.getSelectedSlot(), enchanted);
+changed = true;
+return new Object[]{true};
+}
+
+@Override
+public boolean equals(IPeripheral other) {
+return other == this;
+}
+
+private static class BetterRandom extends Random {
+private long seed;
+
+@Override
+public void setSeed(long seed) {
+super.setSeed(seed);
+this.seed = seed;
+}
+
+public long getSeed() {
+return seed;
+}
+}
 }

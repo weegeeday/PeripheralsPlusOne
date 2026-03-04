@@ -1,35 +1,23 @@
 package com.austinv11.peripheralsplusplus.turtles;
 
-import com.austinv11.collectiveframework.minecraft.utils.ModelManager;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityPlayerSensor;
-import com.austinv11.peripheralsplusplus.utils.ModelUtil;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
 
-public class TurtlePlayerSensor implements ITurtleUpgrade, ModelManager.ModelRegistrar {
+public class TurtlePlayerSensor implements ITurtleUpgrade {
 
 	@Override
 	public ResourceLocation getUpgradeID() {
 		return new ResourceLocation(Reference.PLAYER_SENSOR_UPGRADE);
 	}
-
-    @Override
-    public int getLegacyUpgradeID() {
-        return Reference.PLAYER_SENSOR_UPGRADE_LEGACY;
-    }
 
     @Override
 	public String getUnlocalisedAdjective() {
@@ -43,7 +31,7 @@ public class TurtlePlayerSensor implements ITurtleUpgrade, ModelManager.ModelReg
 
 	@Override
 	public ItemStack getCraftingItem() {
-		return new ItemStack(ModBlocks.PLAYER_SENSOR);
+		return new ItemStack(ModBlocks.PLAYER_SENSOR.get());
 	}
 
 	@Override
@@ -54,7 +42,7 @@ public class TurtlePlayerSensor implements ITurtleUpgrade, ModelManager.ModelReg
     @Nonnull
     @Override
     public TurtleCommandResult useTool(@Nonnull ITurtleAccess turtle, @Nonnull TurtleSide side,
-                                       @Nonnull TurtleVerb verb, @Nonnull EnumFacing direction) {
+                                       @Nonnull TurtleVerb verb, @Nonnull Direction direction) {
         return null;
     }
 
@@ -62,15 +50,4 @@ public class TurtlePlayerSensor implements ITurtleUpgrade, ModelManager.ModelReg
 	public void update(ITurtleAccess turtle, TurtleSide side) {//Nothing
 
 	}
-
-    @Nonnull
-    @Override
-    public Pair<IBakedModel, Matrix4f> getModel(@Nullable ITurtleAccess turtle, @Nonnull TurtleSide side) {
-        return ModelUtil.getTurtleUpgradeModel("turtle_player_sensor", side);
-    }
-
-    @Override
-    public void registerModels(IRegistry<ModelResourceLocation, IBakedModel> registry) {
-        ModelUtil.registerTurtleUpgradeModels(registry, "turtle_player_sensor");
-    }
 }

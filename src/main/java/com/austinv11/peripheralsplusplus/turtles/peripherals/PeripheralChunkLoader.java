@@ -1,102 +1,77 @@
 package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeChunkManager;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.common.world.ForgeChunkManager;
 
 public class PeripheralChunkLoader implements IPlusPlusPeripheral {
 
-	private ITurtleAccess turtle;
-	private ForgeChunkManager.Ticket ticket;
-	private boolean attached = false;
+private final ITurtleAccess turtle;
+private boolean attached = false;
+private ChunkPos pos;
 
-	private ChunkPos pos;
+public PeripheralChunkLoader(ITurtleAccess turtle) {
+this.turtle = turtle;
+this.pos = new ChunkPos(turtle.getPosition());
+}
 
-	public PeripheralChunkLoader(ITurtleAccess turtle) {
-		this.turtle = turtle;
-		this.pos = new ChunkPos(turtle.getPosition());
-	}
+@Override
+public void attach(IComputerAccess computer) {
+attached = true;
+}
 
-	@Override
-	public void attach(IComputerAccess computer) {
-		attached = true;
-	}
+public void update() {
+if (attached && !turtle.getLevel().isClientSide()) {
+if (posChanged()) {
+this.pos = new ChunkPos(turtle.getPosition());
+updateChunkForcing();
+}
+}
+}
 
-	public void update() {
-		if (attached && !turtle.getWorld().isRemote) {
-			if (ticket == null || posChanged()) {
-				this.pos = new ChunkPos(turtle.getPosition());
-				updateTicket();
-			}
-		}
-	}
+@Override
+public void detach(IComputerAccess computer) {
+releaseChunks();
+attached = false;
+}
 
-	@Override
-	public void detach(IComputerAccess computer) {
-		synchronized (this) {
-			ForgeChunkManager.releaseTicket(ticket);
-		}
-		ticket = null;
-	}
+private void updateChunkForcing() {
+releaseChunks();
+for (int x = pos.x - Config.chunkLoadingRadius; x <= pos.x + Config.chunkLoadingRadius; x++) {
+for (int z = pos.z - Config.chunkLoadingRadius; z <= pos.z + Config.chunkLoadingRadius; z++) {
+ForgeChunkManager.forceChunk((net.minecraft.server.level.ServerLevel) turtle.getLevel(),
+"peripheralsplusplus", BlockPos.ZERO, x, z, true, false);
+}
+}
+}
 
-	public void updateTicket() {
-		ForgeChunkManager.releaseTicket(ticket);
-		ticket = ForgeChunkManager.requestTicket(PeripheralsPlusPlus.instance, turtle.getWorld(), ForgeChunkManager.Type.NORMAL);
-		for (ChunkPos coordIntPair : getChunksInRadius(Config.chunkLoadingRadius)) {
-			ForgeChunkManager.forceChunk(ticket, coordIntPair);
-		}
-	}
+private void releaseChunks() {
+if (!turtle.getLevel().isClientSide()) {
+for (int x = pos.x - Config.chunkLoadingRadius; x <= pos.x + Config.chunkLoadingRadius; x++) {
+for (int z = pos.z - Config.chunkLoadingRadius; z <= pos.z + Config.chunkLoadingRadius; z++) {
+ForgeChunkManager.forceChunk((net.minecraft.server.level.ServerLevel) turtle.getLevel(),
+"peripheralsplusplus", BlockPos.ZERO, x, z, false, false);
+}
+}
+}
+}
 
-	public ArrayList<ChunkPos> getChunksInRadius(int radius) {
-		ArrayList<ChunkPos> chunkList = new ArrayList<>();
-		for (int chunkX = pos.x - radius; chunkX <= pos.x + radius; chunkX++) {
-			for (int chunkZ = pos.z - radius; chunkZ <= pos.z + radius; chunkZ++) {
-				chunkList.add(new ChunkPos(chunkX, chunkZ));
-			}
-		}
-		return chunkList;
-	}
+public boolean posChanged() {
+return !new ChunkPos(turtle.getPosition()).equals(pos);
+}
 
-	public boolean posChanged() {
-		return !(new ChunkPos(turtle.getPosition())).equals(pos);
-	}
+@Override
+public String getType() {
+return "chunkLoader";
+}
 
-	@Override
-	public String getType() {
-		return "chunkLoader";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return new String[0];
-	}
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		return new Object[0];
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (this == other);
-	}
-
-	public static class LoaderHandler implements ForgeChunkManager.LoadingCallback {
-		@Override
-		public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world) {
-
-		}
-	}
+@Override
+public boolean equals(IPeripheral other) {
+return this == other;
+}
 }

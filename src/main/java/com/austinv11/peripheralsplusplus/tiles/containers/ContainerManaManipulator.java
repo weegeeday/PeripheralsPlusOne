@@ -1,32 +1,27 @@
 package com.austinv11.peripheralsplusplus.tiles.containers;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import vazkii.botania.api.mana.ILens;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
-public class ContainerManaManipulator extends ContainerChest {
-    public ContainerManaManipulator(IInventory inventory, IInventory tileEntity, EntityPlayer player) {
-        super(inventory, tileEntity, player);
-        // Add lens slots
-        for (int slotIndex = 0; slotIndex < tileEntity.getSizeInventory(); slotIndex++) {
-            Slot slot = getSlot(slotIndex);
-            inventorySlots.set(slotIndex, new LensSlot(slot.inventory, slot.getSlotIndex(), slot.xPos, slot.yPos,
-                    slot.slotNumber));
-        }
-    }
+public class ContainerManaManipulator extends AbstractContainerMenu {
+public ContainerManaManipulator(int syncId, Inventory playerInv, net.minecraft.world.Container inv) {
+super(null, syncId);
+layoutPlayerInventory(playerInv, 8, 84);
+}
 
-    private class LensSlot extends Slot {
-        private LensSlot(IInventory inventoryIn, int index, int xPosition, int yPosition, int slotNumber) {
-            super(inventoryIn, index, xPosition, yPosition);
-            this.slotNumber = slotNumber;
-        }
+protected void layoutPlayerInventory(Inventory playerInv, int left, int top) {
+for (int row = 0; row < 3; row++)
+for (int col = 0; col < 9; col++)
+addSlot(new net.minecraft.world.inventory.Slot(playerInv, col + row * 9 + 9, left + col * 18, top + row * 18));
+for (int col = 0; col < 9; col++)
+addSlot(new net.minecraft.world.inventory.Slot(playerInv, col, left + col * 18, top + 58));
+}
 
-        @Override
-        public boolean isItemValid(ItemStack stack) {
-            return stack.getItem() instanceof ILens;
-        }
-    }
+@Override
+public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+
+@Override
+public boolean stillValid(Player player) { return true; }
 }

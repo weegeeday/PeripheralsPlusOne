@@ -1,35 +1,23 @@
 package com.austinv11.peripheralsplusplus.turtles;
 
-import com.austinv11.collectiveframework.minecraft.utils.ModelManager;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityEnvironmentScanner;
-import com.austinv11.peripheralsplusplus.utils.ModelUtil;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
 
-public class TurtleEnvironmentScanner implements ITurtleUpgrade, ModelManager.ModelRegistrar {
+public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
 	@Override
 	public ResourceLocation getUpgradeID() {
 		return new ResourceLocation(Reference.ENVIRONMENT_UPGRADE);
 	}
-
-    @Override
-    public int getLegacyUpgradeID() {
-        return Reference.ENVIRONMENT_UPGRADE_LEGACY;
-    }
 
     @Override
 	public String getUnlocalisedAdjective() {
@@ -43,13 +31,13 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade, ModelManager.Mo
 
 	@Override
 	public ItemStack getCraftingItem() {
-		return new ItemStack(ModBlocks.ENVIRONMENT_SCANNER);
+		return new ItemStack(ModBlocks.ENVIRONMENT_SCANNER.get());
 	}
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
 		TileEntityEnvironmentScanner te = new TileEntityEnvironmentScanner(turtle);
-		te.setWorld(turtle.getWorld());
+		te.setWorld(turtle.getLevel());
 		te.setPos(turtle.getPosition());
 		return te;
 	}
@@ -57,14 +45,8 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade, ModelManager.Mo
     @Nonnull
     @Override
     public TurtleCommandResult useTool(@Nonnull ITurtleAccess turtle, @Nonnull TurtleSide side,
-                                       @Nonnull TurtleVerb verb, @Nonnull EnumFacing direction) {
+                                       @Nonnull TurtleVerb verb, @Nonnull Direction direction) {
         return TurtleCommandResult.failure();
-    }
-
-    @Nonnull
-    @Override
-    public Pair<IBakedModel, Matrix4f> getModel(@Nullable ITurtleAccess turtle, @Nonnull TurtleSide side) {
-        return ModelUtil.getTurtleUpgradeModel("turtle_environment_scanner", side);
     }
 
     @Override
@@ -73,9 +55,4 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade, ModelManager.Mo
 		if (peripheral instanceof TileEntityEnvironmentScanner)
 			((TileEntityEnvironmentScanner) peripheral).update();
 	}
-
-    @Override
-    public void registerModels(IRegistry<ModelResourceLocation, IBakedModel> iRegistry) {
-        ModelUtil.registerTurtleUpgradeModels(iRegistry, "turtle_environment_scanner");
-    }
 }
