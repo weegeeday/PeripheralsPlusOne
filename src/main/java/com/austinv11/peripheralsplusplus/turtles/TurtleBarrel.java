@@ -5,8 +5,8 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.turtles.peripherals.PeripheralBarrel;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 
@@ -35,7 +35,7 @@ public class TurtleBarrel implements ITurtleUpgrade {
 	public ItemStack getCraftingItem() {
 		if (!Config.enableBarrelTurtle)
 			return ItemStack.EMPTY;
-		return new ItemStack(Blocks.LOG);
+		return new ItemStack(Blocks.OAK_LOG);
 	}
 
 	@Override

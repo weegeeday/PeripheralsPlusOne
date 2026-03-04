@@ -36,10 +36,7 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		TileEntityEnvironmentScanner te = new TileEntityEnvironmentScanner(turtle);
-		te.setWorld(turtle.getLevel());
-		te.setPos(turtle.getPosition());
-		return te;
+		return new TileEntityEnvironmentScanner(turtle);
 	}
 
     @Nonnull

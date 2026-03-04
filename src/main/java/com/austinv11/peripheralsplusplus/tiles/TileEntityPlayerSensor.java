@@ -58,10 +58,6 @@ List<Player> nearby = getLevel().getEntitiesOfClass(Player.class, box);
 HashMap<Integer, HashMap<String, Object>> returnVal = new HashMap<>();
 int i = 1;
 for (Player player : nearby) {
-double dist = player.distanceTo(new net.minecraft.world.entity.Entity(null, null) {
-{ setPos(pos.getX(), pos.getY(), pos.getZ()); }
-@Override public net.minecraft.world.entity.EntityType<?> getType() { return null; }
-});
 // Simpler distance calculation
 double dx = player.getX() - pos.getX();
 double dy = player.getY() - pos.getY();

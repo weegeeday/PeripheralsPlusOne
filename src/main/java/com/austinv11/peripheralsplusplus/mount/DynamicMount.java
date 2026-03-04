@@ -1,6 +1,5 @@
 package com.austinv11.peripheralsplusplus.mount;
 
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.filesystem.IMount;
@@ -19,8 +18,7 @@ public class DynamicMount {
 public static List<String> attach(IComputerAccess computer, IPeripheral peripheral) {
 List<String> attached = new ArrayList<>();
 try {
-IMount dynScript = ComputerCraftAPI.createResourceMount(PeripheralsPlusPlus.class, Reference.MOD_ID,
-"lua/mount/dyn.lua");
+IMount dynScript = ComputerCraftAPI.createResourceMount(Reference.MOD_ID, "lua/mount");
 if (dynScript != null) {
 String path = computer.mount("/rom/programs/dyn.lua", dynScript);
 if (path != null) attached.add(path);

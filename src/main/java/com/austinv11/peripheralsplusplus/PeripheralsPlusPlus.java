@@ -2,6 +2,7 @@ package com.austinv11.peripheralsplusplus;
 
 import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
+import com.austinv11.peripheralsplusplus.init.ModEntities;
 import com.austinv11.peripheralsplusplus.init.ModItems;
 import com.austinv11.peripheralsplusplus.init.ModPeripherals;
 import com.austinv11.peripheralsplusplus.init.ModTileEntities;
@@ -52,6 +53,7 @@ public class PeripheralsPlusPlus {
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModTileEntities.TILE_ENTITIES.register(modBus);
+        ModEntities.ENTITIES.register(modBus);
         CreativeTabPPP.TABS.register(modBus);
 
         modBus.addListener(this::commonSetup);

@@ -35,15 +35,15 @@ public class PocketRfid implements IPocketUpgrade {
     @Nullable
     @Override
     public IPeripheral createPeripheral(@Nonnull IPocketAccess access) {
-        return new TileEntityRfidReaderWriter();
+        net.minecraft.world.entity.Entity e = access.getEntity();
+        if (e == null) return null;
+        net.minecraft.core.BlockPos pos = e.blockPosition();
+        return new TileEntityRfidReaderWriter(pos, e.level().getBlockState(pos));
     }
 
     @Override
     public void update(@Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
-        if (peripheral instanceof TileEntityRfidReaderWriter && access.getEntity() != null) {
-            ((TileEntityRfidReaderWriter) peripheral).setPos(access.getEntity().getPosition());
-            ((TileEntityRfidReaderWriter) peripheral).setWorld(access.getEntity().getEntityWorld());
-        }
+        // position is set at creation time; no update needed
     }
 
     @Override

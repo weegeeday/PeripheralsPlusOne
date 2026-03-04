@@ -27,7 +27,7 @@ super(type, level);
 }
 
 public EntityNanoBotSwarm(Level level, LivingEntity thrower) {
-super(null, thrower, level);
+super(com.austinv11.peripheralsplusplus.init.ModEntities.NANO_BOT_SWARM.get(), thrower, level);
 }
 
 @Override

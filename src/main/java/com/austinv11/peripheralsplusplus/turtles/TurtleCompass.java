@@ -6,16 +6,15 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.turtles.peripherals.PeripheralCompass;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.client.renderer.texture.TextureMap;
-
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TurtleCompass implements ITurtleUpgrade, TextureManager.TextureRegistrar {
+public class TurtleCompass implements ITurtleUpgrade {
     @Nonnull
     @Override
     public ResourceLocation getUpgradeID() {
@@ -53,9 +52,4 @@ public class TurtleCompass implements ITurtleUpgrade, TextureManager.TextureRegi
 
 	@Override
 	public void update(ITurtleAccess turtle, TurtleSide side) {}
-
-    @Override
-    public void registerTextures(TextureMap textureMap) {
-        textureMap.registerSprite(new ResourceLocation(Reference.MOD_ID, "blocks/upgrade_compass"));
-    }
 }

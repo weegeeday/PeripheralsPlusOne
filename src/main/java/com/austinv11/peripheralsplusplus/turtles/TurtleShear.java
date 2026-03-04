@@ -56,10 +56,13 @@ public class TurtleShear implements ITurtleUpgrade {
 		switch (verb) {
 			case Attack:
 				List<Entity> entities = TurtleUtil.getEntitiesNearTurtle(turtle, player, direction);
-				Entity ent = TurtleUtil.getClosestShearableEntity(entities, player);
+				Entity ent = null;
+				for (Entity e : entities) {
+					if (e instanceof IShearable) { ent = e; break; }
+				}
 				if (ent != null)
-					if (((IShearable) ent).isShearable(new ItemStack(net.minecraft.world.item.Items.SHEARS), (net.minecraft.server.level.ServerLevel) ent.level(), ent.blockPosition())) {
-						TurtleUtil.addItemListToInv(((IShearable) ent).onSheared(null, (net.minecraft.server.level.ServerLevel) ent.level(),
+					if (((IShearable) ent).isShearable(new ItemStack(net.minecraft.world.item.Items.SHEARS), ent.level(), ent.blockPosition())) {
+						TurtleUtil.addItemListToInv(((IShearable) ent).onSheared(null, ent.level(),
 								ent.blockPosition(), 0), turtle);
 						return TurtleCommandResult.success();
 					}
