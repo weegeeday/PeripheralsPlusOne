@@ -14,9 +14,16 @@ import javax.annotation.Nullable;
 
 public class TurtleFeeder implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleFeeder(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.FEEDER_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

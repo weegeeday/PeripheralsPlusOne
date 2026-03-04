@@ -13,10 +13,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TurtleRidable implements ITurtleUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleRidable(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 @Nonnull
 @Override
 public ResourceLocation getUpgradeID() {
-return new ResourceLocation(Reference.RIDABLE_UPGRADE);
+return upgradeId;
 }
 
 @Override

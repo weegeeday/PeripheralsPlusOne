@@ -14,9 +14,16 @@ import javax.annotation.Nullable;
 
 public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleEnvironmentScanner(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.ENVIRONMENT_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

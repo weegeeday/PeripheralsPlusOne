@@ -14,9 +14,16 @@ import javax.annotation.Nullable;
 
 public class TurtleChunkLoader implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleChunkLoader(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.CHUNK_LOADER_UPGRADE);
+		return upgradeId;
 	}
 
 	@Override

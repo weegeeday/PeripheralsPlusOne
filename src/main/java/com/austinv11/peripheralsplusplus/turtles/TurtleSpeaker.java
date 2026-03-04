@@ -13,9 +13,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TurtleSpeaker implements ITurtleUpgrade{
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleSpeaker(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.SPEAKER_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

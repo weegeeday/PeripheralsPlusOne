@@ -15,9 +15,16 @@ import javax.annotation.Nullable;
 
 public class TurtleXP implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleXP(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.XP_UPGRADE);
+		return upgradeId;
 	}
 
 	@Override

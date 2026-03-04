@@ -1,4 +1,7 @@
 package com.austinv11.peripheralsplusplus.client.gui;
 
-/** GUI stub for 1.20.1 migration - full implementation pending */
+/**
+ * Legacy GUI handler stub - all GUI registration is now in GuiFactory.
+ */
 public class GuiHandler {}
+

@@ -14,9 +14,16 @@ import javax.annotation.Nullable;
 
 public class TurtlePlayerSensor implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtlePlayerSensor(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.PLAYER_SENSOR_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

@@ -1,11 +1,14 @@
 package com.austinv11.peripheralsplusplus;
 
+import com.austinv11.peripheralsplusplus.client.gui.GuiFactory;
 import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.init.ModEntities;
 import com.austinv11.peripheralsplusplus.init.ModItems;
+import com.austinv11.peripheralsplusplus.init.ModMenus;
 import com.austinv11.peripheralsplusplus.init.ModPeripherals;
 import com.austinv11.peripheralsplusplus.init.ModTileEntities;
+import com.austinv11.peripheralsplusplus.init.ModUpgrades;
 import com.austinv11.peripheralsplusplus.network.*;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.reference.Reference;
@@ -13,9 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
-import com.austinv11.peripheralsplusplus.capabilities.nano.CapabilityNanoBot;
 import com.austinv11.peripheralsplusplus.capabilities.nano.NanoBotHolder;
-import com.austinv11.peripheralsplusplus.capabilities.rfid.CapabilityRfid;
 import com.austinv11.peripheralsplusplus.capabilities.rfid.RfidTagHolder;
 import com.austinv11.peripheralsplusplus.event.handler.CapabilitiesHandler;
 import net.minecraftforge.event.RegisterCapabilitiesEvent;
@@ -54,6 +55,8 @@ public class PeripheralsPlusPlus {
         ModItems.ITEMS.register(modBus);
         ModTileEntities.TILE_ENTITIES.register(modBus);
         ModEntities.ENTITIES.register(modBus);
+        ModMenus.MENUS.register(modBus);
+        ModUpgrades.register(modBus);
         CreativeTabPPP.TABS.register(modBus);
 
         modBus.addListener(this::commonSetup);
@@ -87,12 +90,12 @@ public class PeripheralsPlusPlus {
         NETWORK.registerMessage(id++, SynthResponsePacket.class, SynthResponsePacket::encode, SynthResponsePacket::decode, SynthResponsePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         NETWORK.registerMessage(id++, TextFieldInputEventPacket.class, TextFieldInputEventPacket::encode, TextFieldInputEventPacket::decode, TextFieldInputEventPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        ModPeripherals.registerInternally();
         ModPeripherals.registerWithComputerCraft();
-        LOGGER.info("PeripheralsPlusOne: peripherals and turtle upgrades registered.");
+        LOGGER.info("PeripheralsPlusOne: peripherals registered.");
     }
 
     private void clientSetup(FMLClientSetupEvent event) {
-        // Client-specific setup; renderers etc. will be added in Phase 3
+        event.enqueueWork(GuiFactory::registerScreens);
     }
 }
+

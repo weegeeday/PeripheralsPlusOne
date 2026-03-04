@@ -15,10 +15,17 @@ import javax.annotation.Nullable;
 
 public class TurtleBarrel implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleBarrel(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Nonnull
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.BARREL_UPGRADE);
+		return upgradeId;
 	}
 
 	@Override

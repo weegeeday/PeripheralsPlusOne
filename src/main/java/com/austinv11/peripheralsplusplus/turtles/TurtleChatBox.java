@@ -14,10 +14,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TurtleChatBox implements ITurtleUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleChatBox(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
     @Nonnull
     @Override
     public ResourceLocation getUpgradeID() {
-        return new ResourceLocation(Reference.CHAT_BOX_UPGRADE);
+        return upgradeId;
     }
 
     @Override

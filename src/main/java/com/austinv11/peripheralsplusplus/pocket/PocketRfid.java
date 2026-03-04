@@ -14,10 +14,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PocketRfid implements IPocketUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public PocketRfid(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
     @Nonnull
     @Override
     public ResourceLocation getUpgradeID() {
-        return new ResourceLocation(Reference.POCKET_RFID);
+        return upgradeId;
     }
 
     @Nonnull

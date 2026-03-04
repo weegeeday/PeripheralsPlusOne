@@ -15,9 +15,16 @@ import javax.annotation.Nullable;
 
 public class TurtleGarden implements ITurtleUpgrade
 {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleGarden(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
     @Override
     public ResourceLocation getUpgradeID() {
-        return new ResourceLocation(Reference.GARDEN_UPGRADE);
+        return upgradeId;
     }
 
     @Override

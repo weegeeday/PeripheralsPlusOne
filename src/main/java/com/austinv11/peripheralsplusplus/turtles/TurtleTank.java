@@ -13,10 +13,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TurtleTank implements ITurtleUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleTank(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 	
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.TANK_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

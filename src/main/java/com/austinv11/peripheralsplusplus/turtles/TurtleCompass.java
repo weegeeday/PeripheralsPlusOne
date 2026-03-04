@@ -15,10 +15,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TurtleCompass implements ITurtleUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleCompass(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
     @Nonnull
     @Override
     public ResourceLocation getUpgradeID() {
-        return new ResourceLocation(Reference.COMPASS_UPGRADE);
+        return upgradeId;
     }
 
     @Override

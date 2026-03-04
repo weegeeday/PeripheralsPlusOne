@@ -14,9 +14,16 @@ import javax.annotation.Nullable;
 
 public class TurtleOreDictionary implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleOreDictionary(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.ORE_DICTIONARY_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

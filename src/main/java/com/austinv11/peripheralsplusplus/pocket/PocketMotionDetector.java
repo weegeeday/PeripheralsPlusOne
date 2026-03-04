@@ -14,10 +14,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PocketMotionDetector implements IPocketUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public PocketMotionDetector(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 	
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.POCKET_MOTION_DETECTOR);
+		return upgradeId;
 	}
 	
 	@Override

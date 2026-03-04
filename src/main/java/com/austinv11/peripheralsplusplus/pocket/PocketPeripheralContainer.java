@@ -22,9 +22,16 @@ import java.util.Map;
 
 public class PocketPeripheralContainer implements IPocketUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public PocketPeripheralContainer(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 @Override
 public ResourceLocation getUpgradeID() {
-return new ResourceLocation(Reference.POCKET_PERIPHERAL_CONTAINER);
+return upgradeId;
 }
 
 @Override

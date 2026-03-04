@@ -15,9 +15,16 @@ import javax.annotation.Nullable;
 
 public class TurtleSignReader implements ITurtleUpgrade
 {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleSignReader(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
     @Override
     public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.SIGN_READER_UPGRADE);
+		return upgradeId;
 	}
 
     @Override

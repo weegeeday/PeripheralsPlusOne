@@ -19,9 +19,16 @@ import java.util.List;
 
 public class TurtleShear implements ITurtleUpgrade {
 
+    private final ResourceLocation upgradeId;
+
+    public TurtleShear(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
+
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.SHEAR_UPGRADE);
+		return upgradeId;
 	}
 
     @Override
