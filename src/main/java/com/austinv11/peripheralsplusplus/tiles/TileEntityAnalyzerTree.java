@@ -1,52 +1,34 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import forestry.api.arboriculture.ITreeGenome;
-import forestry.api.genetics.IGenome;
-import net.minecraft.item.ItemStack;
-
-import java.util.HashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class TileEntityAnalyzerTree extends TileEntityAnalyzer {
 
-	public TileEntityAnalyzerTree() {
-		super();
-	}
+public TileEntityAnalyzerTree(BlockPos pos, BlockState state) {
+super(pos, state);
+}
 
-	@Override
-	public String getName(){
-		return "tileEntityTreeAnalyzer";
-	}
+@Override
+public String getType() {
+return "treeAnalyzer";
+}
 
-	@Override
-	public String getType() {
-		return "treeAnalyzer";
-	}
+@Override
+protected Object[] doAnalyze() throws LuaException {
+return new Object[]{null};
+}
 
-	@Override
-	protected String getRootType() {
-		return "rootTrees";
-	}
+@Override
+protected boolean isMemberOf(ItemStack stack) {
+return false;
+}
 
-	@Override
-	protected void addGenome(ItemStack stack, IGenome origGenome, HashMap<String, Object> ret) {
-		ITreeGenome genome = (ITreeGenome) origGenome;
-		ret.put("speciesPrimary", genome.getPrimary().getName());
-		ret.put("speciesSecondary", genome.getSecondary().getName());
-		ret.put("height", genome.getHeight());
-		ret.put("fertility", genome.getFertility());
-		ret.put("yield", genome.getYield());
-		ret.put("sappiness", genome.getSappiness());
-		ret.put("matures", genome.getMaturationTime());
-		ret.put("fruit", genome.getFruitProvider().getDescription());
-		ret.put("girth", genome.getGirth());
-		ret.put("effect", genome.getEffect().getUID());
-		ret.put("decorativeLeaves", genome.getDecorativeLeaves().getDisplayName());
-		ret.put("matchesTemplateGenome", genome.matchesTemplateGenome());
-	}
-
-	@Override
-	protected IPeripheral getInstance() {
-		return this;
-	}
+@Override
+protected IPeripheral getInstance() {
+return this;
+}
 }

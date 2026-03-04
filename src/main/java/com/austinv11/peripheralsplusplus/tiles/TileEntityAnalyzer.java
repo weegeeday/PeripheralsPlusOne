@@ -1,95 +1,90 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.minecraft.reference.ModIds;
-import com.austinv11.collectiveframework.minecraft.tiles.TileEntityInventory;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import forestry.api.genetics.AlleleManager;
-import forestry.api.genetics.IGenome;
-import forestry.api.genetics.IIndividual;
-import forestry.api.genetics.ISpeciesRoot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.HashMap;
 
-public abstract class TileEntityAnalyzer extends TileEntityInventory implements IPlusPlusPeripheral {
+public abstract class TileEntityAnalyzer extends BlockEntity implements IPlusPlusPeripheral, MenuProvider, Container {
 
-	public TileEntityAnalyzer() {
-		super();
-		this.invName = "Analyzer";
-	}
+protected final ItemStack[] items = new ItemStack[]{ItemStack.EMPTY};
 
-	@Override
-	public int getSize() {
-		return 1;
-	}
+public TileEntityAnalyzer(BlockPos pos, BlockState state) {
+super(null, pos, state);
+}
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-	}
+@Override
+public String getType() {
+return "generic_analyzer_this_is_a_bug";
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		return nbttagcompound;
-	}
+@LuaFunction
+public final Object[] analyze(IArguments args) throws LuaException {
+if (!Config.enableAnalyzers)
+throw new LuaException("Analyzers have been disabled");
+return doAnalyze();
+}
 
-	@Override
-	public String getType() {
-		return "generic_analyzer_this_is_a_bug";
-	}
+@LuaFunction
+public final Object[] isMember(IArguments args) throws LuaException {
+if (!Config.enableAnalyzers)
+throw new LuaException("Analyzers have been disabled");
+ItemStack stack = getItem(0);
+if (stack.isEmpty())
+return new Object[]{false};
+return new Object[]{isMemberOf(stack)};
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[] {"analyze","isMember"};
-	}
+protected abstract Object[] doAnalyze() throws LuaException;
+protected abstract boolean isMemberOf(ItemStack stack);
+protected abstract IPeripheral getInstance();
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enableAnalyzers)
-			throw new LuaException("Analyzers have been disabled");
-		if (!Loader.isModLoaded(ModIds.FORESTRY))
-			throw new LuaException("Forestry is not installed");
-		switch (method) {
-			case 0:
-				ISpeciesRoot root = getRoot();
-				ItemStack stack = getStackInSlot(0);
-				if (stack == null || !root.isMember(stack))
-					return new Object[] {false};
-				IIndividual individual = root.getMember(stack);
-				if (individual == null || !individual.isAnalyzed())
-					return new Object[] {null};
-				HashMap<String, Object> ret = new HashMap<String, Object>();
-				addGenome(stack, individual.getGenome(), ret);
-				return new Object[] {ret};
-			case 1:
-				ItemStack specimen = getStackInSlot(0);
-				if (specimen == null || !getRoot().isMember(specimen))
-					return new Object[] {false};
-				return new Object[] {true};
-		}
-		return new Object[]{};
-	}
+@Override
+public boolean equals(@Nullable IPeripheral other) {
+return this == other;
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (this == other);
-	}
+// Container methods
+@Override
+public int getContainerSize() { return 1; }
+@Override
+public boolean isEmpty() { return items[0].isEmpty(); }
+@Override
+public ItemStack getItem(int slot) { return slot == 0 ? items[0] : ItemStack.EMPTY; }
+@Override
+public ItemStack removeItem(int slot, int amount) { if (slot == 0) { ItemStack s = items[0].split(amount); setChanged(); return s; } return ItemStack.EMPTY; }
+@Override
+public ItemStack removeItemNoUpdate(int slot) { if (slot == 0) { ItemStack s = items[0]; items[0] = ItemStack.EMPTY; return s; } return ItemStack.EMPTY; }
+@Override
+public void setItem(int slot, ItemStack stack) { if (slot == 0) { items[0] = stack; setChanged(); } }
+@Override
+public boolean stillValid(Player player) { return Container.stillValidBlockEntity(this, player); }
+@Override
+public void clearContent() { items[0] = ItemStack.EMPTY; }
 
-	protected ISpeciesRoot getRoot() {
-		return AlleleManager.alleleRegistry.getSpeciesRoot(getRootType());
-	}
+@Override
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.analyzer"); }
 
-	protected abstract String getRootType();
-
-	protected abstract void addGenome(ItemStack stack, IGenome origGenome, HashMap<String, Object> ret);
-
-	protected abstract IPeripheral getInstance();
+@Nullable
+@Override
+public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
+return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerAnalyzer(id, playerInv, this);
+}
 }

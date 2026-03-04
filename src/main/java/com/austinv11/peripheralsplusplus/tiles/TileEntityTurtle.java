@@ -1,10 +1,12 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class TileEntityTurtle extends TileEntity {
-	@Override
-	public int getBlockMetadata() {
-		return super.getBlockMetadata();
-	}
+public class TileEntityTurtle extends BlockEntity {
+
+public TileEntityTurtle(BlockPos pos, BlockState state) {
+super(null, pos, state);
+}
 }

@@ -1,61 +1,38 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
 import com.austinv11.peripheralsplusplus.utils.Util;
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import forestry.api.apiculture.IBeeGenome;
-import forestry.api.apiculture.IBeeRoot;
-import forestry.api.genetics.IGenome;
-import net.minecraft.item.ItemStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashMap;
 
 public class TileEntityAnalyzerBee extends TileEntityAnalyzer {
 
-	public TileEntityAnalyzerBee() {
-		super();
-	}
+public TileEntityAnalyzerBee(BlockPos pos, BlockState state) {
+super(pos, state);
+}
 
-	@Override
-	public String getName(){
-		return "tileEntityBeeAnalyzer";
-	}
+@Override
+public String getType() {
+return "beeAnalyzer";
+}
 
-	@Override
-	public String getType() {
-		return "beeAnalyzer";
-	}
+@Override
+protected Object[] doAnalyze() throws LuaException {
+// Forestry for 1.20.1 not available - return stub
+return new Object[]{null};
+}
 
-	@Override
-	protected String getRootType() {
-		return "rootBees";
-	}
+@Override
+protected boolean isMemberOf(ItemStack stack) {
+return false;
+}
 
-	@Override
-	protected void addGenome(ItemStack stack, IGenome origGenome, HashMap<String,Object> ret) {
-		IBeeRoot root = (IBeeRoot) getRoot();
-		IBeeGenome genome = (IBeeGenome) origGenome;
-		ret.put("type", root.getType(stack) == null ? null : root.getType(stack).name());
-		ret.put("speciesPrimary", genome.getPrimary().getAlleleName());
-		ret.put("speciesSecondary", genome.getSecondary().getAlleleName());
-		ret.put("speed", genome.getSpeed());
-		ret.put("lifespan", genome.getLifespan());
-		ret.put("fertility", genome.getFertility());
-		ret.put("neverSleeps", genome.getNeverSleeps());
-		ret.put("toleratesRain", genome.getToleratesRain());
-		ret.put("caveDwelling", genome.getCaveDwelling());
-		ret.put("flower", genome.getFlowerProvider().getDescription());
-		ret.put("flowering", genome.getFlowering());
-		ret.put("territory", Util.arrayToMap(new int[]{genome.getTerritory().getX(), genome.getTerritory().getZ(),
-                genome.getTerritory().getZ()}));
-		ret.put("effect", genome.getEffect().getUID());
-		ret.put("temperature", genome.getPrimary().getTemperature().toString());
-		ret.put("toleranceTemperature", genome.getToleranceTemp().toString());
-		ret.put("humidity", genome.getPrimary().getHumidity().toString());
-		ret.put("toleranceHumidity", genome.getToleranceHumid().toString());
-	}
-
-	@Override
-	protected IPeripheral getInstance() {
-		return this;
-	}
+@Override
+protected IPeripheral getInstance() {
+return this;
+}
 }

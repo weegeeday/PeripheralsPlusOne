@@ -1,56 +1,34 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
+import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import forestry.api.genetics.IGenome;
-import forestry.api.lepidopterology.IButterflyGenome;
-import net.minecraft.item.ItemStack;
-
-import java.util.HashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class TileEntityAnalyzerButterfly extends TileEntityAnalyzer {
 
-	public TileEntityAnalyzerButterfly() {
-		super();
-	}
+public TileEntityAnalyzerButterfly(BlockPos pos, BlockState state) {
+super(pos, state);
+}
 
-	@Override
-	public String getName(){
-		return "tileEntityButterflyAnalyzer";
-	}
+@Override
+public String getType() {
+return "butterflyAnalyzer";
+}
 
-	@Override
-	public String getType() {
-		return "butterflyAnalyzer";
-	}
+@Override
+protected Object[] doAnalyze() throws LuaException {
+return new Object[]{null};
+}
 
-	@Override
-	protected String getRootType() {
-		return "rootButterflies";
-	}
+@Override
+protected boolean isMemberOf(ItemStack stack) {
+return false;
+}
 
-	@Override
-	protected void addGenome(ItemStack stack, IGenome origGenome, HashMap<String, Object> ret) {
-		IButterflyGenome genome = (IButterflyGenome) origGenome;
-		ret.put("speciesPrimary", genome.getPrimary().getName());
-		ret.put("speciesSecondary", genome.getSecondary().getName());
-		ret.put("speed", genome.getSpeed());
-		ret.put("lifespan", genome.getLifespan());
-		ret.put("metabolism", genome.getMetabolism());
-		ret.put("fertility", genome.getFertility());
-		ret.put("nocturnal", genome.getNocturnal());
-		ret.put("tolerantFlyer", genome.getTolerantFlyer());
-		ret.put("fireResistant", genome.getFireResist());
-		ret.put("flower", genome.getFlowerProvider().getDescription());
-		ret.put("effect", genome.getEffect().getUID());
-		ret.put("temperature", genome.getPrimary().getTemperature().toString());
-		ret.put("toleranceTemperature", genome.getToleranceTemp().toString());
-		ret.put("humidity", genome.getPrimary().getHumidity().toString());
-		ret.put("toleranceHumidity", genome.getToleranceHumid().toString());
-		ret.put("cocoon", genome.getCocoon().toString());
-	}
-
-	@Override
-	protected IPeripheral getInstance() {
-		return this;
-	}
+@Override
+protected IPeripheral getInstance() {
+return this;
+}
 }

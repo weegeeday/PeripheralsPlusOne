@@ -1,140 +1,163 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.minecraft.tiles.TileEntityInventory;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
 import com.austinv11.peripheralsplusplus.lua.LuaObjectPlayerInv;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import com.mojang.authlib.GameProfile;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class TileEntityPlayerInterface extends TileEntityInventory implements IPlusPlusPeripheral {
-    public EnumFacing outputSide;
-    public EnumFacing inputSide;
+public class TileEntityPlayerInterface extends BlockEntity implements IPlusPlusPeripheral, MenuProvider, Container {
 
-    public TileEntityPlayerInterface() {
-        super();
-        this.invName = "PlayerInterface";
-    }
-    
-    @Override
-    public int getSize() {
-        return 8;
-    }
-    
-    @Override
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-        if (Config.enablePlayerInterface)
-        {
-            if (method == 0)
-            {
-                if (arguments.length != 1)
-                {
-                    throw new LuaException("Wrong number of arguments. 1 expected.");
-                }
-                if (!(arguments[0] instanceof String))
-                {
-                    throw new LuaException("Bad argument #1 (expected string)");
-                }
-                // Check that the specified player exists
-                for (WorldServer worldServer : DimensionManager.getWorlds())
-                    for (EntityPlayer player : worldServer.playerEntities) {
-                        if (player.getDisplayNameString().equals(arguments[0])) {
-                            // Check that the specified player has given permission for some sort of
-                            // editing by putting their permissions card in the player interface
-                            if (hasPermissionsCardFor(player) || !Config.enableInterfacePermissions) {
-                                return new Object[]{new LuaObjectPlayerInv(player, this,
-                                        getPermCardFor(player))};
-                            } else {
-                                throw new LuaException("Missing permissions for player " + arguments[0]);
-                            }
-                        }
-                    }
-                throw new LuaException("Player not found");
-            }
-            else if (method == 1 || method == 2)
-            {
-                if (arguments.length != 1)
-                {
-                    throw new LuaException("Wrong number of arguments. 1 expected.");
-                }
-                if (!(arguments[0] instanceof String))
-                {
-                    throw new LuaException("Bad argument #1 (expected string)");
-                }
-                if (method == 1)
-                {
-                    outputSide = EnumFacing.valueOf(((String) arguments[0]).toUpperCase());
-                }
-                else
-                {
-                    inputSide = EnumFacing.valueOf(((String) arguments[0]).toUpperCase());
-                }
-            }
-            else if (method == 3)
-            {
-                if (outputSide == null)
-                    return new Object[0];
-                return new Object[]{outputSide.toString()};
-            }
-            else if (method == 4)
-            {
-                if (inputSide == null)
-                    return new Object[0];
-                return new Object[]{inputSide.toString()};
-            }
-        }
-        else
-        {
-            throw new LuaException("Player Interfaces have been disabled");
-        }
-        return new Object[0];
-    }
+public Direction outputSide;
+public Direction inputSide;
+private final ItemStack[] items = new ItemStack[8];
 
-    @Override
-    public boolean equals(IPeripheral other) {
-        return this == other;
-    }
+public TileEntityPlayerInterface(BlockPos pos, BlockState state) {
+super(null, pos, state);
+for (int i = 0; i < items.length; i++) items[i] = ItemStack.EMPTY;
+}
 
-    @Override
-    public String[] getMethodNames() {
-        return new String[]{"getPlayerInv", "setOutputSide", "setInputSide", "getOutputSide", "getInputSide"};
-    }
+@Override
+public void load(CompoundTag tag) {
+super.load(tag);
+for (int i = 0; i < items.length; i++) {
+if (tag.contains("inv" + i))
+items[i] = ItemStack.of(tag.getCompound("inv" + i));
+}
+if (tag.contains("outputSide"))
+outputSide = Direction.byName(tag.getString("outputSide"));
+if (tag.contains("inputSide"))
+inputSide = Direction.byName(tag.getString("inputSide"));
+}
 
-    @Override
-    public String getType() {
-        return "playerInterface";
-    }
+@Override
+protected void saveAdditional(CompoundTag tag) {
+super.saveAdditional(tag);
+for (int i = 0; i < items.length; i++)
+if (!items[i].isEmpty())
+tag.put("inv" + i, items[i].save(new CompoundTag()));
+if (outputSide != null) tag.putString("outputSide", outputSide.getName());
+if (inputSide != null) tag.putString("inputSide", inputSide.getName());
+}
 
-    private boolean hasPermissionsCardFor(EntityPlayer player) {
-        return !getPermCardFor(player).isEmpty();
-    }
+@Override
+public String getType() {
+return "playerInterface";
+}
 
-    private ItemStack getPermCardFor(EntityPlayer player) {
-        for (ItemStack stack : items) {
-            if (stack != null) {
-                if (stack.hasTagCompound()) {
-                    GameProfile profile = NBTUtil.readGameProfileFromNBT(NBTHelper.getCompoundTag(stack, "profile"));
-                    if (profile == null)
-                        return ItemStack.EMPTY;
-                    UUID uuid = profile.getId();
-                    if (uuid.equals(player.getGameProfile().getId())) {
-                        return stack;
-                    }
-                }
-            }
-        }
-        return ItemStack.EMPTY;
-    }
+@LuaFunction
+public final Object[] getPlayerInv(IArguments args) throws LuaException {
+if (!Config.enablePlayerInterface)
+throw new LuaException("Player Interfaces have been disabled");
+String playerName = args.getString(0);
+for (net.minecraft.server.level.ServerLevel sl : ServerLifecycleHooks.getCurrentServer().getAllLevels()) {
+for (Player player : sl.players()) {
+if (player.getName().getString().equals(playerName)) {
+if (hasPermissionsCardFor(player) || !Config.enableInterfacePermissions)
+return new Object[]{new LuaObjectPlayerInv(player, this, getPermCardFor(player))};
+else
+throw new LuaException("Missing permissions for player " + playerName);
+}
+}
+}
+throw new LuaException("Player not found");
+}
+
+@LuaFunction
+public final void setOutputSide(IArguments args) throws LuaException {
+if (!Config.enablePlayerInterface)
+throw new LuaException("Player Interfaces have been disabled");
+outputSide = Direction.byName(args.getString(0).toLowerCase());
+setChanged();
+}
+
+@LuaFunction
+public final void setInputSide(IArguments args) throws LuaException {
+if (!Config.enablePlayerInterface)
+throw new LuaException("Player Interfaces have been disabled");
+inputSide = Direction.byName(args.getString(0).toLowerCase());
+setChanged();
+}
+
+@LuaFunction
+public final Object[] getOutputSide(IArguments args) throws LuaException {
+if (!Config.enablePlayerInterface)
+throw new LuaException("Player Interfaces have been disabled");
+return outputSide == null ? new Object[0] : new Object[]{outputSide.getName()};
+}
+
+@LuaFunction
+public final Object[] getInputSide(IArguments args) throws LuaException {
+if (!Config.enablePlayerInterface)
+throw new LuaException("Player Interfaces have been disabled");
+return inputSide == null ? new Object[0] : new Object[]{inputSide.getName()};
+}
+
+private boolean hasPermissionsCardFor(Player player) {
+return !getPermCardFor(player).isEmpty();
+}
+
+private ItemStack getPermCardFor(Player player) {
+for (ItemStack stack : items) {
+if (!stack.isEmpty() && stack.hasTag()) {
+CompoundTag profileTag = stack.getTag().getCompound("profile");
+GameProfile profile = NbtUtils.readGameProfile(profileTag);
+if (profile != null && profile.getId() != null &&
+profile.getId().equals(player.getGameProfile().getId()))
+return stack;
+}
+}
+return ItemStack.EMPTY;
+}
+
+@Override
+public boolean equals(IPeripheral other) { return this == other; }
+
+// Container
+@Override
+public int getContainerSize() { return items.length; }
+@Override
+public boolean isEmpty() { for (ItemStack s : items) if (!s.isEmpty()) return false; return true; }
+@Override
+public ItemStack getItem(int i) { return i < items.length ? items[i] : ItemStack.EMPTY; }
+@Override
+public ItemStack removeItem(int i, int amt) { if (i < items.length) { ItemStack s = items[i].split(amt); setChanged(); return s; } return ItemStack.EMPTY; }
+@Override
+public ItemStack removeItemNoUpdate(int i) { if (i < items.length) { ItemStack s = items[i]; items[i] = ItemStack.EMPTY; return s; } return ItemStack.EMPTY; }
+@Override
+public void setItem(int i, ItemStack s) { if (i < items.length) { items[i] = s; setChanged(); } }
+@Override
+public boolean stillValid(Player player) { return Container.stillValidBlockEntity(this, player); }
+@Override
+public void clearContent() { for (int i = 0; i < items.length; i++) items[i] = ItemStack.EMPTY; }
+
+// MenuProvider
+@Override
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusplus.player_interface"); }
+@Nullable
+@Override
+public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
+return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerPlayerInterface(id, playerInv, this);
+}
 }
