@@ -38,7 +38,7 @@ private ItemStack slot0 = ItemStack.EMPTY;
 private final List<IComputerAccess> computers = new ArrayList<>();
 
 public TileEntityInteractiveSorter(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.INTERACTIVE_SORTER.get(), pos, state);
 }
 
 @Override

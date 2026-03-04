@@ -37,7 +37,7 @@ public String label;
 private volatile List<Entity> associatedEntities = new ArrayList<>();
 
 public TileEntityAntenna(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANTENNA.get(), pos, state);
 identifier = UUID.randomUUID();
 while (ANTENNA_REGISTRY.containsKey(identifier))
 identifier = UUID.randomUUID();

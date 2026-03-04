@@ -7,6 +7,6 @@ import net.minecraft.world.level.block.state.BlockState;
 public class TileEntityTurtle extends BlockEntity {
 
 public TileEntityTurtle(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TURTLE.get(), pos, state);
 }
 }

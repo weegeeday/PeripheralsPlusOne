@@ -4,7 +4,7 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 
 public class ItemTank extends ItemPPP {
 
-	public ItemTank() {
-		super();
+	public ItemTank(Properties props) {
+		super(props);
 	}
 }

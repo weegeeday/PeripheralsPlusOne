@@ -23,7 +23,7 @@ private static final int SIZE = 56;
 private final ItemStack[] items = new ItemStack[SIZE];
 
 public TileEntityResupplyStation(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.RESUPPLY_STATION.get(), pos, state);
 for (int i = 0; i < SIZE; i++) items[i] = ItemStack.EMPTY;
 }
 

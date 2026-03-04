@@ -15,6 +15,9 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import com.austinv11.peripheralsplusplus.init.ModTileEntities;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
@@ -89,4 +92,10 @@ tag.putString("label", antenna.getLabel());
 }
 return InteractionResult.sidedSuccess(level.isClientSide);
 }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(type, ModTileEntities.ANTENNA.get(), TileEntityAntenna::serverTick);
+    }
+
 }

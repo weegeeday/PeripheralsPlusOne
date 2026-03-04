@@ -26,7 +26,7 @@ private EnergyStorage storage = new EnergyStorage(80000);
 private final LazyOptional<IEnergyStorage> energyCap = LazyOptional.of(() -> this);
 
 public TileEntityRFCharger(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.RF_CHARGER.get(), pos, state);
 }
 
 @Override

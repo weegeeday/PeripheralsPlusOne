@@ -22,7 +22,7 @@ public class TileEntityMEBridge extends BlockEntity implements IPlusPlusPeripher
 private final HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
 
 public TileEntityMEBridge(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ME_BRIDGE.get(), pos, state);
 }
 
 @Override

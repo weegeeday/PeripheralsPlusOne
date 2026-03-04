@@ -4,7 +4,7 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 
 public class ItemResupplyUpgrade extends ItemPPP {
 	
-	public ItemResupplyUpgrade() {
-		super();
+	public ItemResupplyUpgrade(Properties props) {
+		super(props);
 	}
 }

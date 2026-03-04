@@ -41,7 +41,7 @@ public Stack<LinkData> links = new Stack<>();
 public String tag = null;
 
 public TileEntityTeleporter(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TELEPORTER.get(), pos, state);
 }
 
 public int getMaxLinks() {

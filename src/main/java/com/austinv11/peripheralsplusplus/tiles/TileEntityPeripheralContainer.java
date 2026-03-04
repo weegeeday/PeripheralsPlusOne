@@ -24,7 +24,7 @@ public class TileEntityPeripheralContainer extends BlockEntity implements IPlusP
 private final List<ContainedPeripheral> peripheralsContained = new ArrayList<>();
 
 public TileEntityPeripheralContainer(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PERIPHERAL_CONTAINER.get(), pos, state);
 }
 
 @Override

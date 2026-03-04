@@ -15,31 +15,31 @@ public class ModItems {
 
     // Standalone items
     public static final RegistryObject<ItemFeederUpgrade> FEEDER_UPGRADE =
-            ITEMS.register("feeder_upgrade", ItemFeederUpgrade::new);
+            ITEMS.register("feeder_upgrade", () -> new ItemFeederUpgrade(new Item.Properties()));
     public static final RegistryObject<ItemTank> TANK =
-            ITEMS.register("tank", ItemTank::new);
+            ITEMS.register("tank", () -> new ItemTank(new Item.Properties()));
     public static final RegistryObject<ItemSmartHelmet> SMART_HELMET =
-            ITEMS.register("smart_helmet", ItemSmartHelmet::new);
+            ITEMS.register("smart_helmet", () -> new ItemSmartHelmet(new Item.Properties()));
     public static final RegistryObject<ItemNanoSwarm> NANO_SWARM =
-            ITEMS.register("nano_swarm", ItemNanoSwarm::new);
+            ITEMS.register("nano_swarm", () -> new ItemNanoSwarm(new Item.Properties()));
     public static final RegistryObject<ItemChunkLoaderUpgrade> CHUNK_LOADER_UPGRADE =
-            ITEMS.register("chunk_loader_upgrade", ItemChunkLoaderUpgrade::new);
+            ITEMS.register("chunk_loader_upgrade", () -> new ItemChunkLoaderUpgrade(new Item.Properties()));
     public static final RegistryObject<ItemPermissionsCard> PERM_CARD =
-            ITEMS.register("permissions_card", ItemPermissionsCard::new);
+            ITEMS.register("permissions_card", () -> new ItemPermissionsCard(new Item.Properties()));
     public static final RegistryObject<ItemResupplyUpgrade> RESUPPLY_UPGRADE =
-            ITEMS.register("resupply_upgrade", ItemResupplyUpgrade::new);
+            ITEMS.register("resupply_upgrade", () -> new ItemResupplyUpgrade(new Item.Properties()));
     public static final RegistryObject<ItemMotionDetector> MOTION_DETECTOR =
-            ITEMS.register("motion_detector", ItemMotionDetector::new);
+            ITEMS.register("motion_detector", () -> new ItemMotionDetector(new Item.Properties()));
     public static final RegistryObject<ItemRfidChip> RFID_CHIP =
-            ITEMS.register("rfid_chip", ItemRfidChip::new);
+            ITEMS.register("rfid_chip", () -> new ItemRfidChip(new Item.Properties()));
     public static final RegistryObject<ItemPlasticCard> PLASTIC_CARD =
-            ITEMS.register("plastic_card", ItemPlasticCard::new);
+            ITEMS.register("plastic_card", () -> new ItemPlasticCard(new Item.Properties()));
     public static final RegistryObject<ItemFork> FORK =
-            ITEMS.register("fork", ItemFork::new);
+            ITEMS.register("fork", () -> new ItemFork(new Item.Properties()));
 
     // BlockItem registrations
     public static final RegistryObject<ItemBlockTurtle> TURTLE =
-            ITEMS.register("turtle", () -> new ItemBlockTurtle(ModBlocks.TURTLE.get()));
+            ITEMS.register("turtle", () -> new ItemBlockTurtle(ModBlocks.TURTLE.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> CHAT_BOX =
             ITEMS.register("chat_box", () -> new BlockItem(ModBlocks.CHAT_BOX.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> PLAYER_SENSOR =
@@ -63,7 +63,7 @@ public class ModItems {
     public static final RegistryObject<BlockItem> ANALYZER_BUTTERFLY =
             ITEMS.register("analyzer_butterfly", () -> new BlockItem(ModBlocks.ANALYZER_BUTTERFLY.get(), new Item.Properties()));
     public static final RegistryObject<ItemTeleporter> TELEPORTER =
-            ITEMS.register("teleporter", () -> new ItemTeleporter(ModBlocks.TELEPORTER.get()));
+            ITEMS.register("teleporter", () -> new ItemTeleporter(ModBlocks.TELEPORTER.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> PERIPHERAL_CONTAINER =
             ITEMS.register("peripheral_container", () -> new BlockItem(ModBlocks.PERIPHERAL_CONTAINER.get(), new Item.Properties()));
     public static final RegistryObject<BlockItem> ME_BRIDGE =

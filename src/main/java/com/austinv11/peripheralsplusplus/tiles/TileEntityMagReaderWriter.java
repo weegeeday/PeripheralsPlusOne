@@ -27,7 +27,7 @@ private String[] buffers = new String[MAX_TRACKS];
 private final List<IComputerAccess> computers = new ArrayList<>();
 
 public TileEntityMagReaderWriter(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.MAG_READER_WRITER.get(), pos, state);
 }
 
 @Nonnull

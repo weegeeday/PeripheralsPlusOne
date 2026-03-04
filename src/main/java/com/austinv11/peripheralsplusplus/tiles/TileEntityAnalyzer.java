@@ -27,7 +27,7 @@ public abstract class TileEntityAnalyzer extends BlockEntity implements IPlusPlu
 protected final ItemStack[] items = new ItemStack[]{ItemStack.EMPTY};
 
 public TileEntityAnalyzer(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ANALYZER_CHAT_BOX.get(), pos, state);
 }
 
 @Override

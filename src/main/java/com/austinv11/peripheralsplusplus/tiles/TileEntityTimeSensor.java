@@ -20,7 +20,7 @@ public class TileEntityTimeSensor extends BlockEntity implements IPlusPlusPeriph
 private long timerStart = -1;
 
 public TileEntityTimeSensor(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TIME_SENSOR.get(), pos, state);
 }
 
 @Override

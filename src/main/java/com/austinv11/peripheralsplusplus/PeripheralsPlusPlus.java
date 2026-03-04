@@ -4,6 +4,7 @@ import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import com.austinv11.peripheralsplusplus.init.ModItems;
 import com.austinv11.peripheralsplusplus.init.ModPeripherals;
+import com.austinv11.peripheralsplusplus.init.ModTileEntities;
 import com.austinv11.peripheralsplusplus.network.*;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.reference.Reference;
@@ -11,6 +12,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
+import com.austinv11.peripheralsplusplus.capabilities.nano.CapabilityNanoBot;
+import com.austinv11.peripheralsplusplus.capabilities.nano.NanoBotHolder;
+import com.austinv11.peripheralsplusplus.capabilities.rfid.CapabilityRfid;
+import com.austinv11.peripheralsplusplus.capabilities.rfid.RfidTagHolder;
+import com.austinv11.peripheralsplusplus.event.handler.CapabilitiesHandler;
+import net.minecraftforge.event.RegisterCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -44,16 +51,24 @@ public class PeripheralsPlusPlus {
         // Wire deferred registers
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
+        ModTileEntities.TILE_ENTITIES.register(modBus);
         CreativeTabPPP.TABS.register(modBus);
 
         modBus.addListener(this::commonSetup);
         modBus.addListener(this::clientSetup);
         modBus.addListener(Config::onLoad);
+        modBus.addListener(this::registerCapabilities);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+    private void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.register(NanoBotHolder.class);
+        event.register(RfidTagHolder.class);
+    }
+
     private void commonSetup(FMLCommonSetupEvent event) {
+        MinecraftForge.EVENT_BUS.register(new CapabilitiesHandler());
         // Register network packets
         int id = 0;
         NETWORK.registerMessage(id++, ChatPacket.class, ChatPacket::encode, ChatPacket::decode, ChatPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

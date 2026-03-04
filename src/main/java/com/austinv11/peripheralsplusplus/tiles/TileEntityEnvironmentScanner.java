@@ -22,11 +22,11 @@ private boolean isSnow = false;
 private ITurtleAccess turtle;
 
 public TileEntityEnvironmentScanner(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ENVIRONMENT_SCANNER.get(), pos, state);
 }
 
 public TileEntityEnvironmentScanner(ITurtleAccess turtle) {
-super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ENVIRONMENT_SCANNER.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 }
 

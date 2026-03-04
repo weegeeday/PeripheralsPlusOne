@@ -4,7 +4,7 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 
 public class ItemMotionDetector extends ItemPPP {
 	
-	public ItemMotionDetector() {
-		super();
+	public ItemMotionDetector(Properties props) {
+		super(props);
 	}
 }

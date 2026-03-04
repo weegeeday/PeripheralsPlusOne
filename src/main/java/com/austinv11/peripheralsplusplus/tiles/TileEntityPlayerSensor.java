@@ -24,11 +24,11 @@ private final HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
 private ITurtleAccess turtle;
 
 public TileEntityPlayerSensor(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PLAYER_SENSOR.get(), pos, state);
 }
 
 public TileEntityPlayerSensor(ITurtleAccess turtle) {
-super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PLAYER_SENSOR.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 }
 

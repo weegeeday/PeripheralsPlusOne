@@ -26,11 +26,11 @@ private final List<IComputerAccess> computers = new ArrayList<>();
 private final Map<UUID, Long> pendingEvents = new HashMap<>();
 
 public TileEntitySpeaker(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.SPEAKER.get(), pos, state);
 }
 
 public TileEntitySpeaker(ITurtleAccess turtle, TurtleSide side) {
-super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.SPEAKER.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 this.side = side;
 }

@@ -7,7 +7,7 @@ public class ItemPlasticCard extends ItemPPP {
     public static final String NAME_NFC = "item.peripheralsplusone:plastic_card.name_nfc";
     public static final String NAME_MAG = "item.peripheralsplusone:plastic_card.name_mag";
 
-    public ItemPlasticCard() {
-        super();
+    public ItemPlasticCard(Properties props) {
+        super(props);
     }
 }

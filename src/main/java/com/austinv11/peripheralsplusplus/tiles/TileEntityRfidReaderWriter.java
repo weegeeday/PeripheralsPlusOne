@@ -45,7 +45,7 @@ private byte[] selectedId;
 private RfidAuthentication authentication;
 
 public TileEntityRfidReaderWriter(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.RFID_READER_WRITER.get(), pos, state);
 }
 
 @Override

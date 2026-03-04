@@ -35,11 +35,11 @@ private int subticker = 0;
 private ITurtleAccess turtle;
 
 public TileEntityChatBox(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.CHAT_BOX.get(), pos, state);
 }
 
 public TileEntityChatBox(ITurtleAccess turtle) {
-super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.CHAT_BOX.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 }
 

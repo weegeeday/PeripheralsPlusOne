@@ -18,11 +18,11 @@ public class TileEntityOreDictionary extends BlockEntity implements IPlusPlusPer
 private ITurtleAccess turtle = null;
 
 public TileEntityOreDictionary(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ORE_DICTIONARY.get(), pos, state);
 }
 
 public TileEntityOreDictionary(ITurtleAccess turtle) {
-super(null, turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ORE_DICTIONARY.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 }
 

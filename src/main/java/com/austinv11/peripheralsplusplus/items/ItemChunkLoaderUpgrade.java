@@ -4,7 +4,7 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 
 public class ItemChunkLoaderUpgrade extends ItemPPP {
 	
-	public ItemChunkLoaderUpgrade() {
-		super();
+	public ItemChunkLoaderUpgrade(Properties props) {
+		super(props);
 	}
 }

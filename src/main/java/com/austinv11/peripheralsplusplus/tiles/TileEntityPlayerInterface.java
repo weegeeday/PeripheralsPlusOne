@@ -34,7 +34,7 @@ public Direction inputSide;
 private final ItemStack[] items = new ItemStack[8];
 
 public TileEntityPlayerInterface(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PLAYER_INTERFACE.get(), pos, state);
 for (int i = 0; i < items.length; i++) items[i] = ItemStack.EMPTY;
 }
 

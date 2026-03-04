@@ -38,7 +38,7 @@ public class TileEntityPrivacyGuard extends BlockEntity implements IPlusPlusPeri
 private static final String ENCODING = "US-ASCII";
 
 public TileEntityPrivacyGuard(BlockPos pos, BlockState state) {
-super(null, pos, state);
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PRIVACY_GUARD.get(), pos, state);
 if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
 Security.addProvider(new BouncyCastleProvider());
 }
