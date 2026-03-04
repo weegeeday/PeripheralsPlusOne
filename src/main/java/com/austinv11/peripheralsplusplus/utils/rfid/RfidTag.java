@@ -1,13 +1,17 @@
 package com.austinv11.peripheralsplusplus.utils.rfid;
 
-import com.austinv11.collectiveframework.minecraft.utils.Colors;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
+
+
 import com.austinv11.peripheralsplusplus.data.world.WorldDataRfidUniqueId;
 import com.austinv11.peripheralsplusplus.init.ModItems;
 import com.google.common.primitives.Longs;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.*;
-import net.minecraftforge.common.util.Constants;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.StringTag;
+
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class RfidTag {
-    private static final String RFID_TAG = ModItems.RFID_CHIP.getRegistryName().toString();
+    private static final String RFID_TAG = ModItems.RFID_CHIP.getId().toString();
     public static final int SECTOR_SIZE = 4;
     public static final int SECTORS = 16;
     public static final int BLOCK_LENGTH = 16;
@@ -33,7 +37,7 @@ public class RfidTag {
     public static final int ACCESS_BITS_POSITION = DEFAULT_KEY.length;
     public static final int KEY_A_POSITION = 0;
     public static final int KEY_B_POSITION = 10;
-    private static final String LORE_STRING = Colors.RESET + "Contains RFID Chip";
+    private static final String LORE_STRING = "Contains RFID Chip";
     private byte[][] blocks;
 
     private RfidTag() {
@@ -55,7 +59,7 @@ public class RfidTag {
      */
     public RfidTag(ItemStack itemStack) {
         this();
-        NBTTagCompound rfidTag = getTag(itemStack);
+        CompoundTag rfidTag = getTag(itemStack);
         if (rfidTag != null)
             readFromNbt(rfidTag);
     }
@@ -66,10 +70,10 @@ public class RfidTag {
      * @return tag
      */
     @Nullable
-    private NBTTagCompound getTag(ItemStack itemStack) {
+    private CompoundTag getTag(ItemStack itemStack) {
         if (!hasTag(itemStack))
             return null;
-        return (NBTTagCompound) itemStack.getTagCompound().getTag(RFID_TAG);
+        return (CompoundTag) itemStack.getTag().getTag(RFID_TAG);
     }
 
     /**
@@ -78,7 +82,7 @@ public class RfidTag {
      * @return has tag
      */
     public static boolean hasTag(ItemStack itemStack) {
-        return itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey(RFID_TAG);
+        return itemStack.getTag() != null && itemStack.getTag().contains(RFID_TAG);
     }
 
     /**
@@ -98,18 +102,18 @@ public class RfidTag {
     public static void addTag(ItemStack item, RfidTag rfidTag) {
         if (item.isEmpty() || hasTag(item))
             return;
-        NBTTagCompound itemTag = item.getTagCompound();
+        CompoundTag itemTag = item.getTag();
         if (itemTag == null)
-            itemTag = new NBTTagCompound();
+            itemTag = new CompoundTag();
         if (rfidTag.getIdLong() <= 0)
             rfidTag.setId();
-        NBTTagCompound rfidTagNbt = new NBTTagCompound();
-        itemTag.setTag(RFID_TAG, rfidTag.writeToNbt(rfidTagNbt));
-        item.setTagCompound(itemTag);
-        if (!item.isItemEqual(new ItemStack(ModItems.RFID_CHIP))) {
+        CompoundTag rfidTagNbt = new CompoundTag();
+        itemTag.put(RFID_TAG, rfidTag.writeToNbt(rfidTagNbt));
+        item.setTag(itemTag);
+        if (!item.is(ModItems.RFID_CHIP.get())) {
             List<String> text = new ArrayList<>();
             text.add(LORE_STRING);
-            NBTHelper.addInfo(item, text);
+            // NBTHelper call removed
         }
     }
 
@@ -161,11 +165,11 @@ public class RfidTag {
      * Writes the block list directly to the root of the passed compound
      * @param compound tag to write to
      */
-    private NBTTagCompound writeToNbt(NBTTagCompound compound) {
-        NBTTagList blockList = new NBTTagList();
+    private CompoundTag writeToNbt(CompoundTag compound) {
+        ListTag blockList = new ListTag();
         for (byte[] block : blocks)
-            blockList.appendTag(new NBTTagByteArray(block));
-        compound.setTag("block_list", blockList);
+            blockList.add(new ByteArrayTag(block));
+        compound.put("block_list", blockList);
         return compound;
     }
 
@@ -173,11 +177,11 @@ public class RfidTag {
      * Read from a tag compound
      * @param compound compound to read from
      */
-    private void readFromNbt(NBTTagCompound compound) {
-        NBTTagList blockList = compound.getTagList("block_list", Constants.NBT.TAG_BYTE_ARRAY);
+    private void readFromNbt(CompoundTag compound) {
+        ListTag blockList = compound.getList("block_list", 7);
         int blockIndex = 0;
-        for (NBTBase blockBase : blockList) {
-            NBTTagByteArray block = (NBTTagByteArray) blockBase;
+        for (Tag blockBase : blockList) {
+            ByteArrayTag block = (ByteArrayTag) blockBase;
             if (blockIndex >= blocks.length)
                 break;
             blocks[blockIndex] = block.getByteArray();
@@ -192,7 +196,7 @@ public class RfidTag {
      */
     @Nonnull
     public static ItemStack createChip(RfidTag tag) {
-        ItemStack chip = new ItemStack(ModItems.RFID_CHIP);
+        ItemStack chip = new ItemStack(ModItems.RFID_CHIP.get());
         addTag(chip, tag);
         return chip;
     }
@@ -235,35 +239,35 @@ public class RfidTag {
     public static void removeTag(ItemStack itemStack) {
         if (!hasTag(itemStack))
             return;
-        NBTTagCompound compound = itemStack.getTagCompound();
+        CompoundTag compound = itemStack.getTag();
         assert compound != null;
-        compound.removeTag(RFID_TAG);
-        if (compound.hasKey("display")) {
-            NBTTagCompound display = compound.getCompoundTag("display");
-            if (display.hasKey("Lore")) {
-                NBTTagList lore = display.getTagList("Lore", Constants.NBT.TAG_STRING);
+        compound.remove(RFID_TAG);
+        if (compound.contains("display")) {
+            CompoundTag display = compound.getCompound("display");
+            if (display.contains("Lore")) {
+                ListTag lore = display.getList("Lore", 8);
                 int loreIndex = 0;
-                for (NBTBase loreString : lore) {
-                    if (((NBTTagString)loreString).getString().equals(LORE_STRING)) {
-                        lore.removeTag(loreIndex);
+                for (Tag loreString : lore) {
+                    if (((StringTag)loreString).getString().equals(LORE_STRING)) {
+                        lore.remove(loreIndex);
                         break;
                     }
                     loreIndex++;
                 }
-                if (lore.tagCount() > 0)
-                    display.setTag("Lore", lore);
+                if (lore.size() > 0)
+                    display.put("Lore", lore);
                 else
-                    display.removeTag("Lore");
+                    display.remove("Lore");
             }
-            if (display.hasKey("Lore"))
-                compound.setTag("display", display);
+            if (display.contains("Lore"))
+                compound.put("display", display);
             else
-                compound.removeTag("display");
+                compound.remove("display");
         }
-        if (compound.getSize() > 0)
-            itemStack.setTagCompound(compound);
+        if (compound.size() > 0)
+            itemStack.setTag(compound);
         else
-            itemStack.setTagCompound(null);
+            itemStack.setTag(null);
     }
 
     /**
@@ -274,11 +278,11 @@ public class RfidTag {
     public static ItemStack createDummyCard(String name) {
         RfidTag tag = new RfidTag(ItemStack.EMPTY);
         tag.setId(RfidTag.MAX_ID);
-        ItemStack rfidCard = new ItemStack(ModItems.PLASTIC_CARD);
-        rfidCard.setTranslatableName(name);
+        ItemStack rfidCard = new ItemStack(ModItems.PLASTIC_CARD.get());
+        rfidCard.getOrCreateTag().putString("customName", name);
         List<String> info = new ArrayList<>();
         info.add("Craft to generate a unique ID");
-        NBTHelper.addInfo(rfidCard, info);
+        // NBTHelper call removed
         RfidTag.addTag(rfidCard, tag);
         return rfidCard;
     }

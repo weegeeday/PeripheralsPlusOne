@@ -1,6 +1,6 @@
 package com.austinv11.peripheralsplusplus.capabilities.rfid;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class RfidTagHolderDefault implements RfidTagHolder {
     private boolean prodded;

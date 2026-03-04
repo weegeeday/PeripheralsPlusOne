@@ -1,6 +1,6 @@
 package com.austinv11.peripheralsplusplus.capabilities.nano;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.UUID;
 

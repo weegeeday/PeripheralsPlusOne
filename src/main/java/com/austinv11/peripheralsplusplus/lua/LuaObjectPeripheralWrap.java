@@ -1,28 +1,24 @@
 package com.austinv11.peripheralsplusplus.lua;
 
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.ILuaObject;
-import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class LuaObjectPeripheralWrap implements ILuaObject {
+/**
+ * Wrapper for a peripheral in a Lua context.
+ * In CC:Tweaked 1.20.1, ILuaObject is gone; methods are provided via @LuaFunction.
+ * This class is a placeholder for future implementation.
+ */
+public class LuaObjectPeripheralWrap {
 
-	private IPeripheral peripheral;
-	private IComputerAccess computer;
+private final IPeripheral peripheral;
+private final IComputerAccess computer;
 
-	public LuaObjectPeripheralWrap(IPeripheral peripheral, IComputerAccess computer) {
-		this.peripheral = peripheral;
-		this.computer = computer;
-	}
+public LuaObjectPeripheralWrap(IPeripheral peripheral, IComputerAccess computer) {
+this.peripheral = peripheral;
+this.computer = computer;
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return peripheral.getMethodNames();
-	}
-
-	@Override
-	public Object[] callMethod(ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		return peripheral.callMethod(computer, context, method, arguments);
-	}
+public IPeripheral getPeripheral() {
+return peripheral;
+}
 }

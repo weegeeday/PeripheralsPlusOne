@@ -1,89 +1,79 @@
 package com.austinv11.peripheralsplusplus.entities;
 
-import com.austinv11.collectiveframework.minecraft.utils.Colors;
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
 import com.austinv11.peripheralsplusplus.init.ModItems;
 import com.austinv11.peripheralsplusplus.items.ItemNanoSwarm;
 import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-public class EntityNanoBotSwarm extends EntityThrowable {
-	
-	public UUID antennaIdentifier;
-	public String label;
-	
-	public EntityNanoBotSwarm(World world) {
-		super(world);
-	}
-	
-	public EntityNanoBotSwarm(World world, EntityLivingBase thrower) {
-		super(world, thrower);
-	}
-	
-	public EntityNanoBotSwarm(World world, double x, double y, double z) {
-		super(world, x, y, z);
-	}
-	
-	@Override
-	protected void onImpact(RayTraceResult mop) {
-		if (!world.isRemote) {
-			if (mop.typeOfHit == RayTraceResult.Type.ENTITY) {
-				mop.entityHit.attackEntityFrom(new DamageSource(Reference.MOD_ID.toLowerCase()+".nanobots"), 0);
-				ItemNanoSwarm.addSwarmForEntity(this, mop.entityHit);
-			} else if (mop.typeOfHit == RayTraceResult.Type.BLOCK) {
-				ItemStack stack = new ItemStack(ModItems.NANO_SWARM);
-				NBTHelper.setString(stack, "identifier", antennaIdentifier.toString());
-				List<String> info = new ArrayList<String>();
-				
-				if (label == null) {
-					info.add(Colors.RESET.toString()+Colors.GRAY+antennaIdentifier.toString());
-				} else {
-					info.add(Colors.RESET.toString()+Colors.GRAY+label);
-					NBTHelper.setString(stack, "label", label);
-				}
-				
-				NBTHelper.setInfo(stack, info);
-				EnumFacing direction = mop.sideHit;
-				EntityItem entityItem = new EntityItem(this.world,
-						this.posX+direction.getFrontOffsetX(), this.posY+direction.getFrontOffsetY(),
-								this.posZ+direction.getFrontOffsetZ(), stack);
-				world.spawnEntity(entityItem);
-			}
-			this.setDead();
-		}
-	}
-	
-	@Override
-	public void writeEntityToNBT(NBTTagCompound tag) {
-		super.writeEntityToNBT(tag);
-		tag.setString("antennaIdentifier", antennaIdentifier.toString());
-		tag.setBoolean("hasLabel", label != null);
-		if (label != null)
-			tag.setString("label", label);
-	}
-	
-	@Override
-	public void readEntityFromNBT(NBTTagCompound tag) {
-		super.readEntityFromNBT(tag);
-		antennaIdentifier = UUID.fromString(tag.getString("antennaIdentifier"));
-		if (tag.getBoolean("hashLabel"))
-			label = tag.getString("label");
-	}
-	
-	@Override
-	protected float getGravityVelocity() {
-		return 0.0075F;
-	}
+public class EntityNanoBotSwarm extends ThrowableProjectile {
+
+public UUID antennaIdentifier;
+public String label;
+
+public EntityNanoBotSwarm(EntityType<? extends ThrowableProjectile> type, Level level) {
+super(type, level);
+}
+
+public EntityNanoBotSwarm(Level level, LivingEntity thrower) {
+super(null, thrower, level);
+}
+
+@Override
+protected void defineSynchedData() {}
+
+@Override
+protected void onHitEntity(EntityHitResult result) {
+if (!level().isClientSide()) {
+result.getEntity().hurt(level().damageSources().generic(), 0);
+ItemNanoSwarm.addSwarmForEntity(this, result.getEntity());
+}
+}
+
+@Override
+protected void onHitBlock(BlockHitResult result) {
+if (!level().isClientSide()) {
+ItemStack stack = new ItemStack(ModItems.NANO_SWARM.get());
+stack.getOrCreateTag().putString("identifier", antennaIdentifier != null ? antennaIdentifier.toString() : "");
+if (label != null)
+stack.getTag().putString("label", label);
+Direction dir = result.getDirection();
+ItemEntity entity = new ItemEntity(level(),
+result.getBlockPos().getX() + dir.getStepX() + 0.5,
+result.getBlockPos().getY() + dir.getStepY() + 0.5,
+result.getBlockPos().getZ() + dir.getStepZ() + 0.5,
+stack);
+level().addFreshEntity(entity);
+}
+discard();
+}
+
+@Override
+public void addAdditionalSaveData(CompoundTag tag) {
+super.addAdditionalSaveData(tag);
+if (antennaIdentifier != null)
+tag.putUUID("antennaId", antennaIdentifier);
+if (label != null)
+tag.putString("label", label);
+}
+
+@Override
+public void readAdditionalSaveData(CompoundTag tag) {
+super.readAdditionalSaveData(tag);
+if (tag.hasUUID("antennaId"))
+antennaIdentifier = tag.getUUID("antennaId");
+if (tag.contains("label"))
+label = tag.getString("label");
+}
 }

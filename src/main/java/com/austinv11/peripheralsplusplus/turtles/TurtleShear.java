@@ -6,7 +6,7 @@ import com.austinv11.peripheralsplusplus.utils.FakeTurtlePlayer;
 import com.austinv11.peripheralsplusplus.utils.TurtleUtil;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Direction;
@@ -37,7 +37,7 @@ public class TurtleShear implements ITurtleUpgrade {
 	@Override
 	public ItemStack getCraftingItem() {
 		if (Config.enableShearTurtle)
-			return new ItemStack(Items.SHEARS);
+			return new ItemStack(net.minecraft.world.item.Items.SHEARS);
 		return ItemStack.EMPTY;
 	}
 
@@ -58,14 +58,14 @@ public class TurtleShear implements ITurtleUpgrade {
 				List<Entity> entities = TurtleUtil.getEntitiesNearTurtle(turtle, player, direction);
 				Entity ent = TurtleUtil.getClosestShearableEntity(entities, player);
 				if (ent != null)
-					if (((IShearable) ent).isShearable(new ItemStack(Items.SHEARS), ent.world, ent.getPosition())) {
-						TurtleUtil.addItemListToInv(((IShearable) ent).onSheared(new ItemStack(Items.SHEARS), ent.world,
-								ent.getPosition(), 0), turtle);
+					if (((IShearable) ent).isShearable(new ItemStack(net.minecraft.world.item.Items.SHEARS), (net.minecraft.server.level.ServerLevel) ent.level(), ent.blockPosition())) {
+						TurtleUtil.addItemListToInv(((IShearable) ent).onSheared(null, (net.minecraft.server.level.ServerLevel) ent.level(),
+								ent.blockPosition(), 0), turtle);
 						return TurtleCommandResult.success();
 					}
 				return TurtleCommandResult.failure();
 			case Dig:
-				List<ItemStack> items = TurtleUtil.harvestBlock(turtle, player, direction, new ItemStack(Items.SHEARS));
+				List<ItemStack> items = TurtleUtil.harvestBlock(turtle, player, direction, new ItemStack(net.minecraft.world.item.Items.SHEARS));
 				if (items != null) {
 					TurtleUtil.addItemListToInv(items, turtle);
 					return TurtleCommandResult.success();

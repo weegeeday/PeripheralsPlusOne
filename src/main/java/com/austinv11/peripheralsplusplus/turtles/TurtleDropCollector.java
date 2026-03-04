@@ -2,9 +2,9 @@ package com.austinv11.peripheralsplusplus.turtles;
 
 import com.austinv11.peripheralsplusplus.utils.TurtleUtil;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,39 +1,33 @@
 package com.austinv11.peripheralsplusplus.network;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-public class ChatPacket implements IMessage {
+import java.util.function.Supplier;
 
-	public String text;
+public class ChatPacket {
 
-	public ChatPacket() {}
+public final String text;
 
-	public ChatPacket(String text) {
-		this.text = text;
-	}
+public ChatPacket(String text) {
+this.text = text;
+}
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		text = ByteBufUtils.readUTF8String(buf);
-	}
+public static void encode(ChatPacket pkt, FriendlyByteBuf buf) {
+buf.writeUtf(pkt.text);
+}
 
-	@Override
-	public void toBytes(ByteBuf buf) {
-		ByteBufUtils.writeUTF8String(buf, text);
-	}
+public static ChatPacket decode(FriendlyByteBuf buf) {
+return new ChatPacket(buf.readUtf());
+}
 
-	public static class ChatPacketHandler implements IMessageHandler<ChatPacket, IMessage> {
-
-		@Override
-		public IMessage onMessage(ChatPacket message, MessageContext ctx) {
-			Minecraft.getMinecraft().player.sendMessage(new TextComponentString(message.text));
-			return null;
-		}
-	}
+public static void handle(ChatPacket pkt, Supplier<NetworkEvent.Context> ctxSupplier) {
+NetworkEvent.Context ctx = ctxSupplier.get();
+ctx.enqueueWork(() -> {
+net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+if (mc.player != null)
+mc.player.displayClientMessage(net.minecraft.network.chat.Component.literal(pkt.text), false);
+});
+ctx.setPacketHandled(true);
+}
 }

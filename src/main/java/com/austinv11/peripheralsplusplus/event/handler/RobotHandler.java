@@ -2,154 +2,66 @@ package com.austinv11.peripheralsplusplus.event.handler;
 
 import com.austinv11.peripheralsplusplus.network.RobotEventPacket;
 import com.austinv11.peripheralsplusplus.reference.Config;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.TickEvent;
 
 import java.awt.*;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Field;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RobotHandler {
-	
-	private Robot robot;
-	public static CopyOnWriteArrayList<RobotOperation> operationList = new CopyOnWriteArrayList<RobotOperation>();
-	
-	public RobotHandler() {
-		try {
-			robot = new Robot();
-		} catch (AWTException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@SubscribeEvent
-	public void onClientTick(TickEvent.ClientTickEvent event) {
-		doOperations();
-	}
-	
-	private void doOperations() {
-		for (RobotOperation operation : operationList) {
-			if (operation.isFinished()) {
-				operation.onFinish(robot);
-				operationList.remove(operation);
-			} else
-				operation.tick(robot);
-		}
-	}
-	
-	public static abstract class RobotOperation {
-		
-		private int ticker;
-		private int maxTick;
-		
-		public RobotOperation() {
-			maxTick = ticker = Math.round((float)(Config.secondsBeforeReversal * 20));
-		}
-		
-		public boolean isFinished() {
-			return ticker == 0;
-		}
-		
-		public void tick(Robot robot) {
-			if (maxTick == ticker)
-				operate(robot);
-			if (ticker != 0)
-				ticker--;
-		}
-		
-		public abstract void onFinish(Robot robot);
-		
-		public abstract void operate(Robot robot);
-	}
-	
-	public static class KeyBoardOperation extends RobotOperation {
-		
-		public RobotEventPacket.PressType pressType;
-		public String key;
-		
-		public KeyBoardOperation() {
-			super();
-		}
-		
-		@Override
-		public void onFinish(Robot robot) {
-			if (pressType == RobotEventPacket.PressType.PRESS)
-				try {
-					robot.keyRelease(getKeyField().getInt(null));
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-		}
-		
-		@Override
-		public void operate(Robot robot) {
-			try {
-				robot.keyPress(getKeyField().getInt(null));
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		public Field getKeyField() {
-			try {
-				return KeyEvent.class.getField("VK_"+key.toUpperCase());
-			} catch (NoSuchFieldException e) {
-				e.printStackTrace();
-			}
-			return null; //This shouldn't be reached
-		}
-	}
-	
-	public static class MouseClickOperation extends RobotOperation {
-		
-		public RobotEventPacket.PressType pressType;
-		public int button;
-		
-		public MouseClickOperation() {
-			super();
-		}
-		
-		@Override
-		public void onFinish(Robot robot) {
-			if (pressType == RobotEventPacket.PressType.PRESS) {
-				try {
-					robot.mouseRelease(InputEvent.getMaskForButton(button));
-				}
-				catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		@Override
-		public void operate(Robot robot) {
-			try {
-				robot.mousePress(InputEvent.getMaskForButton(button));
-			}
-			catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public static class MouseMoveOperation extends RobotOperation {
-		
-		public int x,y;
-		
-		public MouseMoveOperation() {
-			super();
-		}
-		
-		@Override
-		public void onFinish(Robot robot) {
-			
-		}
-		
-		@Override
-		public void operate(Robot robot) {
-			robot.mouseMove(x, y);
-		}
-	}
+
+private Robot robot;
+public static CopyOnWriteArrayList<RobotOperation> operationList = new CopyOnWriteArrayList<>();
+
+public RobotHandler() {
+try {
+robot = new Robot();
+} catch (AWTException e) {
+e.printStackTrace();
+}
+}
+
+@SubscribeEvent
+public void onClientTick(TickEvent.ClientTickEvent event) {
+doOperations();
+}
+
+public void doOperations() {
+if (robot == null) return;
+for (RobotOperation op : operationList) {
+operationList.remove(op);
+try {
+if (op.isKeyOp()) {
+if (op.isDown())
+robot.keyPress(op.getKeyCode());
+else
+robot.keyRelease(op.getKeyCode());
+} else {
+if (op.isDown())
+robot.mousePress(op.getKeyCode());
+else
+robot.mouseRelease(op.getKeyCode());
+}
+} catch (Exception e) {
+// Ignore
+}
+}
+}
+
+public static class RobotOperation {
+private final int keyCode;
+private final boolean isDown;
+private final boolean isKeyOp;
+
+public RobotOperation(int keyCode, boolean isDown, boolean isKeyOp) {
+this.keyCode = keyCode;
+this.isDown = isDown;
+this.isKeyOp = isKeyOp;
+}
+
+public int getKeyCode() { return keyCode; }
+public boolean isDown() { return isDown; }
+public boolean isKeyOp() { return isKeyOp; }
+}
 }

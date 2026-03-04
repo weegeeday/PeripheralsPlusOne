@@ -1,56 +1,48 @@
 package com.austinv11.peripheralsplusplus.data.world;
 
 import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.storage.MapStorage;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.common.DimensionManager;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 
-public class WorldDataRfidUniqueId extends WorldSavedData {
-    private static final String TAG_KEY = Reference.MOD_ID + "_rfid_unique_id";
-    private long lastId;
+public class WorldDataRfidUniqueId extends SavedData {
 
-    private WorldDataRfidUniqueId() {
-        super(TAG_KEY);
-    }
+private static final String TAG_KEY = Reference.MOD_ID + "_rfid_unique_id";
+private long lastId;
 
-    @SuppressWarnings("unused")
-    public WorldDataRfidUniqueId(String name) {
-        super(name);
-    }
+public WorldDataRfidUniqueId() {}
 
-    @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        lastId = compound.getLong("last_id");
-    }
+@Override
+public CompoundTag save(CompoundTag compound) {
+compound.putLong("last_id", lastId);
+return compound;
+}
 
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setLong("last_id", lastId);
-        return compound;
-    }
+public static WorldDataRfidUniqueId load(CompoundTag tag) {
+WorldDataRfidUniqueId data = new WorldDataRfidUniqueId();
+data.lastId = tag.getLong("last_id");
+return data;
+}
 
-    @Nullable
-    public static WorldDataRfidUniqueId get() {
-        MapStorage storage = DimensionManager.getWorld(0).getMapStorage();
-        if (storage == null)
-            return null;
-        WorldDataRfidUniqueId instance = (WorldDataRfidUniqueId) storage.getOrLoadData(WorldDataRfidUniqueId.class,
-                TAG_KEY);
-        if (instance == null) {
-            instance = new WorldDataRfidUniqueId();
-            storage.setData(TAG_KEY, instance);
-        }
-        return instance;
-    }
+@Nullable
+public static WorldDataRfidUniqueId get() {
+MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+if (server == null) return null;
+return server.overworld().getDataStorage().computeIfAbsent(
+WorldDataRfidUniqueId::load,
+WorldDataRfidUniqueId::new,
+TAG_KEY);
+}
 
-    public long getLastId() {
-        return lastId;
-    }
+public long getLastId() {
+return lastId;
+}
 
-    public void setLastId(long lastId) {
-        this.lastId = lastId;
-    }
+public void setLastId(long lastId) {
+this.lastId = lastId;
+setDirty();
+}
 }

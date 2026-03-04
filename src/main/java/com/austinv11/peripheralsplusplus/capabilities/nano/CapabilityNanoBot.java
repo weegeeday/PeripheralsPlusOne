@@ -1,41 +1,65 @@
 package com.austinv11.peripheralsplusplus.capabilities.nano;
 
 import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.common.capabilities.*;
+import net.minecraftforge.common.util.LazyOptional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CapabilityNanoBot implements ICapabilitySerializable<NBTBase> {
-    @CapabilityInject(NanoBotHolder.class)
-    public static final Capability<NanoBotHolder> INSTANCE = null;
+public class CapabilityNanoBot implements ICapabilityProvider {
 
-    public static final ResourceLocation ID = new ResourceLocation(Reference.MOD_ID,
-            "nano_bot_embedded_entity");
+public static final Capability<NanoBotHolder> CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+public static final ResourceLocation ID = new ResourceLocation(Reference.MOD_ID, "nano_bot_embedded_entity");
 
-    private NanoBotHolder instance = INSTANCE.getDefaultInstance();
+private final NanoBotHolderDefault instance;
+private final LazyOptional<NanoBotHolder> optional;
 
-    @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability.equals(INSTANCE);
-    }
+public CapabilityNanoBot() {
+this.instance = new NanoBotHolderDefault();
+this.optional = LazyOptional.of(() -> instance);
+}
 
-    @Nullable
-    @Override
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        return hasCapability(capability, facing) ? INSTANCE.cast(instance) : null;
-    }
+@Nonnull
+@Override
+public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+return CAPABILITY.orEmpty(cap, optional);
+}
 
-    @Override
-    public NBTBase serializeNBT() {
-        return INSTANCE.getStorage().writeNBT(INSTANCE, instance, null);
-    }
+public static class Provider implements ICapabilityProvider, net.minecraftforge.common.util.INBTSerializable<CompoundTag> {
+private final NanoBotHolderDefault instance;
+private final LazyOptional<NanoBotHolder> optional;
 
-    @Override
-    public void deserializeNBT(NBTBase nbt) {
-        INSTANCE.getStorage().readNBT(INSTANCE, instance, null, nbt);
-    }
+public Provider(Entity entity) {
+this.instance = new NanoBotHolderDefault();
+this.instance.setEntity(entity);
+this.optional = LazyOptional.of(() -> instance);
+}
+
+@Nonnull
+@Override
+public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+return CAPABILITY.orEmpty(cap, optional);
+}
+
+@Override
+public CompoundTag serializeNBT() {
+CompoundTag tag = new CompoundTag();
+tag.putInt("bots", instance.getBots());
+if (instance.getAntenna() != null)
+tag.putUUID("antenna", instance.getAntenna());
+return tag;
+}
+
+@Override
+public void deserializeNBT(CompoundTag nbt) {
+instance.setBots(nbt.getInt("bots"));
+if (nbt.hasUUID("antenna"))
+instance.setAntenna(nbt.getUUID("antenna"));
+}
+}
 }
