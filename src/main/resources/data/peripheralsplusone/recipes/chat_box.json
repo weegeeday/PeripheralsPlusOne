@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "IPI", "III"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "P": {"item": "minecraft:paper"}
+  },
+  "result": {"item": "peripheralsplusone:chat_box", "count": 1}
+}

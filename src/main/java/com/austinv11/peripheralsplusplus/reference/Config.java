@@ -34,7 +34,6 @@ public class Config {
     private static final ForgeConfigSpec.BooleanValue ENABLE_ORE_DICTIONARY_V;
     private static final ForgeConfigSpec.BooleanValue ORE_DICTIONARY_MESSAGE_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_SHEAR_TURTLE_V;
-    private static final ForgeConfigSpec.BooleanValue ENABLE_ANALYZERS_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_TURTLE_TELEPORTER_V;
     private static final ForgeConfigSpec.DoubleValue TELEPORTER_PENALTY_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_ENVIRONMENT_SCANNER_V;
@@ -47,8 +46,6 @@ public class Config {
     // Containers
     private static final ForgeConfigSpec.BooleanValue ENABLE_PERIPHERAL_CONTAINER_V;
     private static final ForgeConfigSpec.IntValue MAX_NUMBER_OF_PERIPHERALS_V;
-    // ME Bridge
-    private static final ForgeConfigSpec.BooleanValue ENABLE_ME_BRIDGE_V;
     // Tank Turtle
     private static final ForgeConfigSpec.BooleanValue ENABLE_TANK_TURTLE_V;
     private static final ForgeConfigSpec.IntValue MAX_NUMBER_OF_MILLIBUCKETS_V;
@@ -74,7 +71,6 @@ public class Config {
     private static final ForgeConfigSpec.BooleanValue ENABLE_PLAYER_INTERFACE_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_MOTION_DETECTOR_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_INTERFACE_PERMISSIONS_V;
-    private static final ForgeConfigSpec.BooleanValue ENABLE_MANA_MANIPULATOR_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_RFID_ITEMS_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_MAG_STRIP_ITEMS_V;
     private static final ForgeConfigSpec.BooleanValue ENABLE_PRIVACY_GUARD_V;
@@ -108,7 +104,6 @@ public class Config {
         ENABLE_ORE_DICTIONARY_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableOreDictionary", true);
         ORE_DICTIONARY_MESSAGE_V = BUILDER.comment("Display chat message with Ore Dictionary entries").define("oreDictionaryMessage", false);
         ENABLE_SHEAR_TURTLE_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableShearTurtle", true);
-        ENABLE_ANALYZERS_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableAnalyzers", true);
         ENABLE_TURTLE_TELEPORTER_V = BUILDER.comment("If disabled, the recipe will be disabled").define("enableTurtleTeleporter", true);
         TELEPORTER_PENALTY_V = BUILDER.comment("Fuel penalty multiplier for Turtle Teleporter").defineInRange("teleporterPenalty", 2.0, 1.0, Double.MAX_VALUE);
         ENABLE_ENVIRONMENT_SCANNER_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableEnvironmentScanner", true);
@@ -131,10 +126,6 @@ public class Config {
         BUILDER.comment("Peripheral Container Settings").push("PeripheralContainer");
         ENABLE_PERIPHERAL_CONTAINER_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enablePeripheralContainer", true);
         MAX_NUMBER_OF_PERIPHERALS_V = BUILDER.comment("Max peripherals in container").defineInRange("maxNumberOfPeripherals", 6, 1, Integer.MAX_VALUE);
-        BUILDER.pop();
-
-        BUILDER.comment("ME Bridge Settings").push("MEBridge");
-        ENABLE_ME_BRIDGE_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableMEBridge", true);
         BUILDER.pop();
 
         BUILDER.comment("Tank Turtle Settings").push("TankTurtle");
@@ -171,10 +162,6 @@ public class Config {
 
         BUILDER.comment("Motion Detector Settings").push("MotionDetector");
         ENABLE_MOTION_DETECTOR_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableMotionDetector", true);
-        BUILDER.pop();
-
-        BUILDER.comment("Mana Manipulator Settings").push("ManaManipulator");
-        ENABLE_MANA_MANIPULATOR_V = BUILDER.comment(ENABLE_CONFIG_MESSAGE).define("enableManaManipulator", true);
         BUILDER.pop();
 
         BUILDER.comment("RFID Item Settings").push("RFIDItems");
@@ -215,7 +202,6 @@ public class Config {
     public static boolean enableOreDictionary = true;
     public static boolean oreDictionaryMessage = false;
     public static boolean enableShearTurtle = true;
-    public static boolean enableAnalyzers = true;
     public static boolean enableTurtleTeleporter = true;
     public static double teleporterPenalty = 2.0;
     public static boolean enableEnvironmentScanner = true;
@@ -227,7 +213,6 @@ public class Config {
     public static boolean enableAPIs = true;
     public static boolean enablePeripheralContainer = true;
     public static int maxNumberOfPeripherals = 6;
-    public static boolean enableMEBridge = true;
     public static boolean enableTankTurtle = true;
     public static int maxNumberOfMillibuckets = 10000;
     public static boolean enableSmartHelmet = true;
@@ -247,7 +232,6 @@ public class Config {
     public static boolean enablePlayerInterface = true;
     public static boolean enableMotionDetector = true;
     public static boolean enableInterfacePermissions = true;
-    public static boolean enableManaManipulator = true;
     public static boolean enableRfidItems = true;
     public static boolean enableMagStripItems = true;
     public static boolean enablePrivacyGuard = true;
@@ -272,7 +256,6 @@ public class Config {
         enableOreDictionary = ENABLE_ORE_DICTIONARY_V.get();
         oreDictionaryMessage = ORE_DICTIONARY_MESSAGE_V.get();
         enableShearTurtle = ENABLE_SHEAR_TURTLE_V.get();
-        enableAnalyzers = ENABLE_ANALYZERS_V.get();
         enableTurtleTeleporter = ENABLE_TURTLE_TELEPORTER_V.get();
         teleporterPenalty = TELEPORTER_PENALTY_V.get();
         enableEnvironmentScanner = ENABLE_ENVIRONMENT_SCANNER_V.get();
@@ -283,7 +266,6 @@ public class Config {
         speechRange = SPEECH_RANGE_V.get();
         enablePeripheralContainer = ENABLE_PERIPHERAL_CONTAINER_V.get();
         maxNumberOfPeripherals = MAX_NUMBER_OF_PERIPHERALS_V.get();
-        enableMEBridge = ENABLE_ME_BRIDGE_V.get();
         enableTankTurtle = ENABLE_TANK_TURTLE_V.get();
         maxNumberOfMillibuckets = MAX_NUMBER_OF_MILLIBUCKETS_V.get();
         enableSmartHelmet = ENABLE_SMART_HELMET_V.get();
@@ -303,7 +285,6 @@ public class Config {
         enablePlayerInterface = ENABLE_PLAYER_INTERFACE_V.get();
         enableMotionDetector = ENABLE_MOTION_DETECTOR_V.get();
         enableInterfacePermissions = ENABLE_INTERFACE_PERMISSIONS_V.get();
-        enableManaManipulator = ENABLE_MANA_MANIPULATOR_V.get();
         enableRfidItems = ENABLE_RFID_ITEMS_V.get();
         enableMagStripItems = ENABLE_MAG_STRIP_ITEMS_V.get();
         enablePrivacyGuard = ENABLE_PRIVACY_GUARD_V.get();

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GRG", " H "],
+  "key": {
+    "G": {"item": "minecraft:gold_ingot"},
+    "R": {"item": "minecraft:redstone"},
+    "H": {"item": "minecraft:iron_helmet"}
+  },
+  "result": {"item": "peripheralsplusone:smart_helmet", "count": 1}
+}

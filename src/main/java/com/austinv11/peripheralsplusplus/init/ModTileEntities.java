@@ -28,18 +28,6 @@ public static final RegistryObject<BlockEntityType<TileEntityOreDictionary>> ORE
 TILE_ENTITIES.register("ore_dictionary", () -> BlockEntityType.Builder
 .of(TileEntityOreDictionary::new, ModBlocks.ORE_DICTIONARY.get()).build(null));
 
-public static final RegistryObject<BlockEntityType<TileEntityAnalyzerBee>> ANALYZER_BEE =
-TILE_ENTITIES.register("analyzer_bee", () -> BlockEntityType.Builder
-.of(TileEntityAnalyzerBee::new, ModBlocks.ANALYZER_BEE.get()).build(null));
-
-public static final RegistryObject<BlockEntityType<TileEntityAnalyzerTree>> ANALYZER_TREE =
-TILE_ENTITIES.register("analyzer_tree", () -> BlockEntityType.Builder
-.of(TileEntityAnalyzerTree::new, ModBlocks.ANALYZER_TREE.get()).build(null));
-
-public static final RegistryObject<BlockEntityType<TileEntityAnalyzerButterfly>> ANALYZER_BUTTERFLY =
-TILE_ENTITIES.register("analyzer_butterfly", () -> BlockEntityType.Builder
-.of(TileEntityAnalyzerButterfly::new, ModBlocks.ANALYZER_BUTTERFLY.get()).build(null));
-
 public static final RegistryObject<BlockEntityType<TileEntityTeleporter>> TELEPORTER =
 TILE_ENTITIES.register("teleporter", () -> BlockEntityType.Builder
 .of(TileEntityTeleporter::new, ModBlocks.TELEPORTER.get()).build(null));
@@ -60,10 +48,6 @@ public static final RegistryObject<BlockEntityType<TileEntityPeripheralContainer
 TILE_ENTITIES.register("peripheral_container", () -> BlockEntityType.Builder
 .of(TileEntityPeripheralContainer::new, ModBlocks.PERIPHERAL_CONTAINER.get()).build(null));
 
-public static final RegistryObject<BlockEntityType<TileEntityMEBridge>> ME_BRIDGE =
-TILE_ENTITIES.register("me_bridge", () -> BlockEntityType.Builder
-.of(TileEntityMEBridge::new, ModBlocks.ME_BRIDGE.get()).build(null));
-
 public static final RegistryObject<BlockEntityType<TileEntityTimeSensor>> TIME_SENSOR =
 TILE_ENTITIES.register("time_sensor", () -> BlockEntityType.Builder
 .of(TileEntityTimeSensor::new, ModBlocks.TIME_SENSOR.get()).build(null));
@@ -79,10 +63,6 @@ TILE_ENTITIES.register("player_interface", () -> BlockEntityType.Builder
 public static final RegistryObject<BlockEntityType<TileEntityResupplyStation>> RESUPPLY_STATION =
 TILE_ENTITIES.register("resupply_station", () -> BlockEntityType.Builder
 .of(TileEntityResupplyStation::new, ModBlocks.RESUPPLY_STATION.get()).build(null));
-
-public static final RegistryObject<BlockEntityType<TileEntityManaManipulator>> MANA_MANIPULATOR =
-TILE_ENTITIES.register("mana_manipulator", () -> BlockEntityType.Builder
-.of(TileEntityManaManipulator::new, ModBlocks.MANA_MANIPULATOR.get()).build(null));
 
 public static final RegistryObject<BlockEntityType<TileEntityRfidReaderWriter>> RFID_READER_WRITER =
 TILE_ENTITIES.register("rfid_reader_writer", () -> BlockEntityType.Builder
