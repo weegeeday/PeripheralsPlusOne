@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.operator.PGPDigestCalculator;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
 import org.bouncycastle.openpgp.operator.bc.BcPGPKeyPair;
@@ -104,7 +105,7 @@ keyring.addPublicKey(keyStr.getBytes(ENCODING));
 ByteArrayOutputStream out = new ByteArrayOutputStream();
 try (OutputStream encStream = BouncyGPG.encryptToStream()
 .withConfig(keyring)
-.toRecipients((String) null)
+.toRecipients(new String[0])
 .andDoNotSign()
 .binaryOutput()
 .andWriteTo(out)) {

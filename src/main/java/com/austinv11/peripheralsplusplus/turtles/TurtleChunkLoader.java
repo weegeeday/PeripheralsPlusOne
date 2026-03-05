@@ -30,6 +30,11 @@ public class TurtleChunkLoader implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.loader";
 	}
+
+	@Override
+	public TurtleUpgradeType getType() {
+		return TurtleUpgradeType.PERIPHERAL;
+	}
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModItems.CHUNK_LOADER_UPGRADE.get());

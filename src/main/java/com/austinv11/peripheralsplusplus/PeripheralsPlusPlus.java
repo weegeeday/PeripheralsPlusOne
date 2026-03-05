@@ -109,7 +109,7 @@ public class PeripheralsPlusPlus {
 
     private void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(),
-                new ResourceLocation(Reference.MOD_ID, "smart_helmet"),
+                "smart_helmet",
                 GuiSmartHelmetOverlay.INSTANCE);
     }
 }

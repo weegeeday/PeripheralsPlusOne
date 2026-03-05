@@ -31,6 +31,11 @@ public class TurtleSignReader implements ITurtleUpgrade
     public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.sign_reader";
 	}
+
+    @Override
+    public TurtleUpgradeType getType() {
+        return TurtleUpgradeType.PERIPHERAL;
+    }
     @Override
     public ItemStack getCraftingItem() {
 		return new ItemStack(Items.OAK_SIGN);

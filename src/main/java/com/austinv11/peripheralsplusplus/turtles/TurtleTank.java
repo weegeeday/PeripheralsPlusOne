@@ -30,6 +30,11 @@ public class TurtleTank implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.tank";
 	}
+
+	@Override
+	public TurtleUpgradeType getType() {
+		return TurtleUpgradeType.PERIPHERAL;
+	}
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModItems.TANK.get());

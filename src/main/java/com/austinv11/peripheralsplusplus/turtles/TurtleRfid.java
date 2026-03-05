@@ -32,7 +32,11 @@ public class TurtleRfid implements ITurtleUpgrade {
         return Reference.MOD_ID + ".turtle_upgrade.rfid";
     }
 
-    @Nonnull
+    @Override
+    public TurtleUpgradeType getType() {
+        return TurtleUpgradeType.PERIPHERAL;
+    }
+
     @Nonnull
     @Override
     public ItemStack getCraftingItem() {

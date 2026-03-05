@@ -31,6 +31,11 @@ public class TurtleChatBox implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.chat_box";
 	}
+
+	@Override
+	public TurtleUpgradeType getType() {
+		return TurtleUpgradeType.PERIPHERAL;
+	}
 	@Override
 	public ItemStack getCraftingItem() {
     	if (Config.enableChatBox)

@@ -18,6 +18,8 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import net.minecraftforge.common.util.LazyOptional;
+
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -26,12 +28,12 @@ public class PeripheralTank implements IPeripheral {
 private static final int TRANSFER_AMOUNT = 1000;
 private final ITurtleAccess turtle;
 private final TurtleSide side;
-private net.minecraftforge.fluids.FluidTank fluidTank;
+private net.minecraftforge.fluids.capability.templates.FluidTank fluidTank;
 
 public PeripheralTank(ITurtleAccess turtle, TurtleSide side) {
 this.turtle = turtle;
 this.side = side;
-fluidTank = new net.minecraftforge.fluids.FluidTank(Config.maxNumberOfMillibuckets);
+fluidTank = new net.minecraftforge.fluids.capability.templates.FluidTank(Config.maxNumberOfMillibuckets);
 if (!turtle.getLevel().isClientSide()) {
 CompoundTag turtleTag = turtle.getUpgradeNBTData(side);
 if (turtleTag.contains("TankData"))
@@ -102,10 +104,11 @@ return doSuck(Direction.DOWN);
 
 private Object[] doSuck(Direction direction) throws LuaException {
 BlockPos pos = turtle.getPosition().relative(direction);
-Optional<IFluidHandler> handler = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite());
-if (handler.isEmpty())
+LazyOptional<IFluidHandler> handlerLazy = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite());
+IFluidHandler handler = handlerLazy.resolve().orElse(null);
+if (handler == null)
 throw new LuaException("Block is not a fluid block");
-FluidStack transferred = FluidUtil.tryFluidTransfer(fluidTank, handler.get(), TRANSFER_AMOUNT, true);
+FluidStack transferred = FluidUtil.tryFluidTransfer(fluidTank, handler, TRANSFER_AMOUNT, true);
 if (transferred.isEmpty()) return new Object[]{0};
 saveTankData();
 return new Object[]{transferred.getAmount()};
@@ -120,9 +123,10 @@ if (placed) {
 saveTankData();
 return new Object[]{TRANSFER_AMOUNT};
 }
-Optional<IFluidHandler> handler = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite());
-if (handler.isPresent()) {
-FluidStack transferred = FluidUtil.tryFluidTransfer(handler.get(), fluidTank, TRANSFER_AMOUNT, true);
+Optional<IFluidHandler> handler2Opt = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite()).resolve();
+if (handler2Opt.isPresent()) {
+IFluidHandler handler2 = handler2Opt.get();
+FluidStack transferred = FluidUtil.tryFluidTransfer(handler2, fluidTank, TRANSFER_AMOUNT, true);
 if (!transferred.isEmpty()) {
 saveTankData();
 return new Object[]{transferred.getAmount()};

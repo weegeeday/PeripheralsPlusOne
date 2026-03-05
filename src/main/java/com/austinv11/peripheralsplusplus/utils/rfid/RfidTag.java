@@ -73,7 +73,7 @@ public class RfidTag {
     private CompoundTag getTag(ItemStack itemStack) {
         if (!hasTag(itemStack))
             return null;
-        return (CompoundTag) itemStack.getTag().getTag(RFID_TAG);
+        return (CompoundTag) itemStack.getTag().get(RFID_TAG);
     }
 
     /**
@@ -147,7 +147,7 @@ public class RfidTag {
             return;
         long newId = (worldDataRfidUniqueId.getLastId() + 1) % MAX_ID;
         worldDataRfidUniqueId.setLastId(newId);
-        worldDataRfidUniqueId.markDirty();
+        worldDataRfidUniqueId.setDirty();
         byte[] newIdBytes = Longs.toByteArray(newId);
         System.arraycopy(newIdBytes, Long.BYTES - ID_SIZE, blocks[0], 0, ID_SIZE);
     }
@@ -184,7 +184,7 @@ public class RfidTag {
             ByteArrayTag block = (ByteArrayTag) blockBase;
             if (blockIndex >= blocks.length)
                 break;
-            blocks[blockIndex] = block.getByteArray();
+            blocks[blockIndex] = block.getAsByteArray();
             blockIndex++;
         }
     }
@@ -248,7 +248,7 @@ public class RfidTag {
                 ListTag lore = display.getList("Lore", 8);
                 int loreIndex = 0;
                 for (Tag loreString : lore) {
-                    if (((StringTag)loreString).getString().equals(LORE_STRING)) {
+                    if (((StringTag)loreString).getAsString().equals(LORE_STRING)) {
                         lore.remove(loreIndex);
                         break;
                     }

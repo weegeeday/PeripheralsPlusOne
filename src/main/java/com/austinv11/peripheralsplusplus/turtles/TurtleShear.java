@@ -36,6 +36,11 @@ public class TurtleShear implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.shears";
 	}
+
+	@Override
+	public TurtleUpgradeType getType() {
+		return TurtleUpgradeType.TOOL;
+	}
 	@Override
 	public ItemStack getCraftingItem() {
 		if (Config.enableShearTurtle)

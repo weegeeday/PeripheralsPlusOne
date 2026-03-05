@@ -170,7 +170,7 @@ throw new LuaException("invalid level count " + levels + " (expected 1-" + MAX_L
 ItemStack slot = turtle.getInventory().getItem(turtle.getSelectedSlot());
 if (!slot.isEnchantable()) return new Object[]{false};
 if (experienceLevel < levels) return new Object[]{false};
-List<EnchantmentInstance> enchants = EnchantmentHelper.selectEnchantment(random, slot, levels, true);
+List<EnchantmentInstance> enchants = EnchantmentHelper.selectEnchantment(turtle.getLevel().getRandom(), slot, levels, true);
 if (enchants.isEmpty()) return new Object[]{false};
 ItemStack enchanted = slot.copy();
 if (enchanted.is(Items.BOOK)) {

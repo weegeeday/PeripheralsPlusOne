@@ -30,6 +30,11 @@ public class TurtleOreDictionary implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.ore_dictionary";
 	}
+
+	@Override
+	public TurtleUpgradeType getType() {
+		return TurtleUpgradeType.PERIPHERAL;
+	}
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModItems.ORE_DICTIONARY.get());

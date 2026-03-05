@@ -7,7 +7,6 @@ import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -80,7 +79,7 @@ ItemStack selected = turtle.getInventory().getItem(turtle.getSelectedSlot());
 if (!selected.is(Items.BONE_MEAL)) return new Object[]{false};
 BlockState state = turtle.getLevel().getBlockState(pos);
 if (state.getBlock() instanceof BonemealableBlock growable) {
-boolean success = BoneMealItem.applyBonemeal(selected, (ServerLevel) turtle.getLevel(), pos);
+boolean success = BoneMealItem.applyBonemeal(selected, turtle.getLevel(), pos, null);
 return new Object[]{success};
 }
 return new Object[]{false};
