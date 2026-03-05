@@ -33,7 +33,6 @@ this.turtle = turtle;
 }
 
 public void tickAsTurtle() {
-if (turtle != null)
 }
 public final Object[] getNearbyPlayers(IArguments args) throws LuaException {
 if (!Config.enablePlayerSensor)

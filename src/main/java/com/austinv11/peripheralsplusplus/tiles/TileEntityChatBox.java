@@ -50,7 +50,6 @@ self.ticker = 0;
 }
 
 public void tickAsTurtle() {
-if (turtle != null)
 if (subticker > 0)
 subticker--;
 if (subticker == 0 && ticker != 0)
