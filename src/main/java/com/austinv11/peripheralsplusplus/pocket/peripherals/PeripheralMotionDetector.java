@@ -1,7 +1,6 @@
 package com.austinv11.peripheralsplusplus.pocket.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.world.entity.Entity;
@@ -9,7 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class PeripheralMotionDetector implements IPlusPlusPeripheral {
+public class PeripheralMotionDetector implements IPeripheral {
 
 private double oldX, oldY, oldZ;
 private float oldPitch, oldYaw;

@@ -33,7 +33,7 @@ import java.security.*;
 import java.util.Date;
 import java.util.HashMap;
 
-public class TileEntityPrivacyGuard extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityPrivacyGuard extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private static final String ENCODING = "US-ASCII";
 
@@ -42,14 +42,6 @@ super(com.austinv11.peripheralsplusplus.init.ModTileEntities.PRIVACY_GUARD.get()
 if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null)
 Security.addProvider(new BouncyCastleProvider());
 }
-
-@Nonnull
-@Override
-public String getType() {
-return "privacy_guard";
-}
-
-@LuaFunction
 public final Object[] generateKey(IArguments args) throws LuaException {
 String id = args.getString(0);
 int size = args.count() > 1 ? args.getInt(1) : 2048;
@@ -87,7 +79,6 @@ throw new LuaException("Key generation failed: " + e.getMessage());
 }
 }
 
-@LuaFunction
 public final Object[] readKey(IArguments args) throws LuaException {
 String keyStr = args.getString(0);
 try {
@@ -104,7 +95,6 @@ throw new LuaException("Key read failed: " + e.getMessage());
 }
 }
 
-@LuaFunction
 public final Object[] encrypt(IArguments args) throws LuaException {
 String keyStr = args.getString(0);
 String plaintext = args.getString(1);
@@ -126,7 +116,6 @@ throw new LuaException("Encryption failed: " + e.getMessage());
 }
 }
 
-@LuaFunction
 public final Object[] decrypt(IArguments args) throws LuaException {
 String keyStr = args.getString(0);
 String password = args.getString(1);
@@ -148,9 +137,36 @@ return new Object[]{plainOut.toString(ENCODING)};
 throw new LuaException("Decryption failed: " + e.getMessage());
 }
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "privacy_guard"; }
 
-@Override
-public boolean equals(@Nullable IPeripheral other) {
-return this == other;
-}
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityPrivacyGuard.this == other; }
+
+        @LuaFunction
+        public final Object[] generateKey(IArguments args) throws LuaException {
+            return TileEntityPrivacyGuard.this.generateKey(args);
+        }
+
+        @LuaFunction
+        public final Object[] readKey(IArguments args) throws LuaException {
+            return TileEntityPrivacyGuard.this.readKey(args);
+        }
+
+        @LuaFunction
+        public final Object[] encrypt(IArguments args) throws LuaException {
+            return TileEntityPrivacyGuard.this.encrypt(args);
+        }
+
+        @LuaFunction
+        public final Object[] decrypt(IArguments args) throws LuaException {
+            return TileEntityPrivacyGuard.this.decrypt(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

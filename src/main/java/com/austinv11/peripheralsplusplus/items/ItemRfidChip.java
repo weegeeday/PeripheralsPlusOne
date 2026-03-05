@@ -3,6 +3,7 @@ package com.austinv11.peripheralsplusplus.items;
 import com.austinv11.peripheralsplusplus.capabilities.rfid.CapabilityRfid;
 import com.austinv11.peripheralsplusplus.init.ModItems;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,8 +15,8 @@ super(props);
 }
 
 @Override
-public boolean interactLivingEntity(ItemStack item, Player player, LivingEntity target, InteractionHand hand) {
-if (player.level().isClientSide()) return true;
+public InteractionResult interactLivingEntity(ItemStack item, Player player, LivingEntity target, InteractionHand hand) {
+if (player.level().isClientSide()) return InteractionResult.SUCCESS;
 target.getCapability(CapabilityRfid.CAPABILITY).ifPresent(tagHolder -> {
 if (!item.is(ModItems.RFID_CHIP.get()) || item.getCount() < 1) return;
 if (!tagHolder.hasBeenProdded()) return;
@@ -27,6 +28,6 @@ tagHolder.setProdded(false);
 item.shrink(1);
 }
 });
-return true;
+return InteractionResult.SUCCESS;
 }
 }

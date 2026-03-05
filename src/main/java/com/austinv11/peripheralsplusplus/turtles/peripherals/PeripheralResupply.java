@@ -3,7 +3,6 @@ package com.austinv11.peripheralsplusplus.turtles.peripherals;
 import com.austinv11.peripheralsplusplus.blocks.BlockResupplyStation;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityResupplyStation;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -17,7 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class PeripheralResupply implements IPlusPlusPeripheral {
+public class PeripheralResupply implements IPeripheral {
 
 private final ITurtleAccess turtle;
 private BlockPos linkedStation;

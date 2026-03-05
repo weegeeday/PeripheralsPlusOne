@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TileEntityRfidReaderWriter extends BlockEntity implements IPlusPlusPeripheral, MenuProvider, Container {
+public class TileEntityRfidReaderWriter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral, MenuProvider, Container {
 
 private final ItemStack[] items = new ItemStack[]{ItemStack.EMPTY};
 private byte[] selectedId;
@@ -61,35 +61,24 @@ super.saveAdditional(tag);
 if (!items[0].isEmpty())
 tag.put("inv0", items[0].save(new CompoundTag()));
 }
-
-@Nonnull
-@Override
-public String getType() {
-return "rfid_reader_writer";
-}
-
-@LuaFunction
 public final Object[] search(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
 return searchLua();
 }
 
-@LuaFunction
 public final Object[] select(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
 return selectLua(new Object[]{args.get(0)});
 }
 
-@LuaFunction
 public final Object[] auth(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
 return authLua(new Object[]{args.get(0), args.get(1), args.get(2)});
 }
 
-@LuaFunction
 public final Object[] deauth(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
@@ -97,14 +86,12 @@ authentication = null;
 return new Object[0];
 }
 
-@LuaFunction
 public final Object[] read(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
 return readLua(new Object[]{args.get(0)});
 }
 
-@LuaFunction
 public final Object[] write(IArguments args) throws LuaException {
 if (!Config.enableRfidItems)
 throw new LuaException("RFID items are not enabled in the config");
@@ -247,12 +234,6 @@ return new Object[]{Util.arrayToMap(Util.byteArraytoUnsignedIntArray(tag.getId()
 }
 return new Object[0];
 }
-
-@Override
-public boolean equals(@Nullable IPeripheral other) {
-return other == this;
-}
-
 // Container implementation
 @Override
 public int getContainerSize() { return items.length; }
@@ -284,4 +265,46 @@ public Component getDisplayName() { return Component.translatable("block.periphe
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
 return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerRfidReaderWriter(id, playerInv, this);
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "rfid_reader_writer"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityRfidReaderWriter.this == other; }
+
+        @LuaFunction
+        public final Object[] search(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.search(args);
+        }
+
+        @LuaFunction
+        public final Object[] select(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.select(args);
+        }
+
+        @LuaFunction
+        public final Object[] auth(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.auth(args);
+        }
+
+        @LuaFunction
+        public final Object[] deauth(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.deauth(args);
+        }
+
+        @LuaFunction
+        public final Object[] read(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.read(args);
+        }
+
+        @LuaFunction
+        public final Object[] write(IArguments args) throws LuaException {
+            return TileEntityRfidReaderWriter.this.write(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class TileEntityOreDictionary extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityOreDictionary extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private ITurtleAccess turtle = null;
 
@@ -25,17 +25,10 @@ public TileEntityOreDictionary(ITurtleAccess turtle) {
 super(com.austinv11.peripheralsplusplus.init.ModTileEntities.ORE_DICTIONARY.get(), turtle.getPosition(), turtle.getLevel().getBlockState(turtle.getPosition()));
 this.turtle = turtle;
 }
-
-@Override
-public String getType() {
-return "oreDictionary";
-}
-
 private boolean isTurtle() {
 return turtle != null;
 }
 
-@LuaFunction
 public final Object[] getEntries(IArguments args) throws LuaException {
 if (!Config.enableOreDictionary)
 throw new LuaException("Ore Dictionaries have been disabled");
@@ -53,7 +46,6 @@ entries.put(i++, tag.location().toString());
 return new Object[]{entries};
 }
 
-@LuaFunction
 public final Object[] doItemsMatch(IArguments args) throws LuaException {
 if (!Config.enableOreDictionary)
 throw new LuaException("Ore Dictionaries have been disabled");
@@ -69,9 +61,26 @@ if (stack1.isEmpty() || stack2.isEmpty())
 return new Object[]{false};
 return new Object[]{ItemStack.isSameItemSameTags(stack1, stack2)};
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "oreDictionary"; }
 
-@Override
-public boolean equals(IPeripheral other) {
-return other == this;
-}
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityOreDictionary.this; }
+
+        @LuaFunction
+        public final Object[] getEntries(IArguments args) throws LuaException {
+            return TileEntityOreDictionary.this.getEntries(args);
+        }
+
+        @LuaFunction
+        public final Object[] doItemsMatch(IArguments args) throws LuaException {
+            return TileEntityOreDictionary.this.doItemsMatch(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

@@ -1,6 +1,5 @@
 package com.austinv11.peripheralsplusplus.utils;
 
-import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.IPeripheralProvider;
 import net.minecraft.core.BlockPos;
@@ -9,29 +8,34 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
- * Implement this on any BlockEntity in PeripheralsPlusOne instead of {@code IPeripheral} to have a way of detecting if a peripheral is from this mod.
+ * Marker interface for PeripheralsPlusOne block entities.
+ * BlockEntities that provide a peripheral should implement {@link HasPeripheral}.
  */
-public interface IPlusPlusPeripheral extends IPeripheral {
-@Override
-default void attach(@Nonnull IComputerAccess computer) {
-}
+public interface IPlusPlusPeripheral {
 
-@Override
-default void detach(@Nonnull IComputerAccess computer) {
-}
+    /**
+     * Implemented by BlockEntities that expose an {@link IPeripheral} to CC:Tweaked.
+     * This avoids the return-type conflict between {@code BlockEntity.getType()} and
+     * {@code IPeripheral.getType()}.
+     */
+    interface HasPeripheral {
+        IPeripheral getModPeripheral();
+    }
 
-/**
- * This is the common provider for all PeripheralsPlusOne BlockEntities
- */
-class Provider implements IPeripheralProvider {
-@Nullable
-@Override
-public IPeripheral getPeripheral(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Direction side) {
-BlockEntity tile = level.getBlockEntity(pos);
-return tile instanceof IPlusPlusPeripheral ? (IPlusPlusPeripheral) tile : null;
-}
-}
+    /**
+     * Common provider for all PeripheralsPlusOne BlockEntities.
+     */
+    class Provider implements IPeripheralProvider {
+        @Nonnull
+        @Override
+        public Optional<IPeripheral> getPeripheral(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Direction side) {
+            BlockEntity tile = level.getBlockEntity(pos);
+            if (tile instanceof HasPeripheral hp) return Optional.of(hp.getModPeripheral());
+            if (tile instanceof IPeripheral ip) return Optional.of(ip);
+            return Optional.empty();
+        }
+    }
 }

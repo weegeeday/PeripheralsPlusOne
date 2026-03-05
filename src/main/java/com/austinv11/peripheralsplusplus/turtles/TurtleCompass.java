@@ -32,12 +32,6 @@ public class TurtleCompass implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return "peripheralsplusone.turtle_upgrade.compass";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		if (Config.enableNavigationTurtle)

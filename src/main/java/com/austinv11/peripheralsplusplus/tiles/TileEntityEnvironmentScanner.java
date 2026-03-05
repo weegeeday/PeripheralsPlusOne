@@ -13,7 +13,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class TileEntityEnvironmentScanner extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityEnvironmentScanner extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private boolean isRaining = false;
 private String biome = "unknown";
@@ -39,51 +39,69 @@ self.biome = level.registryAccess().registryOrThrow(net.minecraft.core.registrie
 self.temp = b.getBaseTemperature() < 0.15f ? "COLD" : (b.getBaseTemperature() < 1.0f ? "MEDIUM" : "WARM");
 self.isSnow = b.coldEnoughToSnow(pos);
 }
-if (self.turtle != null) {
-self.worldPosition = self.turtle.getPosition();
 }
-}
-
-@Override
-public String getType() {
-return "environmentScanner";
-}
-
-@LuaFunction
 public final Object[] isRaining(IArguments args) throws LuaException {
 if (!Config.enableEnvironmentScanner)
 throw new LuaException("Environment Scanners have been disabled");
 return new Object[]{isRaining};
 }
 
-@LuaFunction
 public final Object[] getBiome(IArguments args) throws LuaException {
 if (!Config.enableEnvironmentScanner)
 throw new LuaException("Environment Scanners have been disabled");
 return new Object[]{biome};
 }
 
-@LuaFunction
 public final Object[] getTemperature(IArguments args) throws LuaException {
 if (!Config.enableEnvironmentScanner)
 throw new LuaException("Environment Scanners have been disabled");
 return new Object[]{temp};
 }
 
-@LuaFunction
 public final Object[] getTemp(IArguments args) throws LuaException {
 return getTemperature(args);
 }
 
-@LuaFunction
 public final Object[] isSnow(IArguments args) throws LuaException {
 if (!Config.enableEnvironmentScanner)
 throw new LuaException("Environment Scanners have been disabled");
 return new Object[]{isSnow};
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "environmentScanner"; }
 
-@Override
-public boolean equals(IPeripheral other) {
-return this == other;
-}
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityEnvironmentScanner.this; }
+
+        @LuaFunction
+        public final Object[] isRaining(IArguments args) throws LuaException {
+            return TileEntityEnvironmentScanner.this.isRaining(args);
+        }
+
+        @LuaFunction
+        public final Object[] getBiome(IArguments args) throws LuaException {
+            return TileEntityEnvironmentScanner.this.getBiome(args);
+        }
+
+        @LuaFunction
+        public final Object[] getTemperature(IArguments args) throws LuaException {
+            return TileEntityEnvironmentScanner.this.getTemperature(args);
+        }
+
+        @LuaFunction
+        public final Object[] getTemp(IArguments args) throws LuaException {
+            return TileEntityEnvironmentScanner.this.getTemp(args);
+        }
+
+        @LuaFunction
+        public final Object[] isSnow(IArguments args) throws LuaException {
+            return TileEntityEnvironmentScanner.this.isSnow(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

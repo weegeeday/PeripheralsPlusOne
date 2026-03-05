@@ -33,11 +33,6 @@ public class TurtleRfid implements ITurtleUpgrade {
     }
 
     @Nonnull
-    @Override
-    public TurtleUpgradeType getType() {
-        return TurtleUpgradeType.Peripheral;
-    }
-
     @Nonnull
     @Override
     public ItemStack getCraftingItem() {

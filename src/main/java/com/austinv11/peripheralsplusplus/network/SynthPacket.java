@@ -10,6 +10,10 @@ public class SynthPacket {
 
 public SynthPacket() {}
 
+public SynthPacket(String text, String voice, Float pitch, Float pitchRange, Float pitchShift,
+                   Float rate, Float volume, net.minecraft.core.BlockPos pos, int unused,
+                   dan200.computercraft.api.turtle.TurtleSide side, java.util.UUID eventId) {}
+
 public static void encode(SynthPacket pkt, FriendlyByteBuf buf) {}
 
 public static SynthPacket decode(FriendlyByteBuf buf) {

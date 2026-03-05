@@ -1,7 +1,6 @@
 package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -20,7 +19,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.List;
 import java.util.Random;
 
-public class PeripheralXP implements IPlusPlusPeripheral {
+public class PeripheralXP implements IPeripheral {
 
 private static final int MAX_LEVEL = 30;
 private static final double COLLECT_RANGE = 2.0D;

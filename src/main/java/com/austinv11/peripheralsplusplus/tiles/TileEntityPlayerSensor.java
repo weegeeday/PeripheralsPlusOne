@@ -18,7 +18,7 @@ import net.minecraft.world.phys.AABB;
 import java.util.HashMap;
 import java.util.List;
 
-public class TileEntityPlayerSensor extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityPlayerSensor extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private final HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
 private ITurtleAccess turtle;
@@ -34,15 +34,7 @@ this.turtle = turtle;
 
 public void tickAsTurtle() {
 if (turtle != null)
-this.worldPosition = turtle.getPosition();
 }
-
-@Override
-public String getType() {
-return "playerSensor";
-}
-
-@LuaFunction
 public final Object[] getNearbyPlayers(IArguments args) throws LuaException {
 if (!Config.enablePlayerSensor)
 throw new LuaException("Player sensors have been disabled");
@@ -71,7 +63,6 @@ returnVal.put(i++, table);
 return new Object[]{returnVal};
 }
 
-@LuaFunction
 public final Object[] getAllPlayers(IArguments args) throws LuaException {
 if (!Config.enablePlayerSensor)
 throw new LuaException("Player sensors have been disabled");
@@ -86,24 +77,40 @@ map.put(i++, p);
 }
 return new Object[]{map};
 }
-
-@Override
-public void attach(IComputerAccess computer) {
-computers.put(computer, true);
-}
-
-@Override
-public void detach(IComputerAccess computer) {
-computers.remove(computer);
-}
-
-@Override
-public boolean equals(IPeripheral other) {
-return other == this;
-}
-
 public void blockActivated(String player) {
 for (IComputerAccess computer : computers.keySet())
 computer.queueEvent("player", new Object[]{player});
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "playerSensor"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.put(computer, true);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityPlayerSensor.this; }
+
+        @LuaFunction
+        public final Object[] getNearbyPlayers(IArguments args) throws LuaException {
+            return TileEntityPlayerSensor.this.getNearbyPlayers(args);
+        }
+
+        @LuaFunction
+        public final Object[] getAllPlayers(IArguments args) throws LuaException {
+            return TileEntityPlayerSensor.this.getAllPlayers(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

@@ -15,20 +15,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-public class TileEntityTimeSensor extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityTimeSensor extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private long timerStart = -1;
 
 public TileEntityTimeSensor(BlockPos pos, BlockState state) {
 super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TIME_SENSOR.get(), pos, state);
 }
-
-@Override
-public String getType() {
-return "timeSensor";
-}
-
-@LuaFunction
 public final Object[] getDate(IArguments args) throws LuaException {
 if (!Config.enableTimeSensor)
 throw new LuaException("Time Sensors have been disabled!");
@@ -44,21 +37,18 @@ map.put("second", Integer.valueOf(split[5]));
 return new Object[]{map};
 }
 
-@LuaFunction
 public final Object[] getTime(IArguments args) throws LuaException {
 if (!Config.enableTimeSensor)
 throw new LuaException("Time Sensors have been disabled!");
 return new Object[]{System.currentTimeMillis()};
 }
 
-@LuaFunction
 public final void startTimer(IArguments args) throws LuaException {
 if (!Config.enableTimeSensor)
 throw new LuaException("Time Sensors have been disabled!");
 timerStart = System.currentTimeMillis();
 }
 
-@LuaFunction
 public final Object[] stopTimer(IArguments args) throws LuaException {
 if (!Config.enableTimeSensor)
 throw new LuaException("Time Sensors have been disabled!");
@@ -66,9 +56,36 @@ long time = timerStart < 0 ? 0 : System.currentTimeMillis() - timerStart;
 timerStart = -1;
 return new Object[]{time};
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "timeSensor"; }
 
-@Override
-public boolean equals(IPeripheral other) {
-return other == this;
-}
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityTimeSensor.this == other; }
+
+        @LuaFunction
+        public final Object[] getDate(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.getDate(args);
+        }
+
+        @LuaFunction
+        public final Object[] getTime(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.getTime(args);
+        }
+
+        @LuaFunction
+        public final void startTimer(IArguments args) throws LuaException {
+            TileEntityTimeSensor.this.startTimer(args);
+        }
+
+        @LuaFunction
+        public final Object[] stopTimer(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.stopTimer(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

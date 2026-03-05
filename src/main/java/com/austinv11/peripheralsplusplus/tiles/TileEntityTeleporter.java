@@ -34,7 +34,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import java.util.HashMap;
 import java.util.Stack;
 
-public class TileEntityTeleporter extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityTeleporter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private String name = "tileEntityTeleporter";
 public Stack<LinkData> links = new Stack<>();
@@ -60,10 +60,15 @@ tag = nbt.getString("tTag");
 ListTag linksList = nbt.getList("links", 10);
 for (int i = 0; i < linksList.size(); i++) {
 CompoundTag link = linksList.getCompound(i);
-if (link.contains("linkX") && link.contains("linkY") && link.contains("linkZ") && link.contains("linkDim")) {
-links.add(new LinkData(link.getInt("linkDim"),
-new BlockPos(link.getInt("linkX"), link.getInt("linkY"), link.getInt("linkZ"))));
-}
+        if (link.contains("linkX") && link.contains("linkY") && link.contains("linkZ")) {
+            BlockPos pos = new BlockPos(link.getInt("linkX"), link.getInt("linkY"), link.getInt("linkZ"));
+            if (link.contains("linkKey")) {
+                links.add(new LinkData(link.getString("linkKey"), pos));
+            } else if (link.contains("linkDim")) {
+                // Legacy fallback - convert integer dim to string key
+                links.add(new LinkData(link.getInt("linkDim"), pos));
+            }
+        }
 }
 }
 
@@ -76,27 +81,19 @@ ListTag list = new ListTag();
 for (LinkData link : links) {
 if (link != null) {
 CompoundTag lc = new CompoundTag();
-lc.putInt("linkX", link.link.getX());
-lc.putInt("linkY", link.link.getY());
-lc.putInt("linkZ", link.link.getZ());
-lc.putInt("linkDim", link.linkDim);
+            lc.putInt("linkX", link.link.getX());
+            lc.putInt("linkY", link.link.getY());
+            lc.putInt("linkZ", link.link.getZ());
+            lc.putString("linkKey", link.levelKey);
 list.add(lc);
 }
 }
 nbt.put("links", list);
 }
-
-@Override
-public String getType() {
-return "teleporter";
-}
-
-@LuaFunction
 public final Object[] teleport(IArguments args) throws LuaException {
 return tp(args);
 }
 
-@LuaFunction
 public final Object[] tp(IArguments args) throws LuaException {
 if (!Config.enableTurtleTeleporter)
 throw new LuaException("Turtle teleporters have been disabled");
@@ -160,7 +157,6 @@ level.random.nextGaussian(), 0, level.random.nextGaussian()));
 return new Object[]{result};
 }
 
-@LuaFunction
 public final Object[] getLinks(IArguments args) throws LuaException {
 if (!Config.enableTurtleTeleporter)
 throw new LuaException("Turtle teleporters have been disabled");
@@ -177,7 +173,6 @@ map.put(i + 1, entry);
 return new Object[]{map};
 }
 
-@LuaFunction
 public final Object[] setName(IArguments args) throws LuaException {
 if (!Config.enableTurtleTeleporter)
 throw new LuaException("Turtle teleporters have been disabled");
@@ -185,12 +180,6 @@ this.name = args.getString(0);
 setChanged();
 return new Object[]{name};
 }
-
-@Override
-public boolean equals(IPeripheral other) {
-return other == this;
-}
-
 public void blockActivated(Player player, InteractionHand hand) {
 ItemStack held = player.getItemInHand(hand);
 if (!held.isEmpty() && held.is(Items.REPEATER)) {
@@ -269,4 +258,36 @@ this.levelKey = "minecraft:overworld"; // legacy fallback
 this.link = link;
 }
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "teleporter"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityTeleporter.this; }
+
+        @LuaFunction
+        public final Object[] teleport(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.teleport(args);
+        }
+
+        @LuaFunction
+        public final Object[] tp(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.tp(args);
+        }
+
+        @LuaFunction
+        public final Object[] getLinks(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.getLinks(args);
+        }
+
+        @LuaFunction
+        public final Object[] setName(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.setName(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

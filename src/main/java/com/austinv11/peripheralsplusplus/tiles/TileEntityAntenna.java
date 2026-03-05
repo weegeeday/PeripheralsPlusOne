@@ -27,7 +27,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
 
-public class TileEntityAntenna extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityAntenna extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 public HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
 private final HashMap<Integer, LuaObjectHUD> huds = new HashMap<>();
@@ -70,13 +70,6 @@ public void setRemoved() {
 super.setRemoved();
 ANTENNA_REGISTRY.remove(identifier);
 }
-
-@Override
-public String getType() {
-return "antenna";
-}
-
-@LuaFunction
 public final Object[] getPlayers(IArguments args) throws LuaException {
 if (!Config.enableSmartHelmet)
 throw new LuaException("Smart Helmets have been disabled");
@@ -96,7 +89,6 @@ return new Object[]{Util.arrayToMap(playerNames.toArray())};
 }
 }
 
-@LuaFunction(mainThread = true)
 public final Object[] getHUD(IArguments args) throws LuaException {
 if (!Config.enableSmartHelmet)
 throw new LuaException("Smart Helmets have been disabled");
@@ -109,18 +101,18 @@ LuaObjectHUD obj = new LuaObjectHUD(playerName, identifier);
 return new Object[]{obj};
 }
 
-@LuaFunction
 public final void setLabel(IArguments args) throws LuaException {
 this.label = args.getString(0);
 setChanged();
 }
 
-@LuaFunction
 public final Object[] getLabel(IArguments args) {
 return new Object[]{this.label};
 }
 
-@LuaFunction
+public String getLabelDirect() {
+return this.label;
+}
 public final Object[] getInfectedEntities(IArguments args) throws LuaException {
 if (!Config.enableNanoBots)
 throw new LuaException("Nano bots have been disabled");
@@ -130,7 +122,6 @@ entities.put(i + 1, associatedEntities.get(i).getUUID().toString());
 return new Object[]{entities};
 }
 
-@LuaFunction
 public final Object[] getInfectedEntity(IArguments args) throws LuaException {
 if (!Config.enableNanoBots)
 throw new LuaException("Nano bots have been disabled");
@@ -162,22 +153,6 @@ if (entity.getUUID().toString().equals(id))
 return entity;
 return null;
 }
-
-@Override
-public void attach(IComputerAccess computer) {
-computers.put(computer, true);
-}
-
-@Override
-public void detach(IComputerAccess computer) {
-computers.remove(computer);
-}
-
-@Override
-public boolean equals(IPeripheral other) {
-return this == other;
-}
-
 public void onResponse(int id, int width, int height) {
 if (huds.containsKey(id)) {
 huds.get(id).height = height;
@@ -205,4 +180,56 @@ return associatedEntities.contains(entity);
 public void removeEntity(Entity entity) {
 associatedEntities.remove(entity);
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "antenna"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.put(computer, true);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityAntenna.this == other; }
+
+        @LuaFunction
+        public final Object[] getPlayers(IArguments args) throws LuaException {
+            return TileEntityAntenna.this.getPlayers(args);
+        }
+
+        @LuaFunction(mainThread = true)
+        public final Object[] getHUD(IArguments args) throws LuaException {
+            return TileEntityAntenna.this.getHUD(args);
+        }
+
+        @LuaFunction
+        public final void setLabel(IArguments args) throws LuaException {
+            TileEntityAntenna.this.setLabel(args);
+        }
+
+        @LuaFunction
+        public final Object[] getLabel(IArguments args) {
+            return TileEntityAntenna.this.getLabel(args);
+        }
+
+        @LuaFunction
+        public final Object[] getInfectedEntities(IArguments args) throws LuaException {
+            return TileEntityAntenna.this.getInfectedEntities(args);
+        }
+
+        @LuaFunction
+        public final Object[] getInfectedEntity(IArguments args) throws LuaException {
+            return TileEntityAntenna.this.getInfectedEntity(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

@@ -30,12 +30,6 @@ return upgradeId;
 public String getUnlocalisedAdjective() {
 return Reference.MOD_ID + ".turtle_upgrade.ridable";
 }
-
-@Override
-public TurtleUpgradeType getType() {
-return TurtleUpgradeType.Peripheral;
-}
-
 @Override
 public ItemStack getCraftingItem() {
 if (Config.enableRidableTurtle)

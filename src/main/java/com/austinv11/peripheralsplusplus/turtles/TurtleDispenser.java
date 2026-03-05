@@ -30,12 +30,6 @@ public class TurtleDispenser implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.dispenser";
 	}
-	
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-	
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(Blocks.DISPENSER);

@@ -1,7 +1,6 @@
 package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -17,7 +16,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 
-public class PeripheralBarrel implements IPlusPlusPeripheral {
+public class PeripheralBarrel implements IPeripheral {
 
 private int MAX_SIZE = 4096;
 private int STACK_SIZE = 64;

@@ -2,7 +2,6 @@ package com.austinv11.peripheralsplusplus.pocket.peripherals;
 
 import com.austinv11.peripheralsplusplus.lua.LuaObjectPeripheralWrap;
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -14,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 
-public class PeripheralPeripheralContainer implements IPlusPlusPeripheral {
+public class PeripheralPeripheralContainer implements IPeripheral {
 
 private final Map<IPocketUpgrade, IPeripheral> pocketUpgrades;
 private final Map<ResourceLocation, ItemStack> unequippedItems = new HashMap<>();

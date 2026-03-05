@@ -30,12 +30,6 @@ public class TurtleFeeder implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.feeder";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModItems.FEEDER_UPGRADE.get());

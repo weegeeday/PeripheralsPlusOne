@@ -18,7 +18,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.*;
 
-public class TileEntitySpeaker extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntitySpeaker extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private ITurtleAccess turtle;
 private TurtleSide side = null;
@@ -37,7 +37,6 @@ this.side = side;
 
 public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, TileEntitySpeaker self) {
 if (self.turtle != null)
-self.worldPosition = self.turtle.getPosition();
 synchronized (self) {
 for (Map.Entry<UUID, Long> entry : new ArrayList<>(self.pendingEvents.entrySet())) {
 if (System.currentTimeMillis() - entry.getValue() > 30000) {
@@ -47,18 +46,10 @@ break;
 }
 }
 }
-
-@Override
-public String getType() {
-return "speaker";
-}
-
-@LuaFunction(mainThread = false)
 public final Object[] speak(IArguments args) throws LuaException {
 return synthesize(args);
 }
 
-@LuaFunction(mainThread = false)
 public final Object[] synthesize(IArguments args) throws LuaException {
 if (!Config.enableSpeaker)
 throw new LuaException("Speakers have been disabled");
@@ -83,22 +74,6 @@ new SynthPacket(text, voice, pitch, pitchRange, pitchShift, rateVal, volume, pos
 
 return new Object[]{eventId.toString()};
 }
-
-@Override
-public void attach(IComputerAccess computer) {
-computers.add(computer);
-}
-
-@Override
-public void detach(IComputerAccess computer) {
-computers.remove(computer);
-}
-
-@Override
-public boolean equals(IPeripheral other) {
-return this == other;
-}
-
 public void onSpeechCompletion(String text, UUID eventId) {
 synchronized (this) {
 if (!pendingEvents.containsKey(eventId))
@@ -108,4 +83,36 @@ pendingEvents.remove(eventId);
 for (IComputerAccess computer : computers)
 computer.queueEvent("synthComplete", new Object[]{text, eventId});
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "speaker"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.add(computer);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntitySpeaker.this == other; }
+
+        @LuaFunction(mainThread = false)
+        public final Object[] speak(IArguments args) throws LuaException {
+            return TileEntitySpeaker.this.speak(args);
+        }
+
+        @LuaFunction(mainThread = false)
+        public final Object[] synthesize(IArguments args) throws LuaException {
+            return TileEntitySpeaker.this.synthesize(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

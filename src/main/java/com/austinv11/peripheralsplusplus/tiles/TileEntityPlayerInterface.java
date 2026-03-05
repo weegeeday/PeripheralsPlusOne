@@ -27,7 +27,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class TileEntityPlayerInterface extends BlockEntity implements IPlusPlusPeripheral, MenuProvider, Container {
+public class TileEntityPlayerInterface extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral, MenuProvider, Container {
 
 public Direction outputSide;
 public Direction inputSide;
@@ -60,13 +60,6 @@ tag.put("inv" + i, items[i].save(new CompoundTag()));
 if (outputSide != null) tag.putString("outputSide", outputSide.getName());
 if (inputSide != null) tag.putString("inputSide", inputSide.getName());
 }
-
-@Override
-public String getType() {
-return "playerInterface";
-}
-
-@LuaFunction
 public final Object[] getPlayerInv(IArguments args) throws LuaException {
 if (!Config.enablePlayerInterface)
 throw new LuaException("Player Interfaces have been disabled");
@@ -84,7 +77,6 @@ throw new LuaException("Missing permissions for player " + playerName);
 throw new LuaException("Player not found");
 }
 
-@LuaFunction
 public final void setOutputSide(IArguments args) throws LuaException {
 if (!Config.enablePlayerInterface)
 throw new LuaException("Player Interfaces have been disabled");
@@ -92,7 +84,6 @@ outputSide = Direction.byName(args.getString(0).toLowerCase());
 setChanged();
 }
 
-@LuaFunction
 public final void setInputSide(IArguments args) throws LuaException {
 if (!Config.enablePlayerInterface)
 throw new LuaException("Player Interfaces have been disabled");
@@ -100,14 +91,12 @@ inputSide = Direction.byName(args.getString(0).toLowerCase());
 setChanged();
 }
 
-@LuaFunction
 public final Object[] getOutputSide(IArguments args) throws LuaException {
 if (!Config.enablePlayerInterface)
 throw new LuaException("Player Interfaces have been disabled");
 return outputSide == null ? new Object[0] : new Object[]{outputSide.getName()};
 }
 
-@LuaFunction
 public final Object[] getInputSide(IArguments args) throws LuaException {
 if (!Config.enablePlayerInterface)
 throw new LuaException("Player Interfaces have been disabled");
@@ -130,10 +119,6 @@ return stack;
 }
 return ItemStack.EMPTY;
 }
-
-@Override
-public boolean equals(IPeripheral other) { return this == other; }
-
 // Container
 @Override
 public int getContainerSize() { return items.length; }
@@ -160,4 +145,41 @@ public Component getDisplayName() { return Component.translatable("block.periphe
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
 return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerPlayerInterface(id, playerInv, this);
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "playerInterface"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityPlayerInterface.this == other; }
+
+        @LuaFunction
+        public final Object[] getPlayerInv(IArguments args) throws LuaException {
+            return TileEntityPlayerInterface.this.getPlayerInv(args);
+        }
+
+        @LuaFunction
+        public final void setOutputSide(IArguments args) throws LuaException {
+            TileEntityPlayerInterface.this.setOutputSide(args);
+        }
+
+        @LuaFunction
+        public final void setInputSide(IArguments args) throws LuaException {
+            TileEntityPlayerInterface.this.setInputSide(args);
+        }
+
+        @LuaFunction
+        public final Object[] getOutputSide(IArguments args) throws LuaException {
+            return TileEntityPlayerInterface.this.getOutputSide(args);
+        }
+
+        @LuaFunction
+        public final Object[] getInputSide(IArguments args) throws LuaException {
+            return TileEntityPlayerInterface.this.getInputSide(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

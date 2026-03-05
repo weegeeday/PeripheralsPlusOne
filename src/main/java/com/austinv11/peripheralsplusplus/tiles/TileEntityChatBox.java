@@ -16,7 +16,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ServerChatEvent;
@@ -26,7 +25,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.HashMap;
 
-public class TileEntityChatBox extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityChatBox extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private final HashMap<IComputerAccess, Boolean> computers = new HashMap<>();
 private static final int TICKER_INTERVAL = 20;
@@ -52,7 +51,6 @@ self.ticker = 0;
 
 public void tickAsTurtle() {
 if (turtle != null)
-this.worldPosition = turtle.getPosition();
 if (subticker > 0)
 subticker--;
 if (subticker == 0 && ticker != 0)
@@ -78,13 +76,6 @@ for (IComputerAccess computer : computers.keySet())
 computer.queueEvent("command", new Object[]{player.getName().getString(),
 Util.arrayToMap(message.split(" "))});
 }
-
-@Override
-public String getType() {
-return "chatBox";
-}
-
-@LuaFunction
 public final Object[] say(IArguments args) throws LuaException {
 if (!Config.enableChatBox)
 throw new LuaException("Chat boxes have been disabled");
@@ -116,7 +107,6 @@ ticker++;
 return new Object[]{true};
 }
 
-@LuaFunction
 public final Object[] tell(IArguments args) throws LuaException {
 if (!Config.enableChatBox)
 throw new LuaException("Chat boxes have been disabled");
@@ -147,26 +137,6 @@ ChatUtil.sendMessage(ign, this, message, range, unlimitedY && Config.allowUnlimi
 }
 return new Object[]{true};
 }
-
-@Override
-public void attach(IComputerAccess computer) {
-if (computers.isEmpty())
-ChatListener.chatBoxMap.put(this, true);
-computers.put(computer, true);
-}
-
-@Override
-public void detach(IComputerAccess computer) {
-computers.remove(computer);
-if (computers.isEmpty())
-ChatListener.chatBoxMap.remove(this);
-}
-
-@Override
-public boolean equals(IPeripheral other) {
-return other == this;
-}
-
 public static class ChatListener {
 private static final HashMap<TileEntityChatBox, Boolean> chatBoxMap = new HashMap<>();
 
@@ -180,11 +150,11 @@ Vec3 boxPos = new Vec3(pos.getX(), pos.getY(), pos.getZ());
 double dist = boxPos.distanceTo(event.getPlayer().position());
 if (Config.readRange >= 0 && dist > Config.readRange)
 continue;
-if (!commandPrefix.isEmpty() && !commandPrefix.equals(" ") && event.getMessage().startsWith(commandPrefix)) {
+if (!commandPrefix.isEmpty() && !commandPrefix.equals(" ") && event.getMessage().getString().startsWith(commandPrefix)) {
 event.setCanceled(true);
-box.onCommand(event.getPlayer(), event.getMessage().replace(commandPrefix, ""));
+box.onCommand(event.getPlayer(), event.getMessage().getString().replace(commandPrefix, ""));
 } else {
-box.onChat(event.getPlayer(), event.getMessage());
+box.onChat(event.getPlayer(), event.getMessage().getString());
 }
 }
 }
@@ -204,4 +174,40 @@ box.onDeath(player, event.getSource());
 }
 }
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "chatBox"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            if (computers.isEmpty())
+                ChatListener.chatBoxMap.put(TileEntityChatBox.this, true);
+            computers.put(computer, true);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+            if (computers.isEmpty())
+                ChatListener.chatBoxMap.remove(TileEntityChatBox.this);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityChatBox.this; }
+
+        @LuaFunction
+        public final Object[] say(IArguments args) throws LuaException {
+            return TileEntityChatBox.this.say(args);
+        }
+
+        @LuaFunction
+        public final Object[] tell(IArguments args) throws LuaException {
+            return TileEntityChatBox.this.tell(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

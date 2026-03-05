@@ -36,12 +36,6 @@ public class TurtleShear implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.shears";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Tool;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		if (Config.enableShearTurtle)
@@ -62,7 +56,7 @@ public class TurtleShear implements ITurtleUpgrade {
 			return TurtleCommandResult.failure("Shearing turtles have been disabled");
 		FakeTurtlePlayer player = new FakeTurtlePlayer(turtle);
 		switch (verb) {
-			case Attack:
+			case ATTACK:
 				List<Entity> entities = TurtleUtil.getEntitiesNearTurtle(turtle, player, direction);
 				Entity ent = null;
 				for (Entity e : entities) {
@@ -76,7 +70,7 @@ public class TurtleShear implements ITurtleUpgrade {
 					}
 				}
 				return TurtleCommandResult.failure();
-			case Dig:
+			case DIG:
 				List<ItemStack> items = TurtleUtil.harvestBlock(turtle, player, direction, new ItemStack(net.minecraft.world.item.Items.SHEARS));
 				if (items != null) {
 					TurtleUtil.addItemListToInv(items, turtle);

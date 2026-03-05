@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TileEntityInteractiveSorter extends BlockEntity implements IPlusPlusPeripheral, MenuProvider, Container {
+public class TileEntityInteractiveSorter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral, MenuProvider, Container {
 
 private ItemStack slot0 = ItemStack.EMPTY;
 private final List<IComputerAccess> computers = new ArrayList<>();
@@ -54,20 +54,12 @@ super.saveAdditional(tag);
 if (!slot0.isEmpty())
 tag.put("slot0", slot0.save(new CompoundTag()));
 }
-
-@Override
-public String getType() {
-return "interactiveSorter";
-}
-
-@LuaFunction
 public final Object[] analyze(IArguments args) throws LuaException {
 if (!Config.enableInteractiveSorter)
 throw new LuaException("Interactive Sorters have been disabled");
 return new Object[]{getItemInfo(slot0)};
 }
 
-@LuaFunction
 public final Object[] push(IArguments args) throws LuaException {
 if (!Config.enableInteractiveSorter)
 throw new LuaException("Interactive Sorters have been disabled");
@@ -95,7 +87,6 @@ setChanged();
 return new Object[]{remainder.getCount() < amount};
 }
 
-@LuaFunction
 public final Object[] pull(IArguments args) throws LuaException {
 if (!Config.enableInteractiveSorter)
 throw new LuaException("Interactive Sorters have been disabled");
@@ -127,7 +118,6 @@ return new Object[]{true};
 return new Object[]{false};
 }
 
-@LuaFunction
 public final Object[] isInventoryPresent(IArguments args) throws LuaException {
 if (!Config.enableInteractiveSorter)
 throw new LuaException("Interactive Sorters have been disabled");
@@ -162,14 +152,6 @@ if (stack.hasTag())
 map.put("nbt", stack.getTag().toString());
 return map;
 }
-
-@Override
-public void attach(IComputerAccess computer) { computers.add(computer); }
-@Override
-public void detach(IComputerAccess computer) { computers.remove(computer); }
-@Override
-public boolean equals(IPeripheral other) { return other == this; }
-
 // Container
 @Override
 public int getContainerSize() { return 1; }
@@ -208,4 +190,46 @@ public Component getDisplayName() { return Component.translatable("block.periphe
 public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
 return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerInteractiveSorter(id, playerInv, this);
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "interactiveSorter"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.add(computer);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityInteractiveSorter.this; }
+
+        @LuaFunction
+        public final Object[] analyze(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.analyze(args);
+        }
+
+        @LuaFunction
+        public final Object[] push(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.push(args);
+        }
+
+        @LuaFunction
+        public final Object[] pull(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.pull(args);
+        }
+
+        @LuaFunction
+        public final Object[] isInventoryPresent(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.isInventoryPresent(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

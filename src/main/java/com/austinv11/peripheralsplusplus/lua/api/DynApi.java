@@ -16,5 +16,8 @@ return new String[]{"dyn"};
 public void startup() {}
 
 @Override
+public void advance(double dt) {}
+
+@Override
 public void shutdown() {}
 }

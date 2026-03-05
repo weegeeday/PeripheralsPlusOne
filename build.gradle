@@ -52,6 +52,7 @@ repositories {
             includeGroup 'cc.tweaked'
         }
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -59,6 +60,9 @@ dependencies {
     compileOnly 'cc.tweaked:cc-tweaked-1.20.1-core-api:1.114.2'
     compileOnly fg.deobf('cc.tweaked:cc-tweaked-1.20.1-forge-api:1.114.2')
     runtimeOnly fg.deobf('cc.tweaked:cc-tweaked-1.20.1-forge:1.114.2')
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.76'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.76'
+    implementation 'name.neuhalfen.projects.crypto.bouncycastle.openpgp:bouncy-gpg:2.3.0'
 }
 
 jar {

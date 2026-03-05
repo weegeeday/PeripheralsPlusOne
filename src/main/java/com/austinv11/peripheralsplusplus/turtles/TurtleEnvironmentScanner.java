@@ -30,12 +30,6 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID + ".turtle_upgrade.environment_scanner";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModBlocks.ENVIRONMENT_SCANNER.get());

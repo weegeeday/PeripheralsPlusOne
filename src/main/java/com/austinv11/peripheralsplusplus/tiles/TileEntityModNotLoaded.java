@@ -14,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class TileEntityModNotLoaded extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityModNotLoaded extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private String modId;
 
@@ -39,20 +39,24 @@ super.saveAdditional(tag);
 if (modId != null)
 tag.putString("modId", modId);
 }
-
-@Nonnull
-@Override
-public String getType() {
-return String.format("modNotLoaded_%s", modId);
-}
-
-@LuaFunction
 public final Object[] reason(IArguments args) {
 return new Object[]{String.format("Mod with mod id \"%s\" is not installed.", modId)};
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return String.format("modNotLoaded_%s", modId); }
 
-@Override
-public boolean equals(@Nullable IPeripheral other) {
-return this == other;
-}
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityModNotLoaded.this == other; }
+
+        @LuaFunction
+        public final Object[] reason(IArguments args) {
+            return TileEntityModNotLoaded.this.reason(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

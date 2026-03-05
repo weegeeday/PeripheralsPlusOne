@@ -19,7 +19,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileEntityMagReaderWriter extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityMagReaderWriter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private static final int MAX_TRACKS = 3;
 private static final String MAG_TAG = Reference.MOD_ID + ":mag_card";
@@ -29,19 +29,10 @@ private final List<IComputerAccess> computers = new ArrayList<>();
 public TileEntityMagReaderWriter(BlockPos pos, BlockState state) {
 super(com.austinv11.peripheralsplusplus.init.ModTileEntities.MAG_READER_WRITER.get(), pos, state);
 }
-
-@Nonnull
-@Override
-public String getType() {
-return "mag_reader_writer";
-}
-
-@LuaFunction
 public final Object[] write(IArguments args) throws LuaException {
 return writeLua(new Object[]{args.get(0), args.get(1)});
 }
 
-@LuaFunction
 public final Object[] clear(IArguments args) throws LuaException {
 return clearLua(args.count() > 0 ? new Object[]{args.get(0)} : new Object[0]);
 }
@@ -106,11 +97,36 @@ computer.queueEvent("mag_swipe", event);
 private boolean isMagCard(ItemStack item) {
 return item.is(ModItems.PLASTIC_CARD.get()) && item.hasTag() && item.getTag().contains(MAG_TAG) && item.getCount() == 1;
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "mag_reader_writer"; }
 
-@Override
-public void attach(IComputerAccess computer) { computers.add(computer); }
-@Override
-public void detach(IComputerAccess computer) { computers.remove(computer); }
-@Override
-public boolean equals(@Nullable IPeripheral other) { return other == this; }
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.add(computer);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityMagReaderWriter.this; }
+
+        @LuaFunction
+        public final Object[] write(IArguments args) throws LuaException {
+            return TileEntityMagReaderWriter.this.write(args);
+        }
+
+        @LuaFunction
+        public final Object[] clear(IArguments args) throws LuaException {
+            return TileEntityMagReaderWriter.this.clear(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

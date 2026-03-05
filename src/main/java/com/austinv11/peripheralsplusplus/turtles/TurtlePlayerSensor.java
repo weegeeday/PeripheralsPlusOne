@@ -30,12 +30,6 @@ public class TurtlePlayerSensor implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return Reference.MOD_ID.toLowerCase()+".turtle_upgrade.player_sensor";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		return new ItemStack(ModBlocks.PLAYER_SENSOR.get());

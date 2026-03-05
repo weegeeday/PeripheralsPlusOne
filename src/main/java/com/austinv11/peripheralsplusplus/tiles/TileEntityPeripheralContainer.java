@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TileEntityPeripheralContainer extends BlockEntity implements IPlusPlusPeripheral {
+public class TileEntityPeripheralContainer extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
 private final List<ContainedPeripheral> peripheralsContained = new ArrayList<>();
 
@@ -46,13 +46,6 @@ for (ContainedPeripheral peripheral : peripheralsContained)
 peripherals.add(peripheral.toNbt());
 tag.put("peripherals", peripherals);
 }
-
-@Override
-public String getType() {
-return "peripheralContainer";
-}
-
-@LuaFunction
 public final Object[] getContainedPeripherals(IArguments args) throws LuaException {
 if (!Config.enablePeripheralContainer)
 throw new LuaException("Peripheral Containers have been disabled");
@@ -62,19 +55,12 @@ returnVals.put(i + 1, peripheralsContained.get(i).getPeripheral().getType());
 return new Object[]{returnVals};
 }
 
-@LuaFunction
 public final Object[] wrapPeripheral(IArguments args) throws LuaException {
 if (!Config.enablePeripheralContainer)
 throw new LuaException("Peripheral Containers have been disabled");
 String name = args.getString(0);
 return new Object[]{new LuaObjectPeripheralWrap(getPeripheralByName(name), null)};
 }
-
-@Override
-public boolean equals(IPeripheral other) {
-return this == other;
-}
-
 public void addPeripheral(ContainedPeripheral peripheral) {
 if (peripheral.getPeripheral() == null)
 return;
@@ -92,4 +78,26 @@ return null;
 public List<ContainedPeripheral> getContainedPeripheralList() {
 return peripheralsContained;
 }
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "peripheralContainer"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityPeripheralContainer.this == other; }
+
+        @LuaFunction
+        public final Object[] getContainedPeripherals(IArguments args) throws LuaException {
+            return TileEntityPeripheralContainer.this.getContainedPeripherals(args);
+        }
+
+        @LuaFunction
+        public final Object[] wrapPeripheral(IArguments args) throws LuaException {
+            return TileEntityPeripheralContainer.this.wrapPeripheral(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

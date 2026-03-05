@@ -31,12 +31,6 @@ public class TurtleXP implements ITurtleUpgrade {
 	public String getUnlocalisedAdjective() {
 		return "peripheralsplusone.turtle_upgrade.xp";
 	}
-
-	@Override
-	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
-	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		if (Config.enableXPTurtle)

@@ -86,8 +86,8 @@ return InteractionResult.FAIL;
 UUID id = antenna.identifier;
 CompoundTag tag = held.getOrCreateTag();
 tag.putString("identifier", id.toString());
-if (antenna.getLabel() != null) {
-tag.putString("label", antenna.getLabel());
+if (antenna.getLabelDirect() != null) {
+tag.putString("label", antenna.getLabelDirect());
 }
 }
 return InteractionResult.sidedSuccess(level.isClientSide);
