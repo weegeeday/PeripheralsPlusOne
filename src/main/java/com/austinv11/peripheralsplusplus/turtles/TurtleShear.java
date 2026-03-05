@@ -8,10 +8,11 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
 import net.minecraft.world.entity.Entity;
 
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Shearable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.IShearable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,14 +66,15 @@ public class TurtleShear implements ITurtleUpgrade {
 				List<Entity> entities = TurtleUtil.getEntitiesNearTurtle(turtle, player, direction);
 				Entity ent = null;
 				for (Entity e : entities) {
-					if (e instanceof IShearable) { ent = e; break; }
+					if (e instanceof Shearable) { ent = e; break; }
 				}
-				if (ent != null)
-					if (((IShearable) ent).isShearable(new ItemStack(net.minecraft.world.item.Items.SHEARS), ent.level(), ent.blockPosition())) {
-						TurtleUtil.addItemListToInv(((IShearable) ent).onSheared(null, ent.level(),
-								ent.blockPosition(), 0), turtle);
+				if (ent != null) {
+					Shearable shearable = (Shearable) ent;
+					if (shearable.readyForShearing()) {
+						shearable.shear(SoundSource.NEUTRAL);
 						return TurtleCommandResult.success();
 					}
+				}
 				return TurtleCommandResult.failure();
 			case Dig:
 				List<ItemStack> items = TurtleUtil.harvestBlock(turtle, player, direction, new ItemStack(net.minecraft.world.item.Items.SHEARS));
