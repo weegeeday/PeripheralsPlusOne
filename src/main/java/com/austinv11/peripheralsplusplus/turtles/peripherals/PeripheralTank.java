@@ -18,8 +18,6 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import net.minecraftforge.common.util.LazyOptional;
-
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -104,8 +102,7 @@ return doSuck(Direction.DOWN);
 
 private Object[] doSuck(Direction direction) throws LuaException {
 BlockPos pos = turtle.getPosition().relative(direction);
-LazyOptional<IFluidHandler> handlerLazy = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite());
-IFluidHandler handler = handlerLazy.resolve().orElse(null);
+IFluidHandler handler = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite()).resolve().orElse(null);
 if (handler == null)
 throw new LuaException("Block is not a fluid block");
 FluidStack transferred = FluidUtil.tryFluidTransfer(fluidTank, handler, TRANSFER_AMOUNT, true);
@@ -123,10 +120,10 @@ if (placed) {
 saveTankData();
 return new Object[]{TRANSFER_AMOUNT};
 }
-Optional<IFluidHandler> handler2Opt = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite()).resolve();
-if (handler2Opt.isPresent()) {
-IFluidHandler handler2 = handler2Opt.get();
-FluidStack transferred = FluidUtil.tryFluidTransfer(handler2, fluidTank, TRANSFER_AMOUNT, true);
+Optional<IFluidHandler> handlerOpt = FluidUtil.getFluidHandler(turtle.getLevel(), pos, direction.getOpposite()).resolve();
+if (handlerOpt.isPresent()) {
+IFluidHandler handler = handlerOpt.get();
+FluidStack transferred = FluidUtil.tryFluidTransfer(handler, fluidTank, TRANSFER_AMOUNT, true);
 if (!transferred.isEmpty()) {
 saveTankData();
 return new Object[]{transferred.getAmount()};
