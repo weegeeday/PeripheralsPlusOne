@@ -36,7 +36,7 @@ public class TurtleSpeaker implements ITurtleUpgrade{
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		return new TileEntitySpeaker(turtle, side);
+		return new TileEntitySpeaker(turtle, side).getModPeripheral();
 	}
 
     @Nonnull

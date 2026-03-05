@@ -252,9 +252,8 @@ this.levelKey = levelKey;
 this.link = link;
 }
 
-/** Legacy constructor - converts int dim to string */
 /** Legacy constructor: converts a pre-1.20.1 integer dimension ID to a level key string.
-         * Old worlds only stored overworld by integer (dim=0), so we default to overworld. */
+         * Mapping: -1 → nether, 0 → overworld, 1 → the_end, other → overworld. */
 public LinkData(int linkDim, BlockPos link) {
 this.levelKey = linkDim == -1 ? "minecraft:the_nether" : (linkDim == 1 ? "minecraft:the_end" : "minecraft:overworld");
 this.link = link;

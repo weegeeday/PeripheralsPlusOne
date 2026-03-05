@@ -37,7 +37,7 @@ public class TurtlePlayerSensor implements ITurtleUpgrade {
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		return new TileEntityPlayerSensor(turtle);
+		return new TileEntityPlayerSensor(turtle).getModPeripheral();
 	}
 
     @Nonnull

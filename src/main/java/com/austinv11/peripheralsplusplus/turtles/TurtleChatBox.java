@@ -40,7 +40,7 @@ public class TurtleChatBox implements ITurtleUpgrade {
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		return new TileEntityChatBox(turtle);
+		return new TileEntityChatBox(turtle).getModPeripheral();
 	}
 
     @Nonnull

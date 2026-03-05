@@ -37,7 +37,7 @@ public class TurtleOreDictionary implements ITurtleUpgrade {
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		return new TileEntityOreDictionary(turtle);
+		return new TileEntityOreDictionary(turtle).getModPeripheral();
 	}
 
     @Nonnull

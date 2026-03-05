@@ -43,7 +43,7 @@ public class TurtleRfid implements ITurtleUpgrade {
     @Override
     public IPeripheral createPeripheral(@Nonnull ITurtleAccess turtle, @Nonnull TurtleSide side) {
         return new TileEntityRfidReaderWriter(turtle.getPosition(),
-                turtle.getLevel().getBlockState(turtle.getPosition()));
+                turtle.getLevel().getBlockState(turtle.getPosition())).getModPeripheral();
     }
 
     @Nonnull
