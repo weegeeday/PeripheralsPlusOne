@@ -25,6 +25,9 @@ static {
         reg = (net.minecraft.core.DefaultedRegistry<DispenseItemBehavior>) f.get(null);
     } catch (ReflectiveOperationException e) {
         // In obfuscated environments the field name differs; dispense behavior will be unavailable
+        // (dispense/dispenseUp/dispenseDown will silently return without dispensing)
+        org.apache.logging.log4j.LogManager.getLogger("PeripheralsPlusOne")
+            .warn("PeripheralDispenser: could not access DispenserBlock.DISPENSER_REGISTRY via reflection; dispense behavior disabled", e);
     }
     DISPENSER_REG = reg;
 }

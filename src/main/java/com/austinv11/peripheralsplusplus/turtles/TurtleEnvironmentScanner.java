@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
     private final ResourceLocation upgradeId;
-    private TileEntityEnvironmentScanner scanner = null;
+    private volatile TileEntityEnvironmentScanner scanner = null;
 
     public TurtleEnvironmentScanner(ResourceLocation id) {
         this.upgradeId = id;
