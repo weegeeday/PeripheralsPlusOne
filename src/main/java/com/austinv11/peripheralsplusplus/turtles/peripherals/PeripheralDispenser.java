@@ -10,20 +10,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 
 public class PeripheralDispenser implements IPeripheral {
 
 @SuppressWarnings("unchecked")
-private static final net.minecraft.core.DefaultedRegistry<DispenseItemBehavior> DISPENSER_REG;
+private static final java.util.Map<Item, DispenseItemBehavior> DISPENSER_REG;
 static {
-    net.minecraft.core.DefaultedRegistry<DispenseItemBehavior> reg = null;
+    java.util.Map<Item, DispenseItemBehavior> reg = null;
     try {
         java.lang.reflect.Field f = DispenserBlock.class.getDeclaredField("DISPENSER_REGISTRY");
         f.setAccessible(true);
-        reg = (net.minecraft.core.DefaultedRegistry<DispenseItemBehavior>) f.get(null);
-    } catch (ReflectiveOperationException e) {
+        reg = (java.util.Map<Item, DispenseItemBehavior>) f.get(null);
+    } catch (ReflectiveOperationException | ClassCastException e) {
         // In obfuscated environments the field name differs; dispense behavior will be unavailable
         // (dispense/dispenseUp/dispenseDown will silently return without dispensing)
         org.apache.logging.log4j.LogManager.getLogger("PeripheralsPlusOne")

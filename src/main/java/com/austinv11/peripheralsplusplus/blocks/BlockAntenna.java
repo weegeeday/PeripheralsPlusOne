@@ -99,7 +99,8 @@ return InteractionResult.sidedSuccess(level.isClientSide);
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level level, BlockState state, BlockEntityType<T> type) {
         if (!level.isClientSide && type == ModTileEntities.ANTENNA.get()) {
             @SuppressWarnings("unchecked")
-            BlockEntityTicker<T> ticker = (BlockEntityTicker<T>) TileEntityAntenna::serverTick;
+            BlockEntityTicker<T> ticker = (BlockEntityTicker<T>) (BlockEntityTicker<TileEntityAntenna>)
+                    (level1, pos1, state1, be) -> TileEntityAntenna.serverTick(level1, pos1, state1, be);
             return ticker;
         }
         return null;

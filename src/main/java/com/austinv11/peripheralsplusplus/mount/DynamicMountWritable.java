@@ -1,6 +1,5 @@
 package com.austinv11.peripheralsplusplus.mount;
 
-import dan200.computercraft.api.filesystem.IWritableMount;
 import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nonnull;

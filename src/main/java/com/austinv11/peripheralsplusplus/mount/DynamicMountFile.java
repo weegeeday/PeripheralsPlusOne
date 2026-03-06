@@ -1,7 +1,5 @@
 package com.austinv11.peripheralsplusplus.mount;
 
-import dan200.computercraft.api.filesystem.IMount;
-
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;

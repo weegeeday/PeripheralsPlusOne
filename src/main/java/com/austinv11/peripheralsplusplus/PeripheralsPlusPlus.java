@@ -20,11 +20,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
-import com.austinv11.peripheralsplusplus.capabilities.nano.NanoBotHolder;
-import com.austinv11.peripheralsplusplus.capabilities.rfid.RfidTagHolder;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -68,14 +65,8 @@ public class PeripheralsPlusPlus {
         modBus.addListener(this::clientSetup);
         modBus.addListener(this::registerGuiOverlays);
         modBus.addListener(Config::onLoad);
-        modBus.addListener(this::registerCapabilities);
 
         MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(NanoBotHolder.class);
-        event.register(RfidTagHolder.class);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
