@@ -12,9 +12,22 @@ import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
 public class PeripheralDispenser implements IPeripheral {
+
+@SuppressWarnings("unchecked")
+private static final net.minecraft.core.DefaultedRegistry<DispenseItemBehavior> DISPENSER_REG;
+static {
+    net.minecraft.core.DefaultedRegistry<DispenseItemBehavior> reg = null;
+    try {
+        java.lang.reflect.Field f = DispenserBlock.class.getDeclaredField("DISPENSER_REGISTRY");
+        f.setAccessible(true);
+        reg = (net.minecraft.core.DefaultedRegistry<DispenseItemBehavior>) f.get(null);
+    } catch (ReflectiveOperationException e) {
+        // In obfuscated environments the field name differs; dispense behavior will be unavailable
+    }
+    DISPENSER_REG = reg;
+}
 
 private final ITurtleAccess turtle;
 
@@ -49,7 +62,7 @@ int slot = args.count() > 0 ? args.getInt(0) : turtle.getSelectedSlot();
 synchronized (this) {
 ItemStack stack = turtle.getInventory().getItem(slot);
 if (!stack.isEmpty()) {
-DispenseItemBehavior behavior = DispenserBlock.DISPENSER_REGISTRY.get(stack.getItem());
+DispenseItemBehavior behavior = DISPENSER_REG != null ? DISPENSER_REG.get(stack.getItem()) : null;
 if (behavior != null) {
 BlockPos pos = turtle.getPosition();
 // Create a fake dispenser source

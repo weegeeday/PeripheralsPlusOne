@@ -23,88 +23,88 @@ public class ModUpgrades {
     // Turtle upgrade serialisers
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleChatBox>> CHAT_BOX =
             TURTLE_SERIALISERS.register("chat_box",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleChatBox::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleChatBox::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtlePlayerSensor>> PLAYER_SENSOR =
             TURTLE_SERIALISERS.register("player_sensor",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtlePlayerSensor::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtlePlayerSensor::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleCompass>> COMPASS =
             TURTLE_SERIALISERS.register("compass",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleCompass::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleCompass::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleXP>> XP =
             TURTLE_SERIALISERS.register("xp",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleXP::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleXP::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleBarrel>> BARREL =
             TURTLE_SERIALISERS.register("barrel",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleBarrel::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleBarrel::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleOreDictionary>> ORE_DICTIONARY =
             TURTLE_SERIALISERS.register("ore_dictionary",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleOreDictionary::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleOreDictionary::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleEnvironmentScanner>> ENVIRONMENT_SCANNER =
             TURTLE_SERIALISERS.register("environment_scanner",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleEnvironmentScanner::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleEnvironmentScanner::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleFeeder>> FEEDER =
             TURTLE_SERIALISERS.register("feeder",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleFeeder::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleFeeder::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleShear>> SHEAR =
             TURTLE_SERIALISERS.register("shear",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleShear::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleShear::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleSignReader>> SIGN_READER =
             TURTLE_SERIALISERS.register("sign_reader",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleSignReader::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleSignReader::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleGarden>> GARDEN =
             TURTLE_SERIALISERS.register("garden",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleGarden::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleGarden::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleSpeaker>> SPEAKER =
             TURTLE_SERIALISERS.register("speaker",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleSpeaker::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleSpeaker::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleTank>> TANK =
             TURTLE_SERIALISERS.register("tank",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleTank::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleTank::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleRidable>> RIDABLE =
             TURTLE_SERIALISERS.register("ridable",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleRidable::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleRidable::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleDispenser>> DISPENSER =
             TURTLE_SERIALISERS.register("dispenser",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleDispenser::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleDispenser::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleResupply>> RESUPPLY =
             TURTLE_SERIALISERS.register("resupply",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleResupply::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleResupply::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleChunkLoader>> CHUNK_LOADER =
             TURTLE_SERIALISERS.register("chunk_loader",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleChunkLoader::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleChunkLoader::new));
 
     public static final RegistryObject<TurtleUpgradeSerialiser<TurtleRfid>> RFID =
             TURTLE_SERIALISERS.register("rfid",
-                    () -> TurtleUpgradeSerialiser.simpleSerialiser(TurtleRfid::new));
+                    () -> TurtleUpgradeSerialiser.simple(TurtleRfid::new));
 
     // Pocket upgrade serialisers
     public static final RegistryObject<PocketUpgradeSerialiser<PocketMotionDetector>> POCKET_MOTION_DETECTOR =
             POCKET_SERIALISERS.register("pocket_motion_detector",
-                    () -> PocketUpgradeSerialiser.simpleSerialiser(PocketMotionDetector::new));
+                    () -> PocketUpgradeSerialiser.simple(PocketMotionDetector::new));
 
     public static final RegistryObject<PocketUpgradeSerialiser<PocketPeripheralContainer>> POCKET_PERIPHERAL_CONTAINER =
             POCKET_SERIALISERS.register("pocket_container",
-                    () -> PocketUpgradeSerialiser.simpleSerialiser(PocketPeripheralContainer::new));
+                    () -> PocketUpgradeSerialiser.simple(PocketPeripheralContainer::new));
 
     public static final RegistryObject<PocketUpgradeSerialiser<PocketRfid>> POCKET_RFID =
             POCKET_SERIALISERS.register("pocket_rfid",
-                    () -> PocketUpgradeSerialiser.simpleSerialiser(PocketRfid::new));
+                    () -> PocketUpgradeSerialiser.simple(PocketRfid::new));
 
     public static void register(IEventBus modBus) {
         TURTLE_SERIALISERS.register(modBus);

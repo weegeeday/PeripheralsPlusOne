@@ -105,6 +105,7 @@ keyring.addPublicKey(keyStr.getBytes(ENCODING));
 ByteArrayOutputStream out = new ByteArrayOutputStream();
 try (OutputStream encStream = BouncyGPG.encryptToStream()
 .withConfig(keyring)
+.withStrongAlgorithms()
 .toRecipients(new String[0])
 .andDoNotSign()
 .binaryOutput()

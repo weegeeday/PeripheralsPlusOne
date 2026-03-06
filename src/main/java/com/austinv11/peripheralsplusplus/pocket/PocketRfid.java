@@ -45,7 +45,7 @@ public class PocketRfid implements IPocketUpgrade {
         net.minecraft.world.entity.Entity e = access.getEntity();
         if (e == null) return null;
         net.minecraft.core.BlockPos pos = e.blockPosition();
-        return new TileEntityRfidReaderWriter(pos, e.level().getBlockState(pos));
+        return new TileEntityRfidReaderWriter(pos, e.level().getBlockState(pos)).getModPeripheral();
     }
 
     @Override

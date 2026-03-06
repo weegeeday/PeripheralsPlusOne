@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -28,7 +29,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import javax.annotation.Nullable;
 import java.util.UUID;
 
-public class BlockAntenna extends BlockPppDirectional {
+public class BlockAntenna extends BlockPppDirectional implements EntityBlock {
 
 public BlockAntenna() {
 super();
@@ -94,8 +95,14 @@ return InteractionResult.sidedSuccess(level.isClientSide);
 }
 
     @Override
+    @javax.annotation.Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ModTileEntities.ANTENNA.get(), TileEntityAntenna::serverTick);
+        if (!level.isClientSide && type == ModTileEntities.ANTENNA.get()) {
+            @SuppressWarnings("unchecked")
+            BlockEntityTicker<T> ticker = (BlockEntityTicker<T>) (BlockEntityTicker<TileEntityAntenna>) TileEntityAntenna::serverTick;
+            return ticker;
+        }
+        return null;
     }
 
 }

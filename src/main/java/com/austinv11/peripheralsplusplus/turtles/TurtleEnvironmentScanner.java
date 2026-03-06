@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
     private final ResourceLocation upgradeId;
+    private TileEntityEnvironmentScanner scanner = null;
 
     public TurtleEnvironmentScanner(ResourceLocation id) {
         this.upgradeId = id;
@@ -42,7 +43,8 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
 	@Override
 	public IPeripheral createPeripheral(ITurtleAccess turtle, TurtleSide side) {
-		return new TileEntityEnvironmentScanner(turtle).getModPeripheral();
+		scanner = new TileEntityEnvironmentScanner(turtle);
+		return scanner.getModPeripheral();
 	}
 
     @Nonnull
@@ -54,8 +56,13 @@ public class TurtleEnvironmentScanner implements ITurtleUpgrade {
 
     @Override
 	public void update(ITurtleAccess turtle, TurtleSide side) {
-		IPeripheral peripheral = turtle.getPeripheral(side);
-		if (peripheral instanceof TileEntityEnvironmentScanner)
-			((TileEntityEnvironmentScanner) peripheral).update();
+		if (scanner != null) {
+			TileEntityEnvironmentScanner.serverTick(
+				(net.minecraft.world.level.Level) turtle.getLevel(),
+				turtle.getPosition(),
+				turtle.getLevel().getBlockState(turtle.getPosition()),
+				scanner
+			);
+		}
 	}
 }

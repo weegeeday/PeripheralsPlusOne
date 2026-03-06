@@ -7,8 +7,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import net.minecraftforge.common.util.LazyOptional;
+
 import javax.annotation.Nonnull;
-import java.util.Optional;
 
 /**
  * Marker interface for PeripheralsPlusOne block entities.
@@ -31,11 +32,11 @@ public interface IPlusPlusPeripheral {
     class Provider implements IPeripheralProvider {
         @Nonnull
         @Override
-        public Optional<IPeripheral> getPeripheral(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Direction side) {
+        public LazyOptional<IPeripheral> getPeripheral(@Nonnull Level level, @Nonnull BlockPos pos, @Nonnull Direction side) {
             BlockEntity tile = level.getBlockEntity(pos);
-            if (tile instanceof HasPeripheral hp) return Optional.of(hp.getModPeripheral());
-            if (tile instanceof IPeripheral ip) return Optional.of(ip);
-            return Optional.empty();
+            if (tile instanceof HasPeripheral hp) return LazyOptional.of(hp::getModPeripheral);
+            if (tile instanceof IPeripheral ip) return LazyOptional.of(() -> ip);
+            return LazyOptional.empty();
         }
     }
 }
