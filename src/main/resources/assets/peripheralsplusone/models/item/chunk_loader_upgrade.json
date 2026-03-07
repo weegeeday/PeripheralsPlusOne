@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/chunk_loader_upgrade"
+    "layer0": "peripheralsplusone:item/chunk_loader_upgrade"
   }
 }

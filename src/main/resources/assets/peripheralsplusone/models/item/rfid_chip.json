@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/rfid_chip"
+    "layer0": "peripheralsplusone:item/rfid_chip"
   }
 }

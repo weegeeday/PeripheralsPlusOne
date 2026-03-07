@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/fork"
+    "layer0": "peripheralsplusone:item/fork"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/motion_detector"
+    "layer0": "peripheralsplusone:item/motion_detector"
   }
 }
