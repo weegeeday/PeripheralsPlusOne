@@ -7,287 +7,288 @@ import com.austinv11.peripheralsplusplus.network.ParticlePacket;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import com.austinv11.peripheralsplusplus.utils.ReflectionHelper;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.HashMap;
 import java.util.Stack;
 
-public class TileEntityTeleporter extends TileEntity implements IPlusPlusPeripheral {
-	private String name = "tileEntityTeleporter";
-	public Stack<LinkData> links = new Stack<LinkData>();
-	public String tag = null;
+public class TileEntityTeleporter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
-	public TileEntityTeleporter() {
-		super();
-	}
+private String name = "tileEntityTeleporter";
+public Stack<LinkData> links = new Stack<>();
+public String tag = null;
 
-	public int getMaxLinks() {
-		int tier = world.getBlockState(getPos()).getValue(BlockTeleporter.TIER);
-		return tier == 0 ? 1 : 8;
-	}
+public TileEntityTeleporter(BlockPos pos, BlockState state) {
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TELEPORTER.get(), pos, state);
+}
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-		if (nbttagcompound.hasKey("tTag"))
-			tag = nbttagcompound.getString("tTag");
-		NBTTagList links = nbttagcompound.getTagList("links", Constants.NBT.TAG_COMPOUND);
-		for (int i = 0; i < links.tagCount(); i++) {
-			NBTTagCompound link = links.getCompoundTagAt(i);
-			if (link.hasKey("linkX") && link.hasKey("linkY") && link.hasKey("linkZ") && link.hasKey("linkDim")) {
-				this.links.add(new LinkData(link.getInteger("linkDim"),
-						new BlockPos(link.getInteger("linkX"), link.getInteger("linkY"), link.getInteger("linkZ"))));
-			}
-		}
-	}
+public int getMaxLinks() {
+if (level == null) return 1;
+BlockState bs = level.getBlockState(getBlockPos());
+if (!bs.hasProperty(BlockTeleporter.TIER)) return 1;
+int tier = bs.getValue(BlockTeleporter.TIER);
+return tier == 0 ? 1 : 8;
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		if (tag != null)
-			nbttagcompound.setString("tTag", tag);
-		NBTTagList list = new NBTTagList();
-		for (int i = 0; i < links.size(); i++) {
-			LinkData link = links.get(i);
-			if (link != null) {
-				NBTTagCompound lcompound = new NBTTagCompound();
-				lcompound.setInteger("linkX", link.link.getX());
-				lcompound.setInteger("linkY", link.link.getY());
-				lcompound.setInteger("linkZ", link.link.getZ());
-				lcompound.setInteger("linkDim", link.linkDim);
-				list.appendTag(lcompound);
-			}
-		}
-		nbttagcompound.setTag("links", list);
-		return nbttagcompound;
-	}
+@Override
+public void load(CompoundTag nbt) {
+super.load(nbt);
+if (nbt.contains("tTag"))
+tag = nbt.getString("tTag");
+ListTag linksList = nbt.getList("links", 10);
+for (int i = 0; i < linksList.size(); i++) {
+CompoundTag link = linksList.getCompound(i);
+        if (link.contains("linkX") && link.contains("linkY") && link.contains("linkZ")) {
+            BlockPos pos = new BlockPos(link.getInt("linkX"), link.getInt("linkY"), link.getInt("linkZ"));
+            if (link.contains("linkKey")) {
+                links.add(new LinkData(link.getString("linkKey"), pos));
+            } else if (link.contains("linkDim")) {
+                // Legacy fallback - convert integer dim to string key
+                links.add(new LinkData(link.getInt("linkDim"), pos));
+            }
+        }
+}
+}
 
-	@Override
-	public String getType() {
-		return "teleporter";
-	}
+@Override
+protected void saveAdditional(CompoundTag nbt) {
+super.saveAdditional(nbt);
+if (tag != null)
+nbt.putString("tTag", tag);
+ListTag list = new ListTag();
+for (LinkData link : links) {
+if (link != null) {
+CompoundTag lc = new CompoundTag();
+            lc.putInt("linkX", link.link.getX());
+            lc.putInt("linkY", link.link.getY());
+            lc.putInt("linkZ", link.link.getZ());
+            lc.putString("linkKey", link.levelKey);
+list.add(lc);
+}
+}
+nbt.put("links", list);
+}
+public final Object[] teleport(IArguments args) throws LuaException {
+return tp(args);
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[] {"teleport", "tp", "getLinks", "setName"};
-	}
+public final Object[] tp(IArguments args) throws LuaException {
+if (!Config.enableTurtleTeleporter)
+throw new LuaException("Turtle teleporters have been disabled");
+int index = args.count() > 0 ? args.getInt(0) - 1 : 0;
+if (index < 0 || index >= getMaxLinks())
+throw new LuaException("Bad link " + (index + 1) + " (expected 1-" + getMaxLinks() + ")");
+if (index >= links.size())
+throw new LuaException("No such link");
+LinkData link = links.get(index);
+if (link == null)
+throw new LuaException("No such link");
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enableTurtleTeleporter)
-			throw new LuaException("Turtle teleporters have been disabled");
-		if (method == 0 || method == 1) {
-			if (arguments.length > 0 && !(arguments[0] instanceof Double))
-				throw new LuaException("Bad argument #1 (expected number)");
-			int index = arguments.length > 0 ? (int)Math.floor((Double)arguments[0]) - 1 : 0;
-			if (index < 0 || index >= getMaxLinks())
-				throw new LuaException("Bad link "+(index+1)+" (expected 1-"+getMaxLinks()+")");
-			if (index >= links.size())
-				throw new LuaException("No such link");
-			LinkData link = links.get(index);
-			if (link == null)
-				throw new LuaException("No such link");
-			IBlockState blockState = world.getBlockState(getPos());
-			EnumFacing direction = blockState.getValue(BlockPppDirectional.FACING);
-			TileEntity te = world.getTileEntity(getPos().offset(direction));
-			try {
-				if (ReflectionHelper.getTurtle(te) == null)
-					throw new LuaException("No turtle in front");
-			}catch (Exception e) {
-				throw new LuaException("No turtle in front");
-			}
-			World destWorld = DimensionManager.getWorld(link.linkDim);
-			if (destWorld == null)
-				throw new LuaException("Destination world missing");
-			TileEntity dest = destWorld.getTileEntity(link.link);
-			if (!(dest instanceof TileEntityTeleporter))
-				throw new LuaException("Destination is not a teleporter");
-			IBlockState destinationBlockState = world.getBlockState(dest.getPos());
-			EnumFacing destinationDirection = destinationBlockState.getValue(BlockPppDirectional.FACING);
-			BlockPos destinationPos = dest.getPos().offset(destinationDirection);
-			if (!destinationBlockState.getBlock().isReplaceable(destWorld, destinationPos) ||
-					destinationPos.getY() < 0 || destinationPos.getY() > 254)
-				throw new LuaException("Destination obstructed");
-			double distance = getPos().distanceSq(link.link);
-			ITurtleAccess turtle = null;
-			try {
-				turtle = ReflectionHelper.getTurtle(te);
-			}catch (Exception ignored) {}
-			if (turtle == null)
-				throw new LuaException("Could not get turtle");
-			double fuelUsed = distance *
-					Math.min(Math.max(Math.abs(
-							world.provider.getDimension() - destWorld.provider.getDimension()),
-							100), 1) *
-					Config.teleporterPenalty;
-			if (!turtle.consumeFuel(Math.abs((int)Math.ceil(fuelUsed))))
-				throw new LuaException("Not enough fuel");
-			boolean result = turtle.teleportTo(destWorld, destinationPos);
-			destWorld.markAndNotifyBlock(destinationPos, destWorld.getChunkFromBlockCoords(destinationPos),
-					destinationBlockState, destinationBlockState, 2);
-			world.markAndNotifyBlock(pos, world.getChunkFromBlockCoords(pos), blockState, blockState, 2);
-			if (result) {
-				BlockPos particlePos = pos.offset(direction);
-				PeripheralsPlusPlus.NETWORK.sendToAllAround(new ParticlePacket(
-						"portal",
-						particlePos.getX(),
-						particlePos.getY(),
-						particlePos.getZ(),
-						world.rand.nextGaussian(),
-						0,
-						world.rand.nextGaussian()
-				), new NetworkRegistry.TargetPoint(
-						world.provider.getDimension(),
-						particlePos.getX(),
-						particlePos.getY(),
-						particlePos.getZ(),
-						16));
-				world.playSound(
-						particlePos.getX(),
-						particlePos.getY(),
-						particlePos.getZ(),
-						new SoundEvent(new ResourceLocation("minecraft","mob.endermen.portal")),
-						SoundCategory.BLOCKS,
-						1,
-						1,
-						true);
-			}
-			return new Object[]{result};
-		}else if (method == 2) {
-			HashMap<Integer, Object> map1 = new HashMap<Integer,Object>();
-			for (int i = 0; i < links.size(); i++) {
-				HashMap<String,Object> map2 = new HashMap<String,Object>();
-				map2.put("dim", links.get(i).linkDim);
-				map2.put("x", links.get(i).link.getX());
-				map2.put("y", links.get(i).link.getY());
-				map2.put("z", links.get(i).link.getZ());
-				map2.put("name", name);
-				map1.put(i, map2.clone());
-			}
-			return new Object[]{map1};
-		}else if (method == 3) {
-			if (!(arguments.length >= 1) || !(arguments[0] instanceof String))
-				throw new LuaException("Bad argument #1 (expected string)");
-			this.name = (String) arguments[0];
-			return new Object[]{name};
-		}
-		return new Object[0];
-	}
+BlockState blockState = level.getBlockState(getBlockPos());
+Direction direction = blockState.getValue(BlockPppDirectional.FACING);
+BlockEntity te = level.getBlockEntity(getBlockPos().relative(direction));
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (other == this);
-	}
+ITurtleAccess turtle;
+try {
+turtle = ReflectionHelper.getTurtle(te);
+} catch (Exception e) {
+throw new LuaException("No turtle in front");
+}
+if (turtle == null)
+throw new LuaException("No turtle in front");
 
-	public void blockActivated(EntityPlayer player, EnumHand hand) {
-		ItemStack held = player.getHeldItem(hand);
-		if (!held.isEmpty() && held.isItemEqual(new ItemStack(Items.REPEATER))) {
-			if (held.getTagCompound() != null) {
-				if (held.getTagCompound().hasKey("p++LinkX") && held.getTagCompound().hasKey("p++LinkY") &&
-						held.getTagCompound().hasKey("p++LinkZ") && held.getTagCompound().hasKey("p++LinkDim")) {
-					BlockPos link = new BlockPos(held.getTagCompound().getInteger("p++LinkX"),
-							held.getTagCompound().getInteger("p++LinkY"),
-							held.getTagCompound().getInteger("p++LinkZ"));
-					int linkDim = held.getTagCompound().getInteger("p++LinkDim");
-					World srcWorld = DimensionManager.getWorld(linkDim);
-					if (srcWorld == null) {
-						player.sendMessage(new TextComponentString("Link failed: World is missing"));
-					} else {
-						TileEntity te = srcWorld.getTileEntity(link);
-						if (!(te instanceof TileEntityTeleporter)) {
-							player.sendMessage(new TextComponentString("Link failed: Teleporter no longer exists"));
-						} else {
-							TileEntityTeleporter src = (TileEntityTeleporter)te;
-							if (link.equals(getPos())) {
-								player.sendMessage(new TextComponentString("Link canceled"));
-							} else {
-								boolean unlinked = false;
-								for (int i = 0; i < src.links.size(); i++) {
-									LinkData rlink = src.links.get(i);
-									if (rlink.link.equals(getPos()) && rlink.linkDim == world.provider.getDimension()) {
-										player.sendMessage(new TextComponentString("Unlinked teleporter at " +
-												rlink.linkDim + ":(" + rlink.link.getX() + "," + rlink.link.getY() + ","
-												+ rlink.link.getZ() + ") (link " + (i + 1) + ") from this teleporter"));
-										src.links.remove(i);
-										unlinked = true;
-										break;
-									}
-								}
-								if (!unlinked) {
-									src.addLink(world.provider.getDimension(), getPos());
-									player.sendMessage(new TextComponentString("Linked teleporter at " + linkDim +
-											":(" + link.getX() + "," + link.getY() + "," + link.getZ() + ") (link " +
-											src.links.size() + ") to this teleporter"));
-								}
-							}
-						}
-					}
-					held.getTagCompound().removeTag("p++LinkX");
-					held.getTagCompound().removeTag("p++LinkY");
-					held.getTagCompound().removeTag("p++LinkZ");
-					held.getTagCompound().removeTag("p++LinkDim");
-					if (held.getTagCompound().hasKey("display")) {
-						NBTTagCompound display = held.getTagCompound().getCompoundTag("display");
-						display.removeTag("Lore");
-						if (display.hasNoTags()) {
-							held.getTagCompound().removeTag("display");
-						} else {
-							held.getTagCompound().setTag("display", display);
-						}
-					}
-					return;
-				}
-			}
-			if (held.getTagCompound() == null)
-				held.setTagCompound(new NBTTagCompound());
-			held.getTagCompound().setInteger("p++LinkX", getPos().getX());
-			held.getTagCompound().setInteger("p++LinkY", getPos().getY());
-			held.getTagCompound().setInteger("p++LinkZ", getPos().getZ());
-			held.getTagCompound().setInteger("p++LinkDim", world.provider.getDimension());
-			NBTTagCompound display = new NBTTagCompound();
-			NBTTagList lore = new NBTTagList();
-			lore.appendTag(new NBTTagString("Turtle Teleporter Link"));
-			lore.appendTag(new NBTTagString(world.provider.getDimension()+":("+pos.getX()+","+pos.getY()+","+
-					pos.getZ()+")"));
-			display.setTag("Lore", lore);
-			held.getTagCompound().setTag("display", display);
-			player.sendMessage(new TextComponentString("Link started"));
-		}
-	}
+ServerLevel destWorld = null;
+for (ServerLevel sl : ServerLifecycleHooks.getCurrentServer().getAllLevels()) {
+if (sl.dimension().location().toString().equals(link.levelKey)) {
+destWorld = sl;
+break;
+}
+}
+if (destWorld == null)
+throw new LuaException("Destination world missing");
 
-	public int addLink(int linkDim, BlockPos link) {
-		links.add(new LinkData(linkDim, link));
-		while (links.size() > getMaxLinks())
-			links.pop();
-		return links.size();
-	}
+BlockEntity dest = destWorld.getBlockEntity(link.link);
+if (!(dest instanceof TileEntityTeleporter))
+throw new LuaException("Destination is not a teleporter");
 
-	public static class LinkData {
-		public int linkDim;
-		public BlockPos link;
+BlockState destBlockState = destWorld.getBlockState(link.link);
+Direction destDir = destBlockState.getValue(BlockPppDirectional.FACING);
+BlockPos destPos = link.link.relative(destDir);
 
-		public LinkData(int linkDim, BlockPos link) {
-			this.linkDim = linkDim;
-			this.link = link;
-		}
-	}
+if (!destWorld.isEmptyBlock(destPos) || destPos.getY() < 0 || destPos.getY() > 319)
+throw new LuaException("Destination obstructed");
+
+double distance = Math.sqrt(getBlockPos().distSqr(link.link));
+double fuelUsed = distance * Config.teleporterPenalty;
+if (!turtle.consumeFuel(Math.abs((int) Math.ceil(fuelUsed))))
+throw new LuaException("Not enough fuel");
+
+boolean result = turtle.teleportTo(destWorld, destPos);
+if (result) {
+BlockPos particlePos = getBlockPos().relative(direction);
+PeripheralsPlusPlus.NETWORK.send(
+PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(
+particlePos.getX(), particlePos.getY(), particlePos.getZ(), 16, level.dimension())),
+new ParticlePacket("portal", particlePos.getX(), particlePos.getY(), particlePos.getZ(),
+level.random.nextGaussian(), 0, level.random.nextGaussian()));
+}
+return new Object[]{result};
+}
+
+public final Object[] getLinks(IArguments args) throws LuaException {
+if (!Config.enableTurtleTeleporter)
+throw new LuaException("Turtle teleporters have been disabled");
+HashMap<Integer, Object> map = new HashMap<>();
+for (int i = 0; i < links.size(); i++) {
+HashMap<String, Object> entry = new HashMap<>();
+entry.put("dim", links.get(i).levelKey);
+entry.put("x", links.get(i).link.getX());
+entry.put("y", links.get(i).link.getY());
+entry.put("z", links.get(i).link.getZ());
+entry.put("name", name);
+map.put(i + 1, entry);
+}
+return new Object[]{map};
+}
+
+public final Object[] setName(IArguments args) throws LuaException {
+if (!Config.enableTurtleTeleporter)
+throw new LuaException("Turtle teleporters have been disabled");
+this.name = args.getString(0);
+setChanged();
+return new Object[]{name};
+}
+public void blockActivated(Player player, InteractionHand hand) {
+ItemStack held = player.getItemInHand(hand);
+if (!held.isEmpty() && held.is(Items.REPEATER)) {
+CompoundTag tag = held.getOrCreateTag();
+if (tag.contains("p++LinkX") && tag.contains("p++LinkY") && tag.contains("p++LinkZ")) {
+BlockPos link = new BlockPos(tag.getInt("p++LinkX"), tag.getInt("p++LinkY"), tag.getInt("p++LinkZ"));
+String linkDim = tag.getString("p++LinkDim");
+ServerLevel srcWorld = null;
+for (ServerLevel sl : ServerLifecycleHooks.getCurrentServer().getAllLevels()) {
+if (sl.dimension().location().toString().equals(linkDim)) {
+srcWorld = sl;
+break;
+}
+}
+if (srcWorld == null) {
+player.sendSystemMessage(Component.literal("Link failed: World is missing"));
+} else {
+BlockEntity te = srcWorld.getBlockEntity(link);
+if (!(te instanceof TileEntityTeleporter src)) {
+player.sendSystemMessage(Component.literal("Link failed: Teleporter no longer exists"));
+} else {
+String thisDim = level.dimension().location().toString();
+if (link.equals(getBlockPos())) {
+player.sendSystemMessage(Component.literal("Link canceled"));
+} else {
+boolean unlinked = false;
+for (int i = 0; i < src.links.size(); i++) {
+LinkData rlink = src.links.get(i);
+if (rlink.link.equals(getBlockPos()) && rlink.levelKey.equals(thisDim)) {
+src.links.remove(i);
+unlinked = true;
+break;
+}
+}
+if (!unlinked) {
+src.addLink(thisDim, getBlockPos());
+}
+}
+}
+}
+tag.remove("p++LinkX");
+tag.remove("p++LinkY");
+tag.remove("p++LinkZ");
+tag.remove("p++LinkDim");
+return;
+}
+String thisDim = level.dimension().location().toString();
+tag.putInt("p++LinkX", getBlockPos().getX());
+tag.putInt("p++LinkY", getBlockPos().getY());
+tag.putInt("p++LinkZ", getBlockPos().getZ());
+tag.putString("p++LinkDim", thisDim);
+player.sendSystemMessage(Component.literal("Link started"));
+}
+}
+
+public int addLink(String levelKey, BlockPos link) {
+links.add(new LinkData(levelKey, link));
+while (links.size() > getMaxLinks())
+links.pop();
+setChanged();
+return links.size();
+}
+
+public static class LinkData {
+public String levelKey;
+public BlockPos link;
+
+public LinkData(String levelKey, BlockPos link) {
+this.levelKey = levelKey;
+this.link = link;
+}
+
+/** Legacy constructor: converts a pre-1.20.1 integer dimension ID to a level key string.
+         * Mapping: -1 → nether, 0 → overworld, 1 → the_end, other → overworld. */
+public LinkData(int linkDim, BlockPos link) {
+this.levelKey = linkDim == -1 ? "minecraft:the_nether" : (linkDim == 1 ? "minecraft:the_end" : "minecraft:overworld");
+this.link = link;
+}
+}
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "teleporter"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityTeleporter.this; }
+
+        @LuaFunction
+        public final Object[] teleport(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.teleport(args);
+        }
+
+        @LuaFunction
+        public final Object[] tp(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.tp(args);
+        }
+
+        @LuaFunction
+        public final Object[] getLinks(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.getLinks(args);
+        }
+
+        @LuaFunction
+        public final Object[] setName(IArguments args) throws LuaException {
+            return TileEntityTeleporter.this.setName(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

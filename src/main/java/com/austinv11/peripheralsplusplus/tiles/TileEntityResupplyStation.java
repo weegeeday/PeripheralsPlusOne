@@ -1,91 +1,81 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.minecraft.tiles.TileEntityInventory;
-import com.austinv11.peripheralsplusplus.init.ModBlocks;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
-public class TileEntityResupplyStation extends TileEntityInventory {
+import javax.annotation.Nullable;
 
-	public String getName() {
-		return "tileEntityResupplyStation";
-	}
-	
-	@Override
-	public int getSize() {
-		return 56;
-	}
+public class TileEntityResupplyStation extends BlockEntity implements MenuProvider, Container {
 
-    @Override
-    public ITextComponent getDisplayName() {
-        return new TextComponentString(
-        		I18n.translateToLocal(ModBlocks.RESUPPLY_STATION.getUnlocalizedName()+".name"));
-    }
+private static final int SIZE = 56;
+private final ItemStack[] items = new ItemStack[SIZE];
 
-    public synchronized boolean resupply(ITurtleAccess turtle, int toSlot, ResourceLocation id, int meta) {
-		ItemStack currentStack = turtle.getInventory().getStackInSlot(toSlot);
-		if (!hasCorrectIdAndMeta(currentStack, id, meta))
-			return false;
-		Item item = ForgeRegistries.ITEMS.getValue(id);
-		if (item == null)
-			return false;
-		int amountToFill;
-		if (currentStack.isEmpty())
-			amountToFill = new ItemStack(item, 1, meta).getMaxStackSize();
-		else
-			amountToFill = currentStack.getMaxStackSize()-currentStack.getCount();
-		int currentSlot = 0;
-		ItemStack stackToMerge = null;
-		while (currentSlot < getSizeInventory() && amountToFill > 0) {
-			if (getStackInSlot(currentSlot) == null) {
-				currentSlot++;
-				continue;
-			}
-			if (!hasCorrectIdAndMeta(getStackInSlot(currentSlot), id, meta)) {
-				currentSlot++;
-				continue;
-			}
-			if (stackToMerge == null) {
-				stackToMerge = getStackInSlot(currentSlot).splitStack(MathHelper.clamp(amountToFill, 0,
-						getStackInSlot(currentSlot).getCount()));
-				amountToFill -= stackToMerge.getCount();
-			} else {
-				int toTake = MathHelper.clamp(amountToFill, 0, getStackInSlot(currentSlot).getCount());
-				getStackInSlot(currentSlot).setCount(getStackInSlot(currentSlot).getCount() - toTake);
-				stackToMerge.setCount(stackToMerge.getCount() - toTake);
-				amountToFill -= toTake;
-			}
-			currentSlot++;
-		}
-		if (stackToMerge == null)
-			return false;
-		turtle.getInventory().setInventorySlotContents(toSlot, currentStack.isEmpty() ? stackToMerge :
-				new ItemStack(currentStack.getItem(), currentStack.getCount() + stackToMerge.getCount(), meta));
-		markDirty();
-		turtle.getInventory().markDirty();
-		return true;
-	}
-	
-	private boolean hasCorrectIdAndMeta(ItemStack stack, ResourceLocation id, int meta) {
-		if (stack == null)
-			return true;
-		ResourceLocation otherId;
-		if (stack.getItem() instanceof ItemBlock) {
-			Block block = Block.getBlockFromItem(stack.getItem());
-			otherId = ForgeRegistries.BLOCKS.getKey(block);
-		} else {
-			Item item = stack.getItem();
-			otherId = ForgeRegistries.ITEMS.getKey(item);
-		}
-		return otherId != null && otherId.equals(id) && stack.getItemDamage() == meta;
-	}
+public TileEntityResupplyStation(BlockPos pos, BlockState state) {
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.RESUPPLY_STATION.get(), pos, state);
+for (int i = 0; i < SIZE; i++) items[i] = ItemStack.EMPTY;
+}
+
+public synchronized boolean resupply(ITurtleAccess turtle, int toSlot, ResourceLocation id) {
+Item item = ForgeRegistries.ITEMS.getValue(id);
+if (item == null) return false;
+ItemStack currentStack = turtle.getInventory().getItem(toSlot);
+if (!currentStack.isEmpty() && !currentStack.is(item)) return false;
+int amountToFill = currentStack.isEmpty() ? item.getMaxStackSize() :
+currentStack.getMaxStackSize() - currentStack.getCount();
+for (int i = 0; i < SIZE && amountToFill > 0; i++) {
+ItemStack slot = items[i];
+if (slot.isEmpty() || !slot.is(item)) continue;
+int toTake = Math.min(amountToFill, slot.getCount());
+slot.shrink(toTake);
+amountToFill -= toTake;
+}
+if (amountToFill == item.getMaxStackSize() - (currentStack.isEmpty() ? 0 : currentStack.getCount()))
+return false; // nothing was taken
+int added = item.getMaxStackSize() - (currentStack.isEmpty() ? 0 : currentStack.getCount()) - amountToFill;
+if (currentStack.isEmpty())
+turtle.getInventory().setItem(toSlot, new ItemStack(item, added));
+else
+currentStack.grow(added);
+setChanged();
+return true;
+}
+
+// Container
+@Override
+public int getContainerSize() { return SIZE; }
+@Override
+public boolean isEmpty() { for (ItemStack s : items) if (!s.isEmpty()) return false; return true; }
+@Override
+public ItemStack getItem(int i) { return i < SIZE ? items[i] : ItemStack.EMPTY; }
+@Override
+public ItemStack removeItem(int i, int amt) { if (i < SIZE) { ItemStack s = items[i].split(amt); setChanged(); return s; } return ItemStack.EMPTY; }
+@Override
+public ItemStack removeItemNoUpdate(int i) { if (i < SIZE) { ItemStack s = items[i]; items[i] = ItemStack.EMPTY; return s; } return ItemStack.EMPTY; }
+@Override
+public void setItem(int i, ItemStack s) { if (i < SIZE) { items[i] = s; setChanged(); } }
+@Override
+public boolean stillValid(Player player) { return Container.stillValidBlockEntity(this, player); }
+@Override
+public void clearContent() { for (int i = 0; i < SIZE; i++) items[i] = ItemStack.EMPTY; }
+
+// MenuProvider
+@Override
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.resupply_station"); }
+@Nullable
+@Override
+public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
+return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerResupplyStation(id, playerInv, this);
+}
 }

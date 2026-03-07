@@ -1,40 +1,38 @@
 package com.austinv11.peripheralsplusplus.client.gui;
 
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
 import com.austinv11.peripheralsplusplus.items.ItemSmartHelmet;
-import com.austinv11.peripheralsplusplus.smarthelmet.HelmetCommand;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.gui.overlay.ForgeGui;
+import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.UUID;
+/**
+ * HUD overlay rendered when the player is wearing the Smart Helmet.
+ * Registered via RegisterGuiOverlaysEvent in PeripheralsPlusPlus.
+ */
+public class GuiSmartHelmetOverlay implements IGuiOverlay {
 
-public class GuiSmartHelmetOverlay extends Gui {
+    public static final GuiSmartHelmetOverlay INSTANCE = new GuiSmartHelmetOverlay();
 
-	public static HashMap<UUID,ArrayDeque<HelmetCommand>> renderStack = new HashMap<UUID,ArrayDeque<HelmetCommand>>();
+    @Override
+    public void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int screenWidth, int screenHeight) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null || mc.options.hideGui) return;
+        Player player = mc.player;
+        for (ItemStack armor : player.getArmorSlots()) {
+            if (armor.getItem() instanceof ItemSmartHelmet) {
+                renderHelmetHud(graphics, mc, armor, screenWidth);
+                break;
+            }
+        }
+    }
 
-	@SubscribeEvent
-	public void renderOverlay(RenderGameOverlayEvent.Post event) {
-		if (/*event.isCanceled() || */event.getType() != RenderGameOverlayEvent.ElementType.CROSSHAIRS)
-			return;
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		Iterable<ItemStack> armor = player.getArmorInventoryList();
-		for (ItemStack armorPiece : armor) {
-			if (armorPiece.getItem() instanceof ItemSmartHelmet &&
-					NBTHelper.hasTag(armorPiece, "identifier")) {
-				UUID uuid = UUID.fromString(NBTHelper.getString(armorPiece, "identifier"));
-				if (renderStack.containsKey(uuid)) {
-					ArrayDeque<HelmetCommand> commands = new ArrayDeque<HelmetCommand>(renderStack.get(uuid));
-					while (!commands.isEmpty())
-						commands.poll().call(this);
-				}
-				break;
-			}
-		}
-	}
+    private void renderHelmetHud(GuiGraphics graphics, Minecraft mc, ItemStack helmet, int screenWidth) {
+        // Show a small indicator when the helmet is active (has a linked antenna)
+        if (!helmet.hasTag() || !helmet.getTag().contains("identifier")) return;
+        graphics.drawString(mc.font, "[\u25A0 PPO]", screenWidth - 40, 4, 0x00FF00, true);
+    }
 }
+

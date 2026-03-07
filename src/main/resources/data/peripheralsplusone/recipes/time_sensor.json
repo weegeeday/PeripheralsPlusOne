@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "IKI", "III"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "K": {"item": "minecraft:clock"}
+  },
+  "result": {"item": "peripheralsplusone:time_sensor", "count": 1}
+}

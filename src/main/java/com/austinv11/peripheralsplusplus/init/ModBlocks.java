@@ -2,60 +2,48 @@ package com.austinv11.peripheralsplusplus.init;
 
 import com.austinv11.peripheralsplusplus.blocks.*;
 import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.block.BlockContainer;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraft.world.level.block.Block;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 
-import static net.minecraftforge.fml.common.registry.ForgeRegistries.BLOCKS;
-
-@GameRegistry.ObjectHolder(Reference.MOD_ID)
 public class ModBlocks {
-	public static final BlockPppBase CHAT_BOX = new BlockChatBox();
-	public static final BlockPppBase AI_CHAT_BOX = new BlockAIChatBox();
-	public static final BlockPppBase PLAYER_SENSOR = new BlockPlayerSensor();
-	public static final BlockPppBase RF_CHARGER = new BlockRFCharger();
-	public static final BlockPppBase ORE_DICTIONARY = new BlockOreDictionary();
-	public static final BlockContainer ANALYZER_BEE = new BlockAnalyzerBee();
-	public static final BlockContainer ANALYZER_TREE = new BlockAnalyzerTree();
-	public static final BlockContainer ANALYZER_BUTTERFLY = new BlockAnalyzerButterfly();
-	public static final BlockTeleporter TELEPORTER = new BlockTeleporter();
-	public static final BlockPppBase ENVIRONMENT_SCANNER = new BlockEnvironmentScanner();
-	public static final BlockSpeaker SPEAKER = new BlockSpeaker();
-	public static final BlockAntenna ANTENNA = new BlockAntenna();
-	public static final BlockPppBase PERIPHERAL_CONTAINER = new BlockPeripheralContainer();
-	public static final BlockPppBase ME_BRIDGE = new BlockMEBridge();
-	public static final BlockTurtle TURTLE = new BlockTurtle();
-	public static final BlockPppBase TIME_SENSOR = new BlockTimeSensor();
-	public static final BlockContainer INTERACTIVE_SORTER = new BlockInteractiveSorter();
-    public static final BlockContainer PLAYER_INTERFACE = new BlockPlayerInterface();
-	public static final BlockContainer RESUPPLY_STATION = new BlockResupplyStation();
-	public static final BlockContainer MANA_MANIPULATOR = new BlockManaManipulator();
-	public static final BlockContainer RFID_READER_WRITER = new BlockRfidReaderWriter();
-	public static final BlockPppBase MAG_READER_WRITER = new BlockMagReaderWriter();
-	public static final BlockPppBase PRIVACY_GUARD = new BlockPrivacyGuard();
 
-	public static void register(){
-		BLOCKS.register(CHAT_BOX);
-		BLOCKS.register(AI_CHAT_BOX);
-		BLOCKS.register(PLAYER_SENSOR);
-		BLOCKS.register(RF_CHARGER);
-		BLOCKS.register(ORE_DICTIONARY);
-		BLOCKS.register(ANALYZER_BEE);
-		BLOCKS.register(ANALYZER_TREE);
-		BLOCKS.register(ANALYZER_BUTTERFLY);
-		BLOCKS.register(TELEPORTER);
-		BLOCKS.register(ENVIRONMENT_SCANNER);
-		BLOCKS.register(SPEAKER);
-		BLOCKS.register(ANTENNA);
-		BLOCKS.register(PERIPHERAL_CONTAINER);
-		BLOCKS.register(ME_BRIDGE);
-		BLOCKS.register(TURTLE);
-		BLOCKS.register(TIME_SENSOR);
-		BLOCKS.register(INTERACTIVE_SORTER);
-        BLOCKS.register(PLAYER_INTERFACE);
-		BLOCKS.register(RESUPPLY_STATION);
-		BLOCKS.register(MANA_MANIPULATOR);
-		BLOCKS.register(RFID_READER_WRITER);
-		BLOCKS.register(MAG_READER_WRITER);
-		BLOCKS.register(PRIVACY_GUARD);
-    }
+    public static final DeferredRegister<Block> BLOCKS =
+            DeferredRegister.create(ForgeRegistries.BLOCKS, Reference.MOD_ID);
+
+    public static final RegistryObject<BlockChatBox> CHAT_BOX =
+            BLOCKS.register("chat_box", BlockChatBox::new);
+    public static final RegistryObject<BlockPlayerSensor> PLAYER_SENSOR =
+            BLOCKS.register("player_sensor", BlockPlayerSensor::new);
+    public static final RegistryObject<BlockRFCharger> RF_CHARGER =
+            BLOCKS.register("rf_charger", BlockRFCharger::new);
+    public static final RegistryObject<BlockOreDictionary> ORE_DICTIONARY =
+            BLOCKS.register("ore_dictionary", BlockOreDictionary::new);
+    public static final RegistryObject<BlockTeleporter> TELEPORTER =
+            BLOCKS.register("teleporter", BlockTeleporter::new);
+    public static final RegistryObject<BlockEnvironmentScanner> ENVIRONMENT_SCANNER =
+            BLOCKS.register("environment_scanner", BlockEnvironmentScanner::new);
+    public static final RegistryObject<BlockSpeaker> SPEAKER =
+            BLOCKS.register("speaker", BlockSpeaker::new);
+    public static final RegistryObject<BlockAntenna> ANTENNA =
+            BLOCKS.register("antenna", BlockAntenna::new);
+    public static final RegistryObject<BlockPeripheralContainer> PERIPHERAL_CONTAINER =
+            BLOCKS.register("peripheral_container", BlockPeripheralContainer::new);
+    public static final RegistryObject<BlockTurtle> TURTLE =
+            BLOCKS.register("turtle", BlockTurtle::new);
+    public static final RegistryObject<BlockTimeSensor> TIME_SENSOR =
+            BLOCKS.register("time_sensor", BlockTimeSensor::new);
+    public static final RegistryObject<BlockInteractiveSorter> INTERACTIVE_SORTER =
+            BLOCKS.register("interactive_sorter", BlockInteractiveSorter::new);
+    public static final RegistryObject<BlockPlayerInterface> PLAYER_INTERFACE =
+            BLOCKS.register("player_interface", BlockPlayerInterface::new);
+    public static final RegistryObject<BlockResupplyStation> RESUPPLY_STATION =
+            BLOCKS.register("resupply_station", BlockResupplyStation::new);
+    public static final RegistryObject<BlockRfidReaderWriter> RFID_READER_WRITER =
+            BLOCKS.register("rfid_reader_writer", BlockRfidReaderWriter::new);
+    public static final RegistryObject<BlockMagReaderWriter> MAG_READER_WRITER =
+            BLOCKS.register("mag_reader_writer", BlockMagReaderWriter::new);
+    public static final RegistryObject<BlockPrivacyGuard> PRIVACY_GUARD =
+            BLOCKS.register("privacy_guard", BlockPrivacyGuard::new);
 }

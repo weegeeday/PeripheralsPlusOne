@@ -1,132 +1,122 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-
-import com.austinv11.collectiveframework.minecraft.tiles.NetworkedTileEntity;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.ReflectionHelper;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileEntityRFCharger extends NetworkedTileEntity implements IEnergyStorage, ITickable {
-	private EnergyStorage storage = new EnergyStorage(80000);//Leadstone Capacitor
+public class TileEntityRFCharger extends BlockEntity implements IEnergyStorage {
 
-	public TileEntityRFCharger() {
-		super();
-	}
+private EnergyStorage storage = new EnergyStorage(80000);
+private final LazyOptional<IEnergyStorage> energyCap = LazyOptional.of(() -> this);
 
-	@Override
-	public void readFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
-		if (nbttagcompound.hasKey("capacity")) {
-            int capacity = nbttagcompound.getInteger("capacity");
-            int energy = nbttagcompound.getInteger("energy");
-            storage = new EnergyStorage(capacity, capacity, capacity, energy);
-        }
-	}
+public TileEntityRFCharger(BlockPos pos, BlockState state) {
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.RF_CHARGER.get(), pos, state);
+}
 
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
-		nbttagcompound.setInteger("capacity", storage.getMaxEnergyStored());
-		nbttagcompound.setInteger("energy", storage.getEnergyStored());
-		return nbttagcompound;
-	}
+@Override
+public void load(CompoundTag tag) {
+super.load(tag);
+if (tag.contains("capacity")) {
+int capacity = tag.getInt("capacity");
+int energy = tag.getInt("energy");
+storage = new EnergyStorage(capacity, capacity, capacity, energy);
+}
+}
 
-	@Override
-	public void update() {
-		if (!getWorld().isRemote) {
-			List<ITurtleAccess> turtles = new ArrayList<ITurtleAccess>(6);
-			for (EnumFacing direction : EnumFacing.values()) {
-			    BlockPos pos = getPos().offset(direction);
-				if (getWorld().isAirBlock(pos))
-					continue;
-				TileEntity te = getWorld().getTileEntity(pos);
-				if (te != null) {
-					try {
-						ITurtleAccess turtle = ReflectionHelper.getTurtle(te);
-						if (turtle != null) {
-							turtles.add(turtle);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			int rate = ((int) Math.floor((float) 6/(float) turtles.size()));
-			for (ITurtleAccess turtle : turtles) {
-				if (storage.getEnergyStored() >= rate)
-					storage.extractEnergy(addFuel(turtle, rate)*Config.fuelRF, false);
-			}
-		}
-	}
+@Override
+protected void saveAdditional(CompoundTag tag) {
+super.saveAdditional(tag);
+tag.putInt("capacity", storage.getMaxEnergyStored());
+tag.putInt("energy", storage.getEnergyStored());
+}
 
-	private int addFuel(ITurtleAccess turtle, int rate) {
-		if (turtle.getFuelLimit() > turtle.getFuelLevel()) {
-			turtle.setFuelLevel(rate+turtle.getFuelLevel());//Bad fix for a crash with turtle.addFuel()
-			return rate;
-		}
-		return 0;
-	}
+public static void serverTick(Level level, BlockPos pos, BlockState state, TileEntityRFCharger self) {
+if (level.isClientSide) return;
+List<ITurtleAccess> turtles = new ArrayList<>(6);
+for (Direction direction : Direction.values()) {
+BlockPos neighbor = pos.relative(direction);
+if (level.isEmptyBlock(neighbor)) continue;
+BlockEntity te = level.getBlockEntity(neighbor);
+if (te != null) {
+try {
+ITurtleAccess turtle = ReflectionHelper.getTurtle(te);
+if (turtle != null) turtles.add(turtle);
+} catch (Exception ignored) {}
+}
+}
+if (turtles.isEmpty()) return;
+int rate = Math.max(1, 6 / turtles.size());
+for (ITurtleAccess turtle : turtles) {
+if (self.storage.getEnergyStored() >= rate)
+self.storage.extractEnergy(self.addFuel(turtle, rate) * Config.fuelRF, false);
+}
+}
 
-    @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        return storage.receiveEnergy(maxReceive, simulate);
-    }
+private int addFuel(ITurtleAccess turtle, int rate) {
+if (turtle.getFuelLimit() > turtle.getFuelLevel()) {
+turtle.setFuelLevel(rate + turtle.getFuelLevel());
+return rate;
+}
+return 0;
+}
 
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        return storage.extractEnergy(maxExtract, simulate);
-    }
+@Override
+public int receiveEnergy(int maxReceive, boolean simulate) {
+return storage.receiveEnergy(maxReceive, simulate);
+}
 
-    @Override
-    public int getEnergyStored() {
-        return storage.getEnergyStored();
-    }
+@Override
+public int extractEnergy(int maxExtract, boolean simulate) {
+return 0;
+}
 
-    @Override
-    public int getMaxEnergyStored() {
-        return storage.getMaxEnergyStored();
-    }
+@Override
+public int getEnergyStored() {
+return storage.getEnergyStored();
+}
 
-    @Override
-    public boolean canExtract() {
-        return storage.canExtract();
-    }
+@Override
+public int getMaxEnergyStored() {
+return storage.getMaxEnergyStored();
+}
 
-    @Override
-    public boolean canReceive() {
-        return storage.canReceive();
-    }
+@Override
+public boolean canExtract() {
+return false;
+}
 
-	public void showFuel(EntityPlayer player) {
-		player.sendMessage(new TextComponentString(String.format("Energy: %d/%dRF",
-				getEnergyStored(), getMaxEnergyStored())));
-	}
+@Override
+public boolean canReceive() {
+return true;
+}
 
-	@Override
-	public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-		return capability.equals(CapabilityEnergy.ENERGY) || super.hasCapability(capability, facing);
-	}
+@Nonnull
+@Override
+public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+if (cap == ForgeCapabilities.ENERGY)
+return energyCap.cast();
+return super.getCapability(cap, side);
+}
 
-	@Nullable
-	@Override
-	public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-		if (hasCapability(capability, facing))
-			return CapabilityEnergy.ENERGY.cast(this);
-		return super.getCapability(capability, facing);
-	}
+@Override
+public void invalidateCaps() {
+super.invalidateCaps();
+energyCap.invalidate();
+}
 }

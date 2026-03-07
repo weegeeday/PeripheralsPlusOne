@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["IGI", "GIG", "IGI"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "G": {"item": "minecraft:gold_ingot"}
+  },
+  "result": {"item": "peripheralsplusone:mag_reader_writer", "count": 1}
+}

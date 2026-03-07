@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GGG", "GDG", "GGG"],
+  "key": {
+    "G": {"item": "minecraft:gold_ingot"},
+    "D": {"item": "minecraft:diamond"}
+  },
+  "result": {"item": "peripheralsplusone:player_interface", "count": 1}
+}

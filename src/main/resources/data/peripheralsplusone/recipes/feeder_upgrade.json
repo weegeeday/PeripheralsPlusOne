@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["S S", " B ", "S S"],
+  "key": {
+    "S": {"item": "minecraft:wheat_seeds"},
+    "B": {"item": "minecraft:bowl"}
+  },
+  "result": {"item": "peripheralsplusone:feeder_upgrade", "count": 1}
+}

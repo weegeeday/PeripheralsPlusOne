@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GIG", "IGI", "GIG"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "G": {"item": "minecraft:glass"}
+  },
+  "result": {"item": "peripheralsplusone:environment_scanner", "count": 1}
+}

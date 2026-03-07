@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/nano_swarm"
+    "layer0": "peripheralsplusone:item/nano_swarm"
   }
 }

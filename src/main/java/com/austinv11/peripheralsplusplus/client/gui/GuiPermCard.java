@@ -1,86 +1,61 @@
 package com.austinv11.peripheralsplusplus.client.gui;
 
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
-import com.austinv11.peripheralsplusplus.network.PermCardChangePacket;
-import com.austinv11.peripheralsplusplus.reference.Reference;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
-import org.lwjgl.opengl.GL11;
+import com.mojang.authlib.GameProfile;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
-public class GuiPermCard extends GuiScreen
-{
-    private ItemStack permCard;
-    private ResourceLocation backgroundimage = new ResourceLocation(Reference.MOD_ID.toLowerCase() + ":" +
-            "textures/gui/perm_card.png");
-    private int sizeX, sizeY;
-    private boolean canGetStacks, canWithdraw, canDeposit;
+/**
+ * GUI for viewing/configuring a permissions card.
+ */
+public class GuiPermCard extends Screen {
 
-    public GuiPermCard(ItemStack card)
-    {
-        super();
-        this.permCard = card;
-        this.canGetStacks = NBTHelper.getBoolean(permCard, "getStacks");
-        this.canWithdraw = NBTHelper.getBoolean(permCard, "withdraw");
-        this.canDeposit = NBTHelper.getBoolean(permCard, "deposit");
-        sizeX = 132;
-        sizeY = 166;
+    private static final ResourceLocation TEXTURE =
+            new ResourceLocation("peripheralsplusone", "textures/gui/perm_card.png");
+    private static final int IMAGE_WIDTH = 176;
+    private static final int IMAGE_HEIGHT = 120;
+
+    private final ItemStack card;
+    private int x;
+    private int y;
+
+    public GuiPermCard(ItemStack card) {
+        super(Component.translatable("gui.peripheralsplusone.perm_card"));
+        this.card = card;
     }
 
     @Override
-    public void drawScreen(int par1, int par2, float par3)
-    {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.getTextureManager().bindTexture(backgroundimage);
-        int x = (width - sizeX) / 2;
-        int y = (height - sizeY) / 2;
-        drawTexturedModalRect(x, y, 0, 0, sizeX, sizeY);
-        // Have to draw the buttons before the text because mojang
-        drawTexturedModalRect(x + 10, y + 40, this.canGetStacks ? 0 : 9, 166, 9, 9);
-        drawTexturedModalRect(x + 10, y + 60, this.canWithdraw ? 0 : 9, 166, 9, 9);
-        drawTexturedModalRect(x + 10, y + 80, this.canDeposit ? 0 : 9, 166, 9, 9);
-        fontRenderer.drawString(I18n.translateToLocal("peripheralsplusone.inv.permCard"), x + 22, y + 5, 0x313131);
-        fontRenderer.drawString(I18n.translateToLocal("peripheralsplusone.inv.permCard.perms"), x + 32, y + 20, 0x313131);
-        fontRenderer.drawString(I18n.translateToLocal("peripheralsplusone.inv.permCard.get"), x + 25, y + 40, 0x313131);
-        fontRenderer.drawString(I18n.translateToLocal("peripheralsplusone.inv.permCard.withdraw"), x + 25, y + 60, 0x313131);
-        fontRenderer.drawString(I18n.translateToLocal("peripheralsplusone.inv.permCard.deposit"), x + 25, y + 80, 0x313131);
+    protected void init() {
+        super.init();
+        this.x = (this.width - IMAGE_WIDTH) / 2;
+        this.y = (this.height - IMAGE_HEIGHT) / 2;
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int par3)
-    {
-        int x = (width - sizeX) / 2;
-        int y = (height - sizeY) / 2;
-        if (mouseX >= x + 10 && mouseX < x + 20)
-        {
-            if (mouseY >= y + 40 && mouseY < y + 50)
-            {
-                canGetStacks = !canGetStacks;
-            }
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics);
+        graphics.blit(TEXTURE, x, y, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
 
-            if (mouseY >= y + 60 && mouseY < y + 70)
-            {
-                canWithdraw = !canWithdraw;
-            }
-
-            if (mouseY >= y + 80 && mouseY < y + 90)
-            {
-                canDeposit = !canDeposit;
+        // Show the owner name if set
+        if (card.hasTag() && card.getTag().contains("profile")) {
+            GameProfile profile = NbtUtils.readGameProfile(card.getTag().getCompound("profile"));
+            if (profile != null && profile.getName() != null) {
+                graphics.drawString(this.font,
+                        Component.translatable("peripheralsplusone.gui.perm_card.owner", profile.getName()),
+                        x + 8, y + 20, 0x404040, false);
             }
         }
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean doesGuiPauseGame()
-    {
+    public boolean isPauseScreen() {
         return false;
     }
-
-    @Override
-    public void onGuiClosed()
-    {
-        PeripheralsPlusPlus.NETWORK.sendToServer(new PermCardChangePacket(canGetStacks, canWithdraw, canDeposit));
-    }
 }
+

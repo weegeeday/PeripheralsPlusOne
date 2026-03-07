@@ -1,71 +1,64 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityTurtle;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
 
-public class BlockTurtle extends BlockPppDirectional implements ITileEntityProvider {
-	
-	public BlockTurtle() {
-		super();
-		this.setDefaultState(this.blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
-		this.setRegistryName(Reference.MOD_ID, "turtle");
-		this.setUnlocalizedName("turtle");
-		this.setLightOpacity(0);
-	}
+public class BlockTurtle extends BlockPppDirectional implements EntityBlock {
 
-	@Override
-	protected BlockStateContainer createBlockState() {
-		return new BlockStateContainer(this, FACING);
-	}
+public BlockTurtle() {
+super();
+this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH));
+}
 
-    @Override
-    public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer,
-                                ItemStack stack) {
-		worldIn.setBlockState(pos, state.withProperty(FACING,
-				EnumFacing.getDirectionFromEntityLiving(pos, placer)), 2);
-    }
+@Override
+protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+builder.add(FACING);
+}
 
-    @Override
-	public int getMetaFromState(IBlockState state) {
-		return state.getValue(FACING).getIndex();
-	}
+@Nullable
+@Override
+public BlockState getStateForPlacement(BlockPlaceContext context) {
+return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+}
 
-	@Override
-	public IBlockState getStateFromMeta(int meta) {
-		return getDefaultState().withProperty(FACING, EnumFacing.getFront(meta));
-	}
+@Override
+public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+// Facing is set via getStateForPlacement
+}
 
-	@Override
-	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-		return false;
-	}
+@Override
+public boolean isCollisionShapeFullBlock(BlockState state, net.minecraft.world.level.BlockGetter getter, BlockPos pos) {
+return false;
+}
 
-	@Override
-	public EnumBlockRenderType getRenderType(IBlockState state) {
-		return EnumBlockRenderType.INVISIBLE;
-	}
+@Override
+public RenderShape getRenderShape(BlockState state) {
+return RenderShape.INVISIBLE;
+}
 
-	@Override
-	public boolean isOpaqueCube(IBlockState state) {
-		return false;
-	}
+@Override
+public VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter getter, BlockPos pos, CollisionContext context) {
+return Shapes.empty();
+}
 
-	@Nullable
-	@Override
-	public TileEntity createNewTileEntity(World worldIn, int meta) {
-		return new TileEntityTurtle();
-	}
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityTurtle(pos, state);
+}
 }

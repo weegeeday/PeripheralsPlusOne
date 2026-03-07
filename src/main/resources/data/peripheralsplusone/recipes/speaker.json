@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["III", "INI", "III"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"},
+    "N": {"item": "minecraft:note_block"}
+  },
+  "result": {"item": "peripheralsplusone:speaker", "count": 1}
+}

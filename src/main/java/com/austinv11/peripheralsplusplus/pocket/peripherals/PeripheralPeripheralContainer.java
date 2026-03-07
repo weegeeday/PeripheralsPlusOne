@@ -2,114 +2,88 @@ package com.austinv11.peripheralsplusplus.pocket.peripherals;
 
 import com.austinv11.peripheralsplusplus.lua.LuaObjectPeripheralWrap;
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.IPocketUpgrade;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class PeripheralPeripheralContainer implements IPlusPlusPeripheral {
+public class PeripheralPeripheralContainer implements IPeripheral {
 
-	private final Map<IPocketUpgrade, IPeripheral> pocketUpgrades;
-	private Map<ResourceLocation, ItemStack> unequippedItems;
+private final Map<IPocketUpgrade, IPeripheral> pocketUpgrades;
+private final Map<ResourceLocation, ItemStack> unequippedItems = new HashMap<>();
 
-	public PeripheralPeripheralContainer(Map<IPocketUpgrade, IPeripheral> pocketUpgrades) {
-		super();
-		this.pocketUpgrades = pocketUpgrades;
-		unequippedItems = new HashMap<>();
-	}
-	
-	@Override
-	public String getType() {
-		return "peripheralContainer";
-	}
-	
-	@Override
-	public String[] getMethodNames() {
-		return new String[]{"getContainedPeripherals", "wrapPeripheral", "unequipPeripheral"};
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enablePeripheralContainer)
-			throw new LuaException("Peripheral Containers have been disabled");
-		if (method == 0) {
-			HashMap<Integer, String> returnVals = new HashMap<Integer,String>();
-			for (int i = 0; i < getPeripherals().size(); i++)
-				returnVals.put(i+1, getPeripherals().get(i).getType());
-			return new Object[]{returnVals};
-		} else if (method == 1) {
-			if (arguments.length < 1)
-				throw new LuaException("Too few arguments");
-			if (!(arguments[0] instanceof String))
-				throw new LuaException("Bad argument #1 (expected string)");
-			return new Object[]{new LuaObjectPeripheralWrap(getPeripheralByName((String)arguments[0]), computer)};
-		} else if (method == 2) {
-			if (arguments.length < 1)
-				throw new LuaException("Usage: unequip <String peripheral type>");
-			if (!(arguments[0] instanceof String))
-				throw new LuaException("First argument expected to be a string");
-			IPeripheral peripheral = getPeripheralByName((String) arguments[0]);
-			if (peripheral == null)
-				return new Object[]{false};
-			Map<ResourceLocation, ItemStack> unequipped = new HashMap<>();
-			for (Map.Entry<IPocketUpgrade, IPeripheral> upgrade : getUpgrades().entrySet())
-				if (upgrade.getValue().equals(peripheral)) {
-					unequipped.put(upgrade.getKey().getUpgradeID(), upgrade.getKey().getCraftingItem());
-					getUpgrades().remove(upgrade.getKey(), upgrade.getValue());
-					break;
-				}
-			if (unequipped.isEmpty())
-				return new Object[]{false};
-			unequippedItems.putAll(unequipped);
-			return new Object[]{true};
-		}
-		return new Object[0];
-	}
-	
-	private IPeripheral getPeripheralByName(String argument) {
-		for (IPeripheral peripheral : getPeripherals())
-			if (peripheral.getType().equals(argument))
-				return peripheral;
-		return null;
-	}
-	
-	private List<IPeripheral> getPeripherals() {
-		List<IPeripheral> peripherals = new ArrayList<>();
-		peripherals.addAll(this.pocketUpgrades.values());
-		return peripherals;
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
-	
-	@Override
-	public void attach(IComputerAccess computer) {
-		for (IPeripheral peripheral : getPeripherals())
-			peripheral.attach(computer);
-	}
-	
-	@Override
-	public void detach(IComputerAccess computer) {
-		for (IPeripheral peripheral : getPeripherals())
-			peripheral.detach(computer);
-	}
+public PeripheralPeripheralContainer(Map<IPocketUpgrade, IPeripheral> pocketUpgrades) {
+this.pocketUpgrades = pocketUpgrades;
+}
 
-	public Map<IPocketUpgrade, IPeripheral> getUpgrades() {
-		return pocketUpgrades;
-	}
+@Override
+public String getType() {
+return "peripheralContainer";
+}
 
-	public Map<ResourceLocation, ItemStack> getUnequippedItems() {
-		return unequippedItems;
-	}
+@LuaFunction
+public final Object[] getContainedPeripherals(IArguments args) throws LuaException {
+if (!Config.enablePeripheralContainer)
+throw new LuaException("Peripheral Containers have been disabled");
+HashMap<Integer, String> returnVals = new HashMap<>();
+List<IPeripheral> peripherals = getPeripherals();
+for (int i = 0; i < peripherals.size(); i++)
+returnVals.put(i + 1, peripherals.get(i).getType());
+return new Object[]{returnVals};
+}
+
+@LuaFunction
+public final Object[] wrapPeripheral(IArguments args) throws LuaException {
+if (!Config.enablePeripheralContainer)
+throw new LuaException("Peripheral Containers have been disabled");
+return new Object[]{new LuaObjectPeripheralWrap(getPeripheralByName(args.getString(0)), null)};
+}
+
+@LuaFunction
+public final Object[] unequipPeripheral(IArguments args) throws LuaException {
+if (!Config.enablePeripheralContainer)
+throw new LuaException("Peripheral Containers have been disabled");
+IPeripheral peripheral = getPeripheralByName(args.getString(0));
+if (peripheral == null) return new Object[]{false};
+for (Map.Entry<IPocketUpgrade, IPeripheral> entry : pocketUpgrades.entrySet()) {
+if (entry.getValue().equals(peripheral)) {
+unequippedItems.put(entry.getKey().getUpgradeID(), entry.getKey().getCraftingItem());
+pocketUpgrades.remove(entry.getKey());
+return new Object[]{true};
+}
+}
+return new Object[]{false};
+}
+
+private IPeripheral getPeripheralByName(String name) {
+for (IPeripheral p : pocketUpgrades.values())
+if (p.getType().equals(name)) return p;
+return null;
+}
+
+private List<IPeripheral> getPeripherals() {
+return new ArrayList<>(pocketUpgrades.values());
+}
+
+@Override
+public boolean equals(IPeripheral other) { return other == this; }
+
+@Override
+public void attach(IComputerAccess computer) {
+for (IPeripheral p : getPeripherals()) p.attach(computer);
+}
+
+@Override
+public void detach(IComputerAccess computer) {
+for (IPeripheral p : getPeripherals()) p.detach(computer);
+}
+
+public Map<IPocketUpgrade, IPeripheral> getUpgrades() { return pocketUpgrades; }
+public Map<ResourceLocation, ItemStack> getUnequippedItems() { return unequippedItems; }
 }

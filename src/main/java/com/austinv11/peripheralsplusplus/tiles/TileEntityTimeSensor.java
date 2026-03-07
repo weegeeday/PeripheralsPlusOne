@@ -1,65 +1,91 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.utils.TimeProfiler;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
-public class TileEntityTimeSensor extends TileEntity implements IPlusPlusPeripheral {
-	
-	private TimeProfiler profiler;
+public class TileEntityTimeSensor extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral {
 
-	public TileEntityTimeSensor() {
-		super();
-	}
+private long timerStart = -1;
 
-	@Override
-	public String getType() {
-		return "timeSensor";
-	}
+public TileEntityTimeSensor(BlockPos pos, BlockState state) {
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.TIME_SENSOR.get(), pos, state);
+}
+public final Object[] getDate(IArguments args) throws LuaException {
+if (!Config.enableTimeSensor)
+throw new LuaException("Time Sensors have been disabled!");
+String timeStamp = new SimpleDateFormat("yyyy@MM@dd@HH@mm@ss").format(new Date());
+HashMap<String, Integer> map = new HashMap<>();
+String[] split = timeStamp.split("@");
+map.put("year", Integer.valueOf(split[0]));
+map.put("month", Integer.valueOf(split[1]));
+map.put("day", Integer.valueOf(split[2]));
+map.put("hour", Integer.valueOf(split[3]));
+map.put("minute", Integer.valueOf(split[4]));
+map.put("second", Integer.valueOf(split[5]));
+return new Object[]{map};
+}
 
-	@Override
-	public String[] getMethodNames() {
-		return new String[] {"getDate", "getTime", "startTimer", "stopTimer"};
-	}
+public final Object[] getTime(IArguments args) throws LuaException {
+if (!Config.enableTimeSensor)
+throw new LuaException("Time Sensors have been disabled!");
+return new Object[]{System.currentTimeMillis()};
+}
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enableTimeSensor)
-			throw new LuaException("Time Sensors have been disabled!");
-		if (method == 0) {
-			String timeStamp = new SimpleDateFormat("yyyy@MM@dd@HH@mm@ss").format(new Date());
-			HashMap<String, Integer> map = new HashMap<String, Integer>();
-			String[] split = timeStamp.split("@");
-			map.put("year", Integer.valueOf(split[0]));
-			map.put("month", Integer.valueOf(split[1]));
-			map.put("day", Integer.valueOf(split[2]));
-			map.put("hour", Integer.valueOf(split[3]));
-			map.put("minute", Integer.valueOf(split[4]));
-			map.put("second", Integer.valueOf(split[5]));
-			return new Object[]{map};
-		} else if (method == 1) {
-			return new Object[]{System.currentTimeMillis()};
-		} else if (method == 2) {
-			profiler = new TimeProfiler();
-		} else if (method == 3) {
-			long time = profiler == null ? 0 : profiler.getTime();
-			profiler = null;
-			return new Object[]{time};
-		}
-		return new Object[0];
-	}
+public final void startTimer(IArguments args) throws LuaException {
+if (!Config.enableTimeSensor)
+throw new LuaException("Time Sensors have been disabled!");
+timerStart = System.currentTimeMillis();
+}
 
-	@Override
-	public boolean equals(IPeripheral other) {
-		return (other == this);
-	}
+public final Object[] stopTimer(IArguments args) throws LuaException {
+if (!Config.enableTimeSensor)
+throw new LuaException("Time Sensors have been disabled!");
+long time = timerStart < 0 ? 0 : System.currentTimeMillis() - timerStart;
+timerStart = -1;
+return new Object[]{time};
+}
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "timeSensor"; }
+
+        @Override
+        public boolean equals(IPeripheral other) { return TileEntityTimeSensor.this == other; }
+
+        @LuaFunction
+        public final Object[] getDate(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.getDate(args);
+        }
+
+        @LuaFunction
+        public final Object[] getTime(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.getTime(args);
+        }
+
+        @LuaFunction
+        public final void startTimer(IArguments args) throws LuaException {
+            TileEntityTimeSensor.this.startTimer(args);
+        }
+
+        @LuaFunction
+        public final Object[] stopTimer(IArguments args) throws LuaException {
+            return TileEntityTimeSensor.this.stopTimer(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

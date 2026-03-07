@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GIG", "IRI", "GIG"],
+  "key": {
+    "G": {"item": "minecraft:gunpowder"},
+    "I": {"item": "minecraft:iron_ingot"},
+    "R": {"item": "minecraft:redstone"}
+  },
+  "result": {"item": "peripheralsplusone:nano_swarm", "count": 1}
+}

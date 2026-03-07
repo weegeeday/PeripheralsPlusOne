@@ -1,6 +1,6 @@
 {
     "parent": "computercraft:block/turtle_upgrade_base_right",
     "textures": {
-        "texture": "minecraft:blocks/log_big_oak"
+        "texture": "minecraft:block/log_big_oak"
     }
 }

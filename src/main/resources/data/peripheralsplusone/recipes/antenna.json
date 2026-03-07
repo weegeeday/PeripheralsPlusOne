@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [" I ", "III", "III"],
+  "key": {
+    "I": {"item": "minecraft:iron_ingot"}
+  },
+  "result": {"item": "peripheralsplusone:antenna", "count": 1}
+}

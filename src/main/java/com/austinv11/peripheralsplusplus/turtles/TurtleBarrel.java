@@ -1,36 +1,31 @@
 package com.austinv11.peripheralsplusplus.turtles;
 
-import com.austinv11.collectiveframework.minecraft.utils.ModelManager;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.turtles.peripherals.PeripheralBarrel;
-import com.austinv11.peripheralsplusplus.utils.ModelUtil;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
 
-public class TurtleBarrel implements ITurtleUpgrade, ModelManager.ModelRegistrar {
+public class TurtleBarrel implements ITurtleUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleBarrel(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 
 	@Nonnull
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.BARREL_UPGRADE);
-	}
-
-	@Override
-	public int getLegacyUpgradeID() {
-		return Reference.BARREL_UPGRADE_LEGACY;
+		return upgradeId;
 	}
 
 	@Override
@@ -40,14 +35,13 @@ public class TurtleBarrel implements ITurtleUpgrade, ModelManager.ModelRegistrar
 
 	@Override
 	public TurtleUpgradeType getType() {
-		return TurtleUpgradeType.Peripheral;
+		return TurtleUpgradeType.PERIPHERAL;
 	}
-
 	@Override
 	public ItemStack getCraftingItem() {
 		if (!Config.enableBarrelTurtle)
 			return ItemStack.EMPTY;
-		return new ItemStack(Blocks.LOG);
+		return new ItemStack(Blocks.OAK_LOG);
 	}
 
 	@Override
@@ -58,14 +52,8 @@ public class TurtleBarrel implements ITurtleUpgrade, ModelManager.ModelRegistrar
 	@Nonnull
 	@Override
 	public TurtleCommandResult useTool(@Nonnull ITurtleAccess turtle, @Nonnull TurtleSide side,
-									   @Nonnull TurtleVerb verb, @Nonnull EnumFacing direction) {
+									   @Nonnull TurtleVerb verb, @Nonnull Direction direction) {
 		return TurtleCommandResult.failure();
-	}
-
-	@Nonnull
-	@Override
-	public Pair<IBakedModel, Matrix4f> getModel(@Nullable ITurtleAccess turtle, @Nonnull TurtleSide side) {
-		return ModelUtil.getTurtleUpgradeModel("turtle_barrel", side);
 	}
 
 	@Override
@@ -76,10 +64,5 @@ public class TurtleBarrel implements ITurtleUpgrade, ModelManager.ModelRegistrar
 			if (barrel.changed)
 				barrel.update();
 		}
-	}
-
-	@Override
-	public void registerModels(IRegistry<ModelResourceLocation, IBakedModel> iRegistry) {
-		ModelUtil.registerTurtleUpgradeModels(iRegistry, "turtle_barrel");
 	}
 }

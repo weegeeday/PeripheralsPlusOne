@@ -1,51 +1,39 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
-import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityRfidReaderWriter;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 
 public class BlockRfidReaderWriter extends BlockContainerPPP {
 
-    public BlockRfidReaderWriter() {
-        super(Material.ROCK);
-        this.setRegistryName(Reference.MOD_ID, "rfid_reader_writer");
-        this.setUnlocalizedName("rfid_reader_writer");
-        this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-        this.setHardness(4);
-    }
+public BlockRfidReaderWriter() {
+super();
+}
 
-    @Nullable
-    @Override
-    public TileEntity createNewTileEntity(World worldIn, int meta) {
-        return new TileEntityRfidReaderWriter();
-    }
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityRfidReaderWriter(pos, state);
+}
 
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand,
-                                    EnumFacing facing, float hitX, float hitY, float hitZ) {
-        TileEntity te = world.getTileEntity(pos);
-        if (!world.isRemote) {
-            if (te instanceof TileEntityRfidReaderWriter)
-                player.openGui(PeripheralsPlusPlus.instance, Reference.GUIs.RFID_READER_WRITER.ordinal(), world,
-                        pos.getX(), pos.getY(), pos.getZ());
-        }
-        return true;
-    }
-
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.MODEL;
-    }
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+ InteractionHand hand, BlockHitResult hit) {
+if (!level.isClientSide) {
+BlockEntity te = level.getBlockEntity(pos);
+if (te instanceof net.minecraft.world.MenuProvider menuProvider)
+NetworkHooks.openScreen((ServerPlayer) player, menuProvider, pos);
+}
+return InteractionResult.sidedSuccess(level.isClientSide);
+}
 }

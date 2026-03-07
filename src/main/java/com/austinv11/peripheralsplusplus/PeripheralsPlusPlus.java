@@ -1,77 +1,107 @@
 package com.austinv11.peripheralsplusplus;
 
-import com.austinv11.collectiveframework.minecraft.config.ConfigException;
-import com.austinv11.collectiveframework.minecraft.config.ConfigRegistry;
+import com.austinv11.peripheralsplusplus.client.gui.GuiFactory;
+import com.austinv11.peripheralsplusplus.client.gui.GuiSmartHelmetOverlay;
+import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
+import com.austinv11.peripheralsplusplus.event.handler.CapabilitiesHandler;
+import com.austinv11.peripheralsplusplus.event.handler.PeripheralContainerHandler;
+import com.austinv11.peripheralsplusplus.event.handler.RobotHandler;
 import com.austinv11.peripheralsplusplus.init.ModBlocks;
+import com.austinv11.peripheralsplusplus.init.ModEntities;
 import com.austinv11.peripheralsplusplus.init.ModItems;
+import com.austinv11.peripheralsplusplus.init.ModMenus;
 import com.austinv11.peripheralsplusplus.init.ModPeripherals;
-import com.austinv11.peripheralsplusplus.init.Recipes;
-import com.austinv11.peripheralsplusplus.items.ItemNanoSwarm;
-import com.austinv11.peripheralsplusplus.proxy.CommonProxy;
+import com.austinv11.peripheralsplusplus.init.ModTileEntities;
+import com.austinv11.peripheralsplusplus.init.ModUpgrades;
+import com.austinv11.peripheralsplusplus.network.*;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.reference.Reference;
-import com.austinv11.peripheralsplusplus.turtles.peripherals.PeripheralChunkLoader;
-import net.minecraft.block.BlockDispenser;
-import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid= Reference.MOD_ID, name = Reference.MOD_NAME, version = Reference.VERSION,
-		guiFactory = Reference.GUI_FACTORY_CLASS,
-		dependencies = "required-after:theframework;required-after:computercraft")
+import java.util.Optional;
+
+@Mod(Reference.MOD_ID)
 public class PeripheralsPlusPlus {
-	
-	public static SimpleNetworkWrapper NETWORK;
 
-	@Mod.Instance(Reference.MOD_ID)
-	public static PeripheralsPlusPlus instance;
+    public static final Logger LOGGER = LogManager.getLogger(Reference.MOD_ID);
 
-	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.SERVER_PROXY_CLASS)
-	public static CommonProxy proxy;
-	
-	public static Logger LOGGER = LogManager.getLogger(Reference.MOD_ID);
-	
-	@Mod.EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		LOGGER = event.getModLog();
-		try {
-			ConfigRegistry.registerConfig(Config.INSTANCE);
-		} catch (ConfigException e) {
-			LOGGER.fatal("Fatal problem with the Peripherals++ config has been caught, if this continues, please delete the config file");
-			e.printStackTrace();
-		}
-		ModBlocks.register();
-		ModItems.register();
-		ModPeripherals.registerInternally();
-		proxy.textureAndModelInit();
-		proxy.registerNetwork();
-		proxy.prepareGuis();
-		proxy.registerEvents();
-		proxy.registerEntities();
-		proxy.registerTileEntities();
-		proxy.registerRenderers();
-		proxy.registerCapabilities();
-		if (Config.enableVillagers)
-			proxy.setupVillagers();
-	}
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel NETWORK = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(Reference.MOD_ID, "main"),
+            () -> PROTOCOL_VERSION,
+            PROTOCOL_VERSION::equals,
+            PROTOCOL_VERSION::equals);
 
-	@Mod.EventHandler
-	public void init(FMLInitializationEvent event) {
-		ModPeripherals.registerWithComputerCraft();
-		LOGGER.info("All peripherals and TURTLE upgrades registered!");
-		ForgeChunkManager.setForcedChunkLoadingCallback(PeripheralsPlusPlus.instance,
-				new PeripheralChunkLoader.LoaderHandler());
-	}
+    public PeripheralsPlusPlus() {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-	@Mod.EventHandler
-	public void postInit(FMLPostInitializationEvent event) {
-		Recipes.init();
-		BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(ModItems.NANO_SWARM, new ItemNanoSwarm.BehaviorNanoSwarm());
-	}
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+
+        // Wire deferred registers
+        ModBlocks.BLOCKS.register(modBus);
+        ModItems.ITEMS.register(modBus);
+        ModTileEntities.TILE_ENTITIES.register(modBus);
+        ModEntities.ENTITIES.register(modBus);
+        ModMenus.MENUS.register(modBus);
+        ModUpgrades.register(modBus);
+        CreativeTabPPP.TABS.register(modBus);
+
+        modBus.addListener(this::commonSetup);
+        modBus.addListener(this::clientSetup);
+        modBus.addListener(this::registerGuiOverlays);
+        modBus.addListener(Config::onLoad);
+
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        MinecraftForge.EVENT_BUS.register(new CapabilitiesHandler());
+        MinecraftForge.EVENT_BUS.register(new PeripheralContainerHandler());
+        // Register network packets
+        int id = 0;
+        NETWORK.registerMessage(id++, ChatPacket.class, ChatPacket::encode, ChatPacket::decode, ChatPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, ParticlePacket.class, ParticlePacket::encode, ParticlePacket::decode, ParticlePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, CommandPacket.class, CommandPacket::encode, CommandPacket::decode, CommandPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, GuiPacket.class, GuiPacket::encode, GuiPacket::decode, GuiPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, InputEventPacket.class, InputEventPacket::encode, InputEventPacket::decode, InputEventPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, PermCardChangePacket.class, PermCardChangePacket::encode, PermCardChangePacket::decode, PermCardChangePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, RidableTurtlePacket.class, RidableTurtlePacket::encode, RidableTurtlePacket::decode, RidableTurtlePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, RobotEventPacket.class, RobotEventPacket::encode, RobotEventPacket::decode, RobotEventPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, ScaleRequestPacket.class, ScaleRequestPacket::encode, ScaleRequestPacket::decode, ScaleRequestPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, ScaleRequestResponsePacket.class, ScaleRequestResponsePacket::encode, ScaleRequestResponsePacket::decode, ScaleRequestResponsePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, SynthPacket.class, SynthPacket::encode, SynthPacket::decode, SynthPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        NETWORK.registerMessage(id++, SynthResponsePacket.class, SynthResponsePacket::encode, SynthResponsePacket::decode, SynthResponsePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        NETWORK.registerMessage(id++, TextFieldInputEventPacket.class, TextFieldInputEventPacket::encode, TextFieldInputEventPacket::decode, TextFieldInputEventPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+
+        ModPeripherals.registerWithComputerCraft();
+        LOGGER.info("PeripheralsPlusOne: peripherals registered.");
+    }
+
+    private void clientSetup(FMLClientSetupEvent event) {
+        event.enqueueWork(GuiFactory::registerScreens);
+        // Register client-only event handlers
+        MinecraftForge.EVENT_BUS.register(new RobotHandler());
+    }
+
+    private void registerGuiOverlays(RegisterGuiOverlaysEvent event) {
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(),
+                "smart_helmet",
+                GuiSmartHelmetOverlay.INSTANCE);
+    }
 }
+

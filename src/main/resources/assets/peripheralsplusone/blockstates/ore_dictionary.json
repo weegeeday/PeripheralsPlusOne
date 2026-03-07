@@ -1,11 +1,5 @@
 {
-  "forge_marker": 1,
-  "defaults": {
-    "model": "peripheralsplusone:ore_dictionary",
-    "uvlock": true
-  },
   "variants": {
-    "normal": [{}],
-    "inventory": [{}]
+    "": { "model": "peripheralsplusone:block/ore_dictionary" }
   }
 }

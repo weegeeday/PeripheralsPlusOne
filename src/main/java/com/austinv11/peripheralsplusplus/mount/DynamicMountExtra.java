@@ -1,7 +1,5 @@
 package com.austinv11.peripheralsplusplus.mount;
 
-import dan200.computercraft.api.filesystem.IMount;
-
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DynamicMountExtra implements IMount {
+public class DynamicMountExtra {
     private final Map<String, File> files;
 
     DynamicMountExtra(Map<String, File> files) {
@@ -23,8 +21,6 @@ public class DynamicMountExtra implements IMount {
             return files.get(path);
         throw new IOException(path);
     }
-
-    @Override
     public boolean exists(@Nonnull String path) throws IOException {
         if (path.equals(""))
             return true;
@@ -45,8 +41,6 @@ public class DynamicMountExtra implements IMount {
         }
         return false;
     }
-
-    @Override
     public boolean isDirectory(@Nonnull String path) throws IOException {
         File file;
         try {
@@ -57,8 +51,6 @@ public class DynamicMountExtra implements IMount {
         }
         return path.equals("") || file.isDirectory();
     }
-
-    @Override
     public void list(@Nonnull String path, @Nonnull List<String> contents) throws IOException {
         for (Map.Entry<String, File> file : files.entrySet()) {
             if (file.getKey().startsWith(path)) {
@@ -75,14 +67,11 @@ public class DynamicMountExtra implements IMount {
             }
         }
     }
-
-    @Override
     public long getSize(@Nonnull String path) throws IOException {
         return getFile(path).getTotalSpace();
     }
 
     @Nonnull
-    @Override
     public InputStream openForRead(@Nonnull String path) throws IOException {
         return new FileInputStream(getFile(path));
     }

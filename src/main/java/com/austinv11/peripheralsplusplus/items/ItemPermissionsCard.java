@@ -1,97 +1,69 @@
 package com.austinv11.peripheralsplusplus.items;
 
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
-public class ItemPermissionsCard extends ItemPPP
-{
-    public ItemPermissionsCard()
-    {
-        super();
-        this.setUnlocalizedName("permissions_card");
-        this.setRegistryName(Reference.MOD_ID, "permissions_card");
-        this.setMaxStackSize(1);
-    }
+public class ItemPermissionsCard extends ItemPPP {
 
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-        ItemStack stack = player.getHeldItem(hand);
-        if (Config.enablePlayerInterface)
-        {
-            NBTTagCompound compound = stack.getTagCompound();
-            if (!player.isSneaking())
-            {
-                if (!world.isRemote)
-                {
-                    if (NBTHelper.getTag(stack, "profile") == null)
-                    {
-                        NBTTagCompound nbt = new NBTTagCompound();
-                        NBTUtil.writeGameProfile(nbt, player.getGameProfile());
-                        NBTHelper.setTag(stack, "profile", nbt);
+public ItemPermissionsCard(Properties props) {
+super(props.stacksTo(1));
+}
 
-                        NBTHelper.setBoolean(stack, "getStacks", false);
-                        NBTHelper.setBoolean(stack, "withdraw", false);
-                        NBTHelper.setBoolean(stack, "deposit", false);
-                        player.sendMessage(new TextComponentTranslation(
-                                "peripheralsplusone.chat.permCard.set"));
-                    }
-                    else
-                    {
-                        player.sendMessage(new TextComponentTranslation(
-                                "peripheralsplusone.chat.permCard.alreadySet"));
-                        return new ActionResult<>(EnumActionResult.FAIL, stack);
-                    }
-                }
-            }
-            else
-            {
-                if (compound == null || NBTHelper.getTag(stack, "profile") == null)
-                {
-                    if (!world.isRemote)
-                    {
-                        player.sendMessage(new TextComponentTranslation(
-                                "peripheralsplusone.chat.permCard.notSet"));
-                    }
-                    return new ActionResult<>(EnumActionResult.FAIL, stack);
-                }
-                GameProfile gameProfile = NBTUtil.readGameProfileFromNBT(NBTHelper.getCompoundTag(stack,
-                        "profile"));
-                if (gameProfile == null || !gameProfile.getId().equals(player.getGameProfile().getId()))
-                {
-                    if (!world.isRemote)
-                    {
-                        player.sendMessage(new TextComponentTranslation(
-                                "peripheralsplusone.chat.permCard.wrongOwner"));
-                    }
-                    return new ActionResult<>(EnumActionResult.FAIL, stack);
-                }
+@Override
+public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+ItemStack stack = player.getItemInHand(hand);
+if (!Config.enablePlayerInterface)
+return InteractionResultHolder.pass(stack);
 
-                player.openGui(PeripheralsPlusPlus.instance, Reference.GUIs.PERMCARD.ordinal(), world,
-                        (int) player.posX, (int) player.posY, (int) player.posZ);
-            }
-        }
-        return new ActionResult<>(EnumActionResult.SUCCESS, stack);
-    }
+if (!player.isCrouching()) {
+if (!world.isClientSide()) {
+CompoundTag tag = stack.getTag();
+if (tag == null || !tag.contains("profile")) {
+CompoundTag nbt = new CompoundTag();
+NbtUtils.writeGameProfile(nbt, player.getGameProfile());
+stack.getOrCreateTag().put("profile", nbt);
+stack.getOrCreateTag().putBoolean("getStacks", false);
+stack.getOrCreateTag().putBoolean("withdraw", false);
+stack.getOrCreateTag().putBoolean("deposit", false);
+player.sendSystemMessage(Component.translatable("peripheralsplusone.chat.permCard.set"));
+} else {
+player.sendSystemMessage(Component.translatable("peripheralsplusone.chat.permCard.alreadySet"));
+return InteractionResultHolder.fail(stack);
+}
+}
+} else {
+if (!stack.hasTag() || !stack.getTag().contains("profile")) {
+if (!world.isClientSide())
+player.sendSystemMessage(Component.translatable("peripheralsplusone.chat.permCard.notSet"));
+return InteractionResultHolder.fail(stack);
+}
+GameProfile profile = NbtUtils.readGameProfile(stack.getTag().getCompound("profile"));
+if (profile == null || !profile.getId().equals(player.getGameProfile().getId())) {
+if (!world.isClientSide())
+player.sendSystemMessage(Component.translatable("peripheralsplusone.chat.permCard.wrongOwner"));
+return InteractionResultHolder.fail(stack);
+}
+// Open GUI for permissions configuration
+}
+return InteractionResultHolder.success(stack);
+}
 
-    @Override
-    public String getItemStackDisplayName(ItemStack stack)
-    {
-        GameProfile username = NBTUtil.readGameProfileFromNBT(NBTHelper.getCompoundTag(stack, "profile"));
-        return I18n.translateToLocal("item.peripheralsplusone:permissions_card.name") +
-                (NBTHelper.getTag(stack, "profile") == null ? "" : " - " +
-                        (username.getName() == null ? "" : username.getName()));
-    }
+@Override
+public Component getName(ItemStack stack) {
+if (stack.hasTag() && stack.getTag().contains("profile")) {
+GameProfile profile = NbtUtils.readGameProfile(stack.getTag().getCompound("profile"));
+if (profile != null && profile.getName() != null)
+return Component.translatable("item.peripheralsplusone.permissions_card")
+.append(" - " + profile.getName());
+}
+return super.getName(stack);
+}
 }

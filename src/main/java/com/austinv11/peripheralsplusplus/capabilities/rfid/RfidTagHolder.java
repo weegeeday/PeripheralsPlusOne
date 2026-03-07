@@ -1,6 +1,6 @@
 package com.austinv11.peripheralsplusplus.capabilities.rfid;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
 

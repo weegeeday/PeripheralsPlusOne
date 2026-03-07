@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["GGG", "GPG", "GGG"],
+  "key": {
+    "G": {"item": "minecraft:gold_ingot"},
+    "P": {"item": "minecraft:paper"}
+  },
+  "result": {"item": "peripheralsplusone:permissions_card", "count": 1}
+}

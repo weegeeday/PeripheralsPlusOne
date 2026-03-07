@@ -1,36 +1,30 @@
 package com.austinv11.peripheralsplusplus.turtles;
 
-import com.austinv11.collectiveframework.minecraft.utils.ModelManager;
-import com.austinv11.collectiveframework.minecraft.utils.TextureManager;
+
 import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.turtles.peripherals.PeripheralGarden;
-import com.austinv11.peripheralsplusplus.utils.ModelUtil;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.*;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.IRegistry;
-import org.apache.commons.lang3.tuple.Pair;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.vecmath.Matrix4f;
 
-public class TurtleGarden implements ITurtleUpgrade, ModelManager.ModelRegistrar, TextureManager.TextureRegistrar
+public class TurtleGarden implements ITurtleUpgrade
 {
-    @Override
-    public ResourceLocation getUpgradeID() {
-        return new ResourceLocation(Reference.GARDEN_UPGRADE);
+
+    private final ResourceLocation upgradeId;
+
+    public TurtleGarden(ResourceLocation id) {
+        this.upgradeId = id;
     }
 
     @Override
-    public int getLegacyUpgradeID() {
-        return Reference.GARDEN_UPGRADE_LEGACY;
+    public ResourceLocation getUpgradeID() {
+        return upgradeId;
     }
 
     @Override
@@ -40,9 +34,8 @@ public class TurtleGarden implements ITurtleUpgrade, ModelManager.ModelRegistrar
 
     @Override
     public TurtleUpgradeType getType() {
-        return TurtleUpgradeType.Peripheral;
+        return TurtleUpgradeType.PERIPHERAL;
     }
-
     @Override
     public ItemStack getCraftingItem() {
         return new ItemStack(Items.WHEAT_SEEDS);
@@ -56,26 +49,10 @@ public class TurtleGarden implements ITurtleUpgrade, ModelManager.ModelRegistrar
     @Nonnull
     @Override
     public TurtleCommandResult useTool(@Nonnull ITurtleAccess turtle, @Nonnull TurtleSide side,
-                                       @Nonnull TurtleVerb verb, @Nonnull EnumFacing direction) {
+                                       @Nonnull TurtleVerb verb, @Nonnull Direction direction) {
         return TurtleCommandResult.failure();
-    }
-
-    @Nonnull
-    @Override
-    public Pair<IBakedModel, Matrix4f> getModel(@Nullable ITurtleAccess turtle, @Nonnull TurtleSide side) {
-        return ModelUtil.getTurtleUpgradeModel("turtle_garden", side);
     }
 
     @Override
     public void update(ITurtleAccess turtle, TurtleSide side) {}
-
-    @Override
-    public void registerModels(IRegistry<ModelResourceLocation, IBakedModel> iRegistry) {
-        ModelUtil.registerTurtleUpgradeModels(iRegistry, "turtle_garden");
-    }
-
-    @Override
-    public void registerTextures(TextureMap textureMap) {
-        textureMap.registerSprite(new ResourceLocation(Reference.MOD_ID, "blocks/gardener_upgrade"));
-    }
 }

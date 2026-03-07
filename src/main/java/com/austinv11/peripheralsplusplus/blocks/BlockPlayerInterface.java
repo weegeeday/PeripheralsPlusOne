@@ -1,53 +1,39 @@
 package com.austinv11.peripheralsplusplus.blocks;
 
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
-import com.austinv11.peripheralsplusplus.creativetab.CreativeTabPPP;
-import com.austinv11.peripheralsplusplus.reference.Reference;
 import com.austinv11.peripheralsplusplus.tiles.TileEntityPlayerInterface;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
+
+import javax.annotation.Nullable;
 
 public class BlockPlayerInterface extends BlockContainerPPP {
 
-    public BlockPlayerInterface()
-    {
-        super(Material.ROCK);
-        this.setRegistryName(Reference.MOD_ID, "player_interface");
-        this.setUnlocalizedName("player_interface");
-        this.setCreativeTab(CreativeTabPPP.PPP_TAB);
-        this.setHardness(4f);
-    }
+public BlockPlayerInterface() {
+super();
+}
 
-    @Override
-    public TileEntity createNewTileEntity(World world, int p_149915_2_)
-    {
-        return new TileEntityPlayerInterface();
-    }
+@Nullable
+@Override
+public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+return new TileEntityPlayerInterface(pos, state);
+}
 
-    @Override
-    public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player,
-                                    EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (!world.isRemote)
-        {
-            TileEntity te = world.getTileEntity(pos);
-            if (te != null)
-            {
-                player.openGui(PeripheralsPlusPlus.instance, Reference.GUIs.PLAYER_INTERFACE.ordinal(), world,
-                        pos.getX(), pos.getY(), pos.getZ());
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public EnumBlockRenderType getRenderType(IBlockState state) {
-        return EnumBlockRenderType.MODEL;
-    }
+@Override
+public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player,
+ InteractionHand hand, BlockHitResult hit) {
+if (!level.isClientSide) {
+BlockEntity te = level.getBlockEntity(pos);
+if (te instanceof net.minecraft.world.MenuProvider menuProvider)
+NetworkHooks.openScreen((ServerPlayer) player, menuProvider, pos);
+}
+return InteractionResult.sidedSuccess(level.isClientSide);
+}
 }

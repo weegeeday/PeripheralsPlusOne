@@ -4,9 +4,7 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 
 public class ItemFeederUpgrade extends ItemPPP {
 
-	public ItemFeederUpgrade() {
-		super();
-		this.setRegistryName(Reference.MOD_ID, "feeder_upgrade");
-		this.setUnlocalizedName("feeder_upgrade");
+	public ItemFeederUpgrade(Properties props) {
+		super(props);
 	}
 }

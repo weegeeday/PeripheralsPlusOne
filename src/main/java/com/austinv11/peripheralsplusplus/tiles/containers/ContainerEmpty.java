@@ -1,14 +1,18 @@
 package com.austinv11.peripheralsplusplus.tiles.containers;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
-// Empty container class for GuiContainer because Panda is lazy
-public class ContainerEmpty extends Container
-{
-    @Override
-    public boolean canInteractWith(EntityPlayer player)
-    {
-        return true;
-    }
+public class ContainerEmpty extends AbstractContainerMenu {
+public ContainerEmpty(int syncId, Inventory playerInv) {
+super(null, syncId);
+}
+
+@Override
+public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+
+@Override
+public boolean stillValid(Player player) { return true; }
 }

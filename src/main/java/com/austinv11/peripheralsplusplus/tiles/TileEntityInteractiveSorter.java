@@ -1,337 +1,235 @@
 package com.austinv11.peripheralsplusplus.tiles;
 
-import com.austinv11.collectiveframework.minecraft.tiles.TileEntityInventory;
-import com.austinv11.collectiveframework.minecraft.utils.Location;
-import com.austinv11.collectiveframework.minecraft.utils.WorldUtils;
 import com.austinv11.peripheralsplusplus.reference.Config;
 import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import com.austinv11.peripheralsplusplus.utils.Util;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.*;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TileEntityInteractiveSorter extends TileEntityInventory implements IPlusPlusPeripheral {
+public class TileEntityInteractiveSorter extends BlockEntity implements IPlusPlusPeripheral.HasPeripheral, MenuProvider, Container {
 
-	private List<IComputerAccess> computers = new ArrayList<IComputerAccess>();
-	
-	public TileEntityInteractiveSorter() {
-		super();
-	}
-	
-	@Override
-	public int getSize() {
-		return 1;
-	}
-	
-	public String getName() {
-		return "tileEntityInteractiveSorter";
-	}
-	
-	@Override
-	public String getType() {
-		return "interactiveSorter";
-	}
-	
-	@Override
-	public String[] getMethodNames() {
-		return new String[]{"analyze", "push", "pull", "isInventoryPresent"};
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-		if (!Config.enableInteractiveSorter)
-			throw new LuaException("Interactive Sorters have been disabled");
-		if (method == 0) {
-			return new Object[]{getItemInfo(getStackInSlot(0))};
-			
-		} else if (method == 1) {
-			if (getStackInSlot(0).isEmpty())
-				return new Object[]{false};
-			EnumFacing dir;
-			if (arguments.length < 1)
-				throw new LuaException("Too few arguments");
-			if (!(arguments[0] instanceof String) && !(arguments[0] instanceof Double))
-				throw new LuaException("Bad argument #1 (expected string or number)");
-			if (arguments.length > 1 && !(arguments[1] instanceof Double))
-				throw new LuaException("Bad argument #2 (expected number)");
-			if (arguments[0] instanceof String)
-				dir = EnumFacing.valueOf(((String) arguments[0]).toUpperCase());
-			else
-				dir = EnumFacing.getFront((int) (double) (Double) arguments[0]);
-			int amount = arguments.length > 1 ? MathHelper.clamp((int) (double) (Double) arguments[1], 0,
-					getStackInSlot(0).getCount()) : getStackInSlot(0).getCount();
-			IInventory inventory = getInventoryForSide(world, getPos(), dir);
-			if (inventory == null) {
-				BlockPos pos = getPos().offset(dir);
-				WorldUtils.spawnItemInWorld(new Location(pos.getX(), pos.getY(), pos.getZ(), world),
-						getStackInSlot(0).splitStack(amount));
-				markDirty();
-				return new Object[]{true};
-			}
+private ItemStack slot0 = ItemStack.EMPTY;
+private final List<IComputerAccess> computers = new ArrayList<>();
 
-			int oldSize = getStackInSlot(0).getCount();
-			int[] slots = inventory instanceof ISidedInventory ? 
-					((ISidedInventory) inventory).getSlotsForFace(dir.getOpposite()) : getDefaultSlots(inventory);
-			int currentSlot = 0;
-			while (!getStackInSlot(0).isEmpty() && getStackInSlot(0).getCount() > oldSize-amount && currentSlot < slots.length) {
-				if (inventory.getStackInSlot(slots[currentSlot]).isEmpty()) {
-					inventory.setInventorySlotContents(slots[currentSlot], getStackInSlot(0));
-					setInventorySlotContents(0, ItemStack.EMPTY);
-				} else {
-					if (!inventory.getStackInSlot(slots[currentSlot]).isItemEqual(getStackInSlot(0))) {
-						currentSlot++;
-						continue;
-					}
-					int transferred = MathHelper.clamp(inventory.getStackInSlot(slots[currentSlot]).getCount()+amount,
-							getStackInSlot(0).getCount(), getStackInSlot(0).getMaxStackSize());
-					
-					getStackInSlot(0).setCount(getStackInSlot(0).getCount() - transferred);
-					inventory.getStackInSlot(0).setCount(inventory.getStackInSlot(0).getCount() + transferred);
-				}
-				inventory.markDirty();
-				markDirty();
-				currentSlot++;
-			}
-			return new Object[]{getStackInSlot(0).isEmpty() || getStackInSlot(0).getCount() != oldSize};
-			
-		} else if (method == 2) {
-			EnumFacing dir;
-			if (arguments.length < 1)
-				throw new LuaException("Too few arguments");
-			if (!(arguments[0] instanceof String) && !(arguments[0] instanceof Double))
-				throw new LuaException("Bad argument #1 (expected string or number)");
-			if (arguments.length > 1 && !(arguments[1] instanceof Double))
-				throw new LuaException("Bad argument #2 (expected number)");
-			if (arguments.length > 2 && !(arguments[2] instanceof Double))
-				throw new LuaException("Bad argument #3 (expected number)");
-			if (arguments[0] instanceof String)
-				dir = EnumFacing.valueOf(((String) arguments[0]).toUpperCase());
-			else
-				dir = EnumFacing.getFront(((int) (double) (Double) arguments[0]));
-			IInventory inventory = getInventoryForSide(world, getPos(), dir);
-			if (inventory == null)
-				throw new LuaException("Block is not a valid inventory");
-			int slots[] = inventory instanceof ISidedInventory ? 
-					((ISidedInventory) inventory).getSlotsForFace(dir.getOpposite()) : getDefaultSlots(inventory);
-			int slot = -1;
-			if (arguments.length > 2) {
-				slot = getNearestSlot((int)(double)(Double)arguments[2], slots);
-				if (inventory.getStackInSlot(slot).isEmpty())
-					return new Object[]{false};
-			} else {
-				for (int slot1 : slots)
-					if (getStackInSlot(0).isEmpty()) {
-						if (!inventory.getStackInSlot(slot1).isEmpty()) {
-							slot = slot1;
-							break;
-						}
-					} else {
-						if (!inventory.getStackInSlot(slot1).isEmpty()) {
-							if (inventory.getStackInSlot(slot1).isItemEqual(getStackInSlot(0))) {
-								slot = slot1;
-								break;
-							}
-						}
-					}
-			}
-			if (slot == -1)
-				return new Object[]{false};
-			int amount = arguments.length > 1 ? MathHelper.clamp((int) (double) (Double) arguments[1], 0,
-					inventory.getStackInSlot(slot).getCount()) : inventory.getStackInSlot(slot).getCount();
-			int transferred;
-			if (!getStackInSlot(0).isEmpty()) {
-				transferred = MathHelper.clamp(getStackInSlot(0).getCount()+amount,
-						getStackInSlot(0).getCount(), getStackInSlot(0).getMaxStackSize());
-				getStackInSlot(0).setCount(getStackInSlot(0).getCount() + transferred);
-				inventory.getStackInSlot(slot).setCount(inventory.getStackInSlot(slot).getCount() - transferred);
-			} else {
-				transferred = amount;
-				setInventorySlotContents(0, inventory.getStackInSlot(slot).splitStack(transferred));
-			}
-			if (!inventory.getStackInSlot(slot).isEmpty() && inventory.getStackInSlot(slot).getCount() < 1)
-				inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
-			inventory.markDirty();
-			markDirty();
-			return new Object[]{true};
-			
-		} else if (method == 3) {
-			EnumFacing dir;
-			if (arguments.length < 1)
-				throw new LuaException("Too few arguments");
-			if (!(arguments[0] instanceof String) && !(arguments[0] instanceof Double))
-				throw new LuaException("Bad argument #1 (expected string or number)");
-			if (arguments[0] instanceof String)
-				dir = EnumFacing.valueOf(((String) arguments[0]).toUpperCase());
-			else
-				dir = EnumFacing.getFront((int) (double) (Double) arguments[0]);
-			return new Object[]{getInventoryForSide(world, getPos(), dir) != null};
-		}
-		return new Object[0];
-	}
+public TileEntityInteractiveSorter(BlockPos pos, BlockState state) {
+super(com.austinv11.peripheralsplusplus.init.ModTileEntities.INTERACTIVE_SORTER.get(), pos, state);
+}
 
-	@Nullable
-	static IInventory getInventoryForSide(World world, BlockPos origin, EnumFacing side) {
-		BlockPos pos = origin.offset(side);
-		if (!world.isAirBlock(pos)) {
-			Block block = world.getBlockState(pos).getBlock();
-			if (block instanceof IInventory)
-				return (IInventory) block;
-			if (block instanceof ITileEntityProvider && world.getTileEntity(pos) instanceof IInventory)
-				return (IInventory)world.getTileEntity(pos);
-		}
-		return null;
-	}
+@Override
+public void load(CompoundTag tag) {
+super.load(tag);
+if (tag.contains("slot0"))
+slot0 = ItemStack.of(tag.getCompound("slot0"));
+}
 
-	private int getNearestSlot(int requested, int[] slots) {
-		int difference = Integer.MAX_VALUE;
-		int currentSlot = slots[0];
-		for (int slot : slots) {
-			if (slot == requested)
-				return slot;
-			if (Math.abs(requested-slot) < difference) {
-				difference = Math.abs(requested-slot);
-				currentSlot = slot;
-			}
-		}
-		return currentSlot;
-	}
-	
-	private int[] getDefaultSlots(IInventory inventory) {
-		int[] array = new int[inventory.getSizeInventory()];
-		for (int i = 0; i < inventory.getSizeInventory(); i++)
-			array[i] = i;
-		return array;
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
-	
-	@Override
-	public void attach(IComputerAccess computer) {
-		computers.add(computer);
-	}
-	
-	@Override
-	public void detach(IComputerAccess computer) {
-		computers.remove(computer);
-	}
-	
-	@Override
-	public void setInventorySlotContents(int slot, ItemStack stack) {
-		super.setInventorySlotContents(slot, stack);
-		if (!stack.isEmpty() && stack.getCount() > 0 && slot == 0)
-			for (IComputerAccess computer : computers)
-				computer.queueEvent("itemReady", null);
-	}
-	
-	private HashMap<String, Object> getItemInfo(ItemStack stack) {
-		if (stack.isEmpty())
-			return null;
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("amount", stack.getCount());
-		ResourceLocation id;
-		if (stack.getItem() instanceof ItemBlock) {
-			Block block = Block.getBlockFromItem(stack.getItem());
-			id = ForgeRegistries.BLOCKS.getKey(block);
-		} else {
-			id = ForgeRegistries.ITEMS.getKey(stack.getItem());
-		}
-		map.put("stringId", id);
-		map.put("oreDictionaryEntries", Util.getOreDictEntries(stack));
-		map.put("meta", stack.getItemDamage());
-		map.put("name", stack.getDisplayName());
-		if (stack.hasTagCompound()) 
-			map.put("nbt", convertNBTToMap(stack.getTagCompound()));
-		
-		return map;
-	}
-	
-	private HashMap<String, Object> convertNBTToMap(NBTTagCompound tag) {
-		HashMap<String, Object> nbtMap = new HashMap<>();
-		for (Object key : tag.getKeySet()) {
-			NBTBase nbtBase = tag.getTag((String) key);
-			nbtMap.put((String) key, getObjectForNBT(nbtBase.copy()));
-		}
-		return nbtMap;
-	}
-	
-	private Object getObjectForNBT(NBTBase nbtBase) {
-		if (nbtBase == null)
-			return null;
-		switch (nbtBase.getId()) {
-			case 0: //NBTTagEnd
-				return null;
-			
-			case 1:
-				NBTTagByte tagByte = (NBTTagByte)nbtBase;
-				return tagByte.getByte();
-			
-			case 2:
-				NBTTagShort tagShort = (NBTTagShort)nbtBase;
-				return tagShort.getShort();
-				
-			case 3:
-				NBTTagInt tagInt = (NBTTagInt)nbtBase;
-				return tagInt.getInt();
-				
-			case 4:
-				NBTTagLong tagLong = (NBTTagLong)nbtBase;
-				return tagLong.getLong();
-				
-			case 5:
-				NBTTagFloat tagFloat = (NBTTagFloat)nbtBase;
-				return tagFloat.getFloat();
-				
-			case 6:
-				NBTTagDouble tagDouble = (NBTTagDouble)nbtBase;
-				return tagDouble.getDouble();
-				
-			case 7:
-				NBTTagByteArray tagByteArray = (NBTTagByteArray)nbtBase;
-				return Util.arrayToMap(tagByteArray.getByteArray());
-				
-			case 8:
-				NBTTagString tagString = (NBTTagString)nbtBase;
-				return tagString.getString();
-				
-			case 9:
-				NBTTagList tagList = (NBTTagList)nbtBase;
-				Object[] tags = new Object[tagList.tagCount()];
-				for (int i = 0; i < tagList.tagCount(); i++)
-					tags[i] = getObjectForNBT(tagList.removeTag(i));
-				return Util.arrayToMap(tags);
-				
-			case 10:
-				NBTTagCompound tagCompound = (NBTTagCompound)nbtBase;
-				return convertNBTToMap(tagCompound);
-				
-			case 11:
-				NBTTagIntArray tagIntArray = (NBTTagIntArray)nbtBase;
-				return Util.arrayToMap(tagIntArray.getIntArray());
-				
-			default:
-				return null;
-		}
-	}
+@Override
+protected void saveAdditional(CompoundTag tag) {
+super.saveAdditional(tag);
+if (!slot0.isEmpty())
+tag.put("slot0", slot0.save(new CompoundTag()));
+}
+public final Object[] analyze(IArguments args) throws LuaException {
+if (!Config.enableInteractiveSorter)
+throw new LuaException("Interactive Sorters have been disabled");
+return new Object[]{getItemInfo(slot0)};
+}
+
+public final Object[] push(IArguments args) throws LuaException {
+if (!Config.enableInteractiveSorter)
+throw new LuaException("Interactive Sorters have been disabled");
+if (slot0.isEmpty())
+return new Object[]{false};
+Direction dir = parseDirection(args.getString(0));
+int amount = args.count() > 1 ? Math.min(args.getInt(1), slot0.getCount()) : slot0.getCount();
+
+IItemHandler inv = getInventoryForSide(dir);
+if (inv == null) {
+// Drop item
+BlockPos pos = getBlockPos().relative(dir);
+level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level,
+pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, slot0.split(amount)));
+setChanged();
+return new Object[]{true};
+}
+
+ItemStack toInsert = slot0.copy();
+toInsert.setCount(amount);
+ItemStack remainder = ItemHandlerHelper.insertItemStacked(inv, toInsert, false);
+slot0.shrink(amount - remainder.getCount());
+if (slot0.getCount() <= 0) slot0 = ItemStack.EMPTY;
+setChanged();
+return new Object[]{remainder.getCount() < amount};
+}
+
+public final Object[] pull(IArguments args) throws LuaException {
+if (!Config.enableInteractiveSorter)
+throw new LuaException("Interactive Sorters have been disabled");
+Direction dir = parseDirection(args.getString(0));
+int amount = args.count() > 1 ? args.getInt(1) : Integer.MAX_VALUE;
+
+IItemHandler inv = getInventoryForSide(dir);
+if (inv == null)
+throw new LuaException("Block is not a valid inventory");
+
+for (int i = 0; i < inv.getSlots(); i++) {
+ItemStack found = inv.getStackInSlot(i);
+if (!found.isEmpty() && (slot0.isEmpty() || ItemStack.isSameItemSameTags(slot0, found))) {
+int toTake = Math.min(amount, found.getCount());
+ItemStack taken = inv.extractItem(i, toTake, false);
+if (!taken.isEmpty()) {
+if (slot0.isEmpty()) {
+slot0 = taken;
+} else {
+slot0.grow(taken.getCount());
+}
+setChanged();
+for (IComputerAccess computer : computers)
+computer.queueEvent("itemReady", null);
+return new Object[]{true};
+}
+}
+}
+return new Object[]{false};
+}
+
+public final Object[] isInventoryPresent(IArguments args) throws LuaException {
+if (!Config.enableInteractiveSorter)
+throw new LuaException("Interactive Sorters have been disabled");
+Direction dir = parseDirection(args.getString(0));
+return new Object[]{getInventoryForSide(dir) != null};
+}
+
+private Direction parseDirection(String s) throws LuaException {
+try {
+return Direction.valueOf(s.toUpperCase());
+} catch (IllegalArgumentException e) {
+throw new LuaException("Invalid direction: " + s);
+}
+}
+
+@Nullable
+private IItemHandler getInventoryForSide(Direction dir) {
+BlockPos pos = getBlockPos().relative(dir);
+BlockEntity te = level.getBlockEntity(pos);
+if (te == null) return null;
+return te.getCapability(ForgeCapabilities.ITEM_HANDLER, dir.getOpposite()).orElse(null);
+}
+
+private HashMap<String, Object> getItemInfo(ItemStack stack) {
+if (stack.isEmpty()) return null;
+HashMap<String, Object> map = new HashMap<>();
+map.put("amount", stack.getCount());
+ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+map.put("stringId", id != null ? id.toString() : "unknown");
+map.put("name", stack.getHoverName().getString());
+if (stack.hasTag())
+map.put("nbt", stack.getTag().toString());
+return map;
+}
+// Container
+@Override
+public int getContainerSize() { return 1; }
+@Override
+public boolean isEmpty() { return slot0.isEmpty(); }
+@Override
+public ItemStack getItem(int i) { return i == 0 ? slot0 : ItemStack.EMPTY; }
+@Override
+public ItemStack removeItem(int i, int amount) {
+if (i == 0) { ItemStack s = slot0.split(amount); setChanged(); return s; } return ItemStack.EMPTY;
+}
+@Override
+public ItemStack removeItemNoUpdate(int i) {
+if (i == 0) { ItemStack s = slot0; slot0 = ItemStack.EMPTY; return s; } return ItemStack.EMPTY;
+}
+@Override
+public void setItem(int i, ItemStack stack) {
+if (i == 0) {
+slot0 = stack;
+if (!stack.isEmpty())
+for (IComputerAccess computer : computers)
+computer.queueEvent("itemReady", null);
+setChanged();
+}
+}
+@Override
+public boolean stillValid(Player player) { return Container.stillValidBlockEntity(this, player); }
+@Override
+public void clearContent() { slot0 = ItemStack.EMPTY; }
+
+// MenuProvider
+@Override
+public Component getDisplayName() { return Component.translatable("block.peripheralsplusone.interactive_sorter"); }
+@Nullable
+@Override
+public AbstractContainerMenu createMenu(int id, Inventory playerInv, Player player) {
+return new com.austinv11.peripheralsplusplus.tiles.containers.ContainerInteractiveSorter(id, playerInv, this);
+}
+    private final IPeripheral peripheral = new IPeripheral() {
+        @Override
+        public String getType() { return "interactiveSorter"; }
+
+        @Override
+        public void attach(IComputerAccess computer) {
+            computers.add(computer);
+        }
+
+        @Override
+        public void detach(IComputerAccess computer) {
+            computers.remove(computer);
+        }
+
+        @Override
+        public boolean equals(IPeripheral other) { return other == TileEntityInteractiveSorter.this; }
+
+        @LuaFunction
+        public final Object[] analyze(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.analyze(args);
+        }
+
+        @LuaFunction
+        public final Object[] push(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.push(args);
+        }
+
+        @LuaFunction
+        public final Object[] pull(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.pull(args);
+        }
+
+        @LuaFunction
+        public final Object[] isInventoryPresent(IArguments args) throws LuaException {
+            return TileEntityInteractiveSorter.this.isInventoryPresent(args);
+        }
+
+    };
+
+    @Override
+    public IPeripheral getModPeripheral() { return peripheral; }
+
 }

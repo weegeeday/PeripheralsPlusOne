@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "peripheralsplusone:items/smart_helmet"
+    "layer0": "peripheralsplusone:item/smart_helmet"
   }
 }

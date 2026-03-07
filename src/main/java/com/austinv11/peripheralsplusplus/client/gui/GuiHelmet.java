@@ -1,147 +1,36 @@
 package com.austinv11.peripheralsplusplus.client.gui;
 
-import com.austinv11.collectiveframework.minecraft.utils.NBTHelper;
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
-import com.austinv11.peripheralsplusplus.items.ItemSmartHelmet;
-import com.austinv11.peripheralsplusplus.network.InputEventPacket;
-import com.austinv11.peripheralsplusplus.network.TextFieldInputEventPacket;
-import com.austinv11.peripheralsplusplus.smarthelmet.AddButtonCommand;
-import com.austinv11.peripheralsplusplus.smarthelmet.AddTextFieldCommand;
-import com.austinv11.peripheralsplusplus.smarthelmet.HelmetCommand;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
-import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.UUID;
+/**
+ * GUI for the Smart Helmet configuration.
+ */
+public class GuiHelmet extends Screen {
 
-public class GuiHelmet extends GuiScreen {
+    private static final ResourceLocation TEXTURE =
+            new ResourceLocation("peripheralsplusone", "textures/gui/gui.png");
+    private static final int IMAGE_WIDTH = 176;
+    private static final int IMAGE_HEIGHT = 166;
 
-	public static HashMap<UUID,ArrayDeque<HelmetCommand>> renderStack = new HashMap<UUID,ArrayDeque<HelmetCommand>>();
-	public HashMap<Integer,GuiTextField> textFields = new HashMap<Integer,GuiTextField>();
+    public GuiHelmet() {
+        super(Component.translatable("gui.peripheralsplusone.helmet"));
+    }
 
-	@Override
-	public void drawScreen(int mouseX, int mouseY, float renderPartialTicks) {
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		Iterable<ItemStack> armor = player.getArmorInventoryList();
-		for (ItemStack itemStack : armor) {
-			if (itemStack.getItem() instanceof ItemSmartHelmet &&
-					NBTHelper.hasTag(itemStack, "identifier")) {
-				UUID uuid = UUID.fromString(NBTHelper.getString(itemStack, "identifier"));
-				if (renderStack.containsKey(uuid)) {
-					ArrayDeque<HelmetCommand> commands = new ArrayDeque<>(renderStack.get(uuid));
-					while (!commands.isEmpty()) {
-						HelmetCommand command = commands.poll();
-						if (!(command instanceof AddTextFieldCommand) &&
-								!(command instanceof AddButtonCommand))
-							command.call(this);
-					}
-				}
-			}
-		}
-		super.drawScreen(mouseX, mouseY, renderPartialTicks);
-		for (GuiTextField text : textFields.values())
-			text.drawTextBox();
-	}
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics);
+        int x = (this.width - IMAGE_WIDTH) / 2;
+        int y = (this.height - IMAGE_HEIGHT) / 2;
+        graphics.blit(TEXTURE, x, y, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
 
-	@Override
-	public void initGui() {
-		super.initGui();
-		textFields.clear();
-		buttonList.clear();
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		Iterable<ItemStack> armor = player.getArmorInventoryList();
-		for (ItemStack itemStack : armor) {
-			if (itemStack.getItem() instanceof ItemSmartHelmet &&
-					NBTHelper.hasTag(itemStack, "identifier")) {
-				UUID uuid = UUID.fromString(NBTHelper.getString(itemStack, "identifier"));
-				if (renderStack.containsKey(uuid)) {
-					ArrayDeque<HelmetCommand> commands = new ArrayDeque<>(renderStack.get(uuid));
-					while (!commands.isEmpty()) {
-						HelmetCommand command = commands.poll();
-						if (command instanceof AddTextFieldCommand || command instanceof AddButtonCommand)
-							command.call(this);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public boolean doesGuiPauseGame() {
-		return false;
-	}
-
-	@Override
-	public GuiButton addButton(GuiButton button) {
-		buttonList.add(button);
-		return button;
-	}
-
-	public void addTextField(int id, GuiTextField field) {
-		textFields.put(id, field);
-	}
-
-	@Override
-	protected void mouseClicked(int x, int y, int mouseEvent) throws IOException {
-		super.mouseClicked(x, y, mouseEvent);
-		for (GuiTextField text : textFields.values())
-			text.mouseClicked(x, y, mouseEvent);
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		Iterable<ItemStack> armor = player.getArmorInventoryList();
-		for (ItemStack armorPiece : armor) {
-			if (armorPiece.getItem() instanceof ItemSmartHelmet &&
-					NBTHelper.hasTag(armorPiece, "identifier")) {
-				PeripheralsPlusPlus.NETWORK.sendToServer(new InputEventPacket(
-						UUID.fromString(armorPiece.getTagCompound().getString("identifier")),
-						Mouse.getEventButton(),
-						Mouse.getEventButtonState(),
-						"mouseInput",
-						Minecraft.getMinecraft().player.getDisplayNameString()));
-				break;
-			}
-		}
-	}
-
-	@Override
-	public void updateScreen() {
-		super.updateScreen();
-		for (GuiTextField text : textFields.values())
-			text.updateCursorCounter();
-	}
-
-	@Override
-	protected void keyTyped(char eventChar, int eventKey) throws IOException {
-		super.keyTyped(eventChar, eventKey);
-		EntityPlayer player = Minecraft.getMinecraft().player;
-		Iterable<ItemStack> armor = player.getArmorInventoryList();
-		for (ItemStack armorPiece : armor) {
-			if (armorPiece.getItem() instanceof ItemSmartHelmet &&
-					NBTHelper.hasTag(armorPiece, "identifier")) {
-				for (GuiTextField text : textFields.values())
-					if (text.textboxKeyTyped(eventChar, eventKey))
-						PeripheralsPlusPlus.NETWORK.sendToServer(new TextFieldInputEventPacket(
-								UUID.fromString(armorPiece.getTagCompound().getString("identifier")),
-								eventChar+"",
-								text.getText(),
-								"textboxEntry",
-								player.getDisplayNameString()));
-				PeripheralsPlusPlus.NETWORK.sendToServer(new InputEventPacket(
-						UUID.fromString(armorPiece.getTagCompound().getString("identifier")),
-						Keyboard.getEventKey(),
-						Keyboard.getEventKeyState(),
-						"keyInput",
-						player.getDisplayNameString()));
-			}
-		}
-	}
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
 }
+

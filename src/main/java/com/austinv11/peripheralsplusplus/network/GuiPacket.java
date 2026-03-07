@@ -1,49 +1,22 @@
 package com.austinv11.peripheralsplusplus.network;
 
-import com.austinv11.peripheralsplusplus.PeripheralsPlusPlus;
-import com.austinv11.peripheralsplusplus.reference.Reference;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
-public class GuiPacket implements IMessage {
+import java.util.function.Supplier;
 
-	public boolean close;
+/** Stub packet - to be fully implemented in a future phase */
+public class GuiPacket {
 
-	public GuiPacket() {}
+public GuiPacket() {}
 
-	public GuiPacket(boolean close) {
-		this.close = close;
-	}
+public static void encode(GuiPacket pkt, FriendlyByteBuf buf) {}
 
-	@Override
-	public void fromBytes(ByteBuf buf) {
-		NBTTagCompound tag = ByteBufUtils.readTag(buf);
-		close = tag.getBoolean("close");
-	}
+public static GuiPacket decode(FriendlyByteBuf buf) {
+return new GuiPacket();
+}
 
-	@Override
-	public void toBytes(ByteBuf buf) {
-		NBTTagCompound tag = new NBTTagCompound();
-		tag.setBoolean("close", close);
-		ByteBufUtils.writeTag(buf, tag);
-	}
-
-	public static class GuiPacketHandler implements IMessageHandler<GuiPacket, IMessage> {
-
-		@Override
-		public IMessage onMessage(GuiPacket message, MessageContext ctx) {
-			if (message.close)
-				Minecraft.getMinecraft().player.closeScreen();
-			else
-				Minecraft.getMinecraft().player.openGui(PeripheralsPlusPlus.instance, Reference.GUIs.HELMET.ordinal(),
-						Minecraft.getMinecraft().player.world, (int) Minecraft.getMinecraft().player.posX,
-						(int) Minecraft.getMinecraft().player.posY, (int) Minecraft.getMinecraft().player.posZ);
-			return null;
-		}
-	}
+public static void handle(GuiPacket pkt, Supplier<NetworkEvent.Context> ctxSupplier) {
+ctxSupplier.get().setPacketHandled(true);
+}
 }

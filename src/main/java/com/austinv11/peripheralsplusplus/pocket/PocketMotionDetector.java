@@ -6,18 +6,25 @@ import com.austinv11.peripheralsplusplus.reference.Reference;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.pocket.IPocketAccess;
 import dan200.computercraft.api.pocket.IPocketUpgrade;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class PocketMotionDetector implements IPocketUpgrade {
+
+    private final ResourceLocation upgradeId;
+
+    public PocketMotionDetector(ResourceLocation id) {
+        this.upgradeId = id;
+    }
+
 	
 	@Override
 	public ResourceLocation getUpgradeID() {
-		return new ResourceLocation(Reference.POCKET_MOTION_DETECTOR);
+		return upgradeId;
 	}
 	
 	@Override
@@ -27,7 +34,7 @@ public class PocketMotionDetector implements IPocketUpgrade {
 	
 	@Override
 	public ItemStack getCraftingItem() {
-		return new ItemStack(ModItems.MOTION_DETECTOR);
+		return new ItemStack(ModItems.MOTION_DETECTOR.get());
 	}
 
     @Nullable
@@ -43,7 +50,7 @@ public class PocketMotionDetector implements IPocketUpgrade {
 	}
 
 	@Override
-	public boolean onRightClick(@Nonnull World world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
+	public boolean onRightClick(@Nonnull Level world, @Nonnull IPocketAccess access, @Nullable IPeripheral peripheral) {
 		return false;
 	}
 }

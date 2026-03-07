@@ -1,10 +1,10 @@
 package com.austinv11.peripheralsplusplus.tiles.containers;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
+import com.austinv11.peripheralsplusplus.init.ModMenus;
+import net.minecraft.world.entity.player.Inventory;
 
-public class ContainerRfidReaderWriter extends ContainerAnalyzer {
-    public ContainerRfidReaderWriter(EntityPlayer player, IInventory inv, int xSize, int ySize) {
-        super(player, inv, xSize, ySize);
+public class ContainerRfidReaderWriter extends ContainerSingleSlot {
+    public ContainerRfidReaderWriter(int syncId, Inventory playerInv, net.minecraft.world.Container inv) {
+        super(ModMenus.RFID_READER_WRITER.get(), syncId, playerInv, inv);
     }
 }

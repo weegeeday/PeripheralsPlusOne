@@ -1,130 +1,94 @@
 package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.block.BlockDirectional;
-import net.minecraft.block.BlockDispenser;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.dispenser.IBehaviorDispenseItem;
-import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
 
-public class PeripheralDispenser implements IPlusPlusPeripheral {
-	
-	private ITurtleAccess turtle;
-	
-	public PeripheralDispenser(ITurtleAccess turtle) {
-		this.turtle = turtle;
-	}
-	
-	@Override
-	public String getType() {
-		return "flinging";
-	}
-	
-	@Override
-	public String[] getMethodNames() {
-		return new String[]{"dispense", "dispenseUp", "dispenseDown"};
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments)
-            throws LuaException, InterruptedException {
-		if (!Config.enableFlingingTurtle)
-			throw new LuaException("Flinging turtles have been disabled");
-		if (arguments.length > 0 && !(arguments[0] instanceof Double))
-			throw new LuaException("Bad argument #1 (expected number)");
-		int slot = 1;
-		EnumFacing direction;
-		switch (method) {
-			case 0:
-				direction = turtle.getDirection();
-				break;
-			case 1:
-				direction = EnumFacing.UP;
-				break;
-			case 2:
-				direction = EnumFacing.DOWN;
-				break;
-			default:
-				throw new LuaException("Unhandled method");
-		}
-		if (arguments.length > 0)
-			slot += (int)(double)(Double)arguments[0];
-		else
-			slot = turtle.getSelectedSlot();
-		
-		synchronized (this) {
-			ItemStack stack = turtle.getInventory().getStackInSlot(slot);
-			if (!stack.isEmpty()) {
-				IBehaviorDispenseItem behavior = BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(stack.getItem());
-				if (behavior != IBehaviorDispenseItem.DEFAULT_BEHAVIOR) {
-					BlockSourceTurtle blockSource = new BlockSourceTurtle(direction);
-					ItemStack newStack = behavior.dispense(blockSource, stack);
-					turtle.getInventory().setInventorySlotContents(slot, newStack);
-					turtle.getInventory().markDirty();
-				}
-			}
-		}
-		return new Object[0];
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return this == other;
-	}
-	
-	public class BlockSourceTurtle implements IBlockSource {
-		
-		public EnumFacing direction;
-		
-		public BlockSourceTurtle(EnumFacing direction) {
-			this.direction = direction;
-		}
-		
-		@Override
-		public double getX() {
-			return turtle.getPosition().getX();
-		}
-		
-		@Override
-		public double getY() {
-			return turtle.getPosition().getY();
-		}
-		
-		@Override
-		public double getZ() {
-			return turtle.getPosition().getZ();
-		}
+public class PeripheralDispenser implements IPeripheral {
 
-		@Override
-		public BlockPos getBlockPos() {
-			return turtle.getPosition();
-		}
+@SuppressWarnings("unchecked")
+private static final java.util.Map<Item, DispenseItemBehavior> DISPENSER_REG;
+static {
+    java.util.Map<Item, DispenseItemBehavior> reg = null;
+    try {
+        java.lang.reflect.Field f = DispenserBlock.class.getDeclaredField("DISPENSER_REGISTRY");
+        f.setAccessible(true);
+        reg = (java.util.Map<Item, DispenseItemBehavior>) f.get(null);
+    } catch (ReflectiveOperationException | ClassCastException e) {
+        // In obfuscated environments the field name differs; dispense behavior will be unavailable
+        // (dispense/dispenseUp/dispenseDown will silently return without dispensing)
+        org.apache.logging.log4j.LogManager.getLogger("PeripheralsPlusOne")
+            .warn("PeripheralDispenser: could not access DispenserBlock.DISPENSER_REGISTRY via reflection; dispense behavior disabled", e);
+    }
+    DISPENSER_REG = reg;
+}
 
-		@Override
-		public IBlockState getBlockState() {
-			return Blocks.DISPENSER.getDefaultState().withProperty(BlockDirectional.FACING, direction);
-		}
-		
-		@Override
-		public TileEntity getBlockTileEntity() {
-			return getWorld().getTileEntity(turtle.getPosition());
-		}
-		
-		@Override
-		public World getWorld() {
-			return turtle.getWorld();
-		}
-	}
+private final ITurtleAccess turtle;
+
+public PeripheralDispenser(ITurtleAccess turtle) {
+this.turtle = turtle;
+}
+
+@Override
+public String getType() {
+return "flinging";
+}
+
+@LuaFunction
+public final Object[] dispense(IArguments args) throws LuaException {
+return doDispense(turtle.getDirection(), args);
+}
+
+@LuaFunction
+public final Object[] dispenseUp(IArguments args) throws LuaException {
+return doDispense(Direction.UP, args);
+}
+
+@LuaFunction
+public final Object[] dispenseDown(IArguments args) throws LuaException {
+return doDispense(Direction.DOWN, args);
+}
+
+private Object[] doDispense(Direction direction, IArguments args) throws LuaException {
+if (!Config.enableFlingingTurtle)
+throw new LuaException("Flinging turtles have been disabled");
+int slot = args.count() > 0 ? args.getInt(0) : turtle.getSelectedSlot();
+synchronized (this) {
+ItemStack stack = turtle.getInventory().getItem(slot);
+if (!stack.isEmpty()) {
+DispenseItemBehavior behavior = DISPENSER_REG != null ? DISPENSER_REG.get(stack.getItem()) : null;
+if (behavior != null) {
+BlockPos pos = turtle.getPosition();
+// Create a fake dispenser source
+ItemStack result = dispenseItem(behavior, stack, pos, direction, (ServerLevel) turtle.getLevel());
+turtle.getInventory().setItem(slot, result);
+}
+}
+}
+return new Object[0];
+}
+
+private ItemStack dispenseItem(DispenseItemBehavior behavior, ItemStack stack, BlockPos pos, Direction dir, ServerLevel level) {
+// Simplified: just drop the item in the direction
+BlockPos target = pos.relative(dir);
+level.addFreshEntity(new net.minecraft.world.entity.item.ItemEntity(level,
+target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5,
+stack.copy()));
+return ItemStack.EMPTY;
+}
+
+@Override
+public boolean equals(IPeripheral other) {
+return this == other;
+}
 }

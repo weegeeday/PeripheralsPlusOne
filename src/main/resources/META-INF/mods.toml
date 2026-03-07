@@ -1,0 +1,31 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="GPL-2.0"
+
+[[mods]]
+    modId="peripheralsplusone"
+    version="${file.jarVersion}"
+    displayName="PeripheralsPlusOne"
+    description='''A pseudo-port of MiscPeripherals.
+Adds many peripheral devices and turtle upgrades for CC: Tweaked.'''
+
+[[dependencies.peripheralsplusone]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.peripheralsplusone]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.peripheralsplusone]]
+    modId="computercraft"
+    mandatory=true
+    versionRange="[1.114,)"
+    ordering="AFTER"
+    side="BOTH"

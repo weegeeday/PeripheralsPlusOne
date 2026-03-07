@@ -1,70 +1,66 @@
 package com.austinv11.peripheralsplusplus.turtles.peripherals;
 
 import com.austinv11.peripheralsplusplus.reference.Config;
-import com.austinv11.peripheralsplusplus.utils.IPlusPlusPeripheral;
 import com.austinv11.peripheralsplusplus.utils.Util;
-import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.turtle.ITurtleAccess;
-import net.minecraft.block.BlockSign;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 
-public class PeripheralSignReader implements IPlusPlusPeripheral
-{
-    private ITurtleAccess turtle;
+public class PeripheralSignReader implements IPeripheral {
 
-    public PeripheralSignReader(ITurtleAccess turtle) {
-        this.turtle = turtle;
-    }
+private final ITurtleAccess turtle;
 
-    @Override
-    public String getType() {
-        return "signReader";
-    }
+public PeripheralSignReader(ITurtleAccess turtle) {
+this.turtle = turtle;
+}
 
-    @Override
-    public String[] getMethodNames() {
-		return new String[]{"read", "readUp", "readDown"};
-	}
+@Override
+public String getType() {
+return "signReader";
+}
 
-    @Override
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws LuaException, InterruptedException {
-        if (!Config.enableReaderTurtle)
-            throw new LuaException("Sign Reading Turtles have been disabled");
-        switch (method) {
-            case 0:
-                return getSignText(turtle.getPosition().offset(turtle.getDirection()));
-            case 1:
-                return getSignText(turtle.getPosition().up());
-            case 2:
-                return getSignText(turtle.getPosition().down());
-        }
-        throw new LuaException();
-    }
+@LuaFunction
+public final Object[] read(IArguments args) throws LuaException {
+if (!Config.enableReaderTurtle)
+throw new LuaException("Sign Reading Turtles have been disabled");
+return getSignText(turtle.getPosition().relative(turtle.getDirection()));
+}
 
-    private Object[] getSignText(BlockPos pos) throws LuaException {
-        IBlockState blockFacing = turtle.getWorld().getBlockState(pos);
-        if (blockFacing.getBlock() instanceof BlockSign) {
-            TileEntitySign tileEntitySign = (TileEntitySign) turtle.getWorld().getTileEntity(pos);
-            if (tileEntitySign == null)
-                throw new LuaException("No sign found.");
-            ArrayList<String> lines = new ArrayList<>();
-            for (ITextComponent line : tileEntitySign.signText)
-                lines.add(line.getUnformattedText());
-            return new Object[] {Util.arrayToMap(lines.toArray())};
-        }
-        throw new LuaException("No sign found.");
-    }
+@LuaFunction
+public final Object[] readUp(IArguments args) throws LuaException {
+if (!Config.enableReaderTurtle)
+throw new LuaException("Sign Reading Turtles have been disabled");
+return getSignText(turtle.getPosition().above());
+}
 
-    @Override
-    public boolean equals(IPeripheral other) {
-        return (other == this);
-    }
+@LuaFunction
+public final Object[] readDown(IArguments args) throws LuaException {
+if (!Config.enableReaderTurtle)
+throw new LuaException("Sign Reading Turtles have been disabled");
+return getSignText(turtle.getPosition().below());
+}
+
+private Object[] getSignText(BlockPos pos) throws LuaException {
+BlockEntity te = turtle.getLevel().getBlockEntity(pos);
+if (!(te instanceof SignBlockEntity sign))
+throw new LuaException("No sign found.");
+ArrayList<String> lines = new ArrayList<>();
+net.minecraft.network.chat.Component[] messages = sign.getFrontText().getMessages(false);
+for (net.minecraft.network.chat.Component msg : messages)
+lines.add(msg.getString());
+return new Object[]{Util.arrayToMap(lines.toArray())};
+}
+
+@Override
+public boolean equals(IPeripheral other) {
+return other == this;
+}
 }
